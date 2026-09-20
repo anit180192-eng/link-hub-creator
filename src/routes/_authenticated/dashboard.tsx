@@ -39,12 +39,12 @@ import {
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your start page — AntLabs" },
+      { title: "Your homepage — Browser Homepage" },
       {
         name: "description",
         content: "Add your accounts, pick a theme, and publish your personal browser start page.",
       },
-      { property: "og:title", content: "Your start page — AntLabs" },
+      { property: "og:title", content: "Your homepage — Browser Homepage" },
       { property: "og:description", content: "Add your accounts and publish your start page." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -212,7 +212,7 @@ function Dashboard() {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
           <Link to="/" className="font-display text-lg font-bold tracking-tight">
-            Ant<span className="text-primary">Labs</span>
+            Browser <span className="text-primary">Homepage</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm">

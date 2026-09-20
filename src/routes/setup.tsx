@@ -1,100 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Brand } from "@/components/Brand";
+import { HomepageSetupGuide } from "@/components/HomepageSetupGuide";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/setup")({
-  head: () => ({
-    meta: [
-      { title: "Make it your homepage — AntLabs" },
-      {
-        name: "description",
-        content:
-          "Step-by-step instructions for setting your AntLabs start page as the homepage in Chrome, Safari, Edge and Firefox.",
-      },
-      { property: "og:title", content: "Make it your homepage — AntLabs" },
-      {
-        property: "og:description",
-        content: "Set your AntLabs start page as the homepage in Chrome, Safari, Edge and Firefox.",
-      },
-      { property: "og:type", content: "article" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Set your browser homepage — Browser Homepage" },
+    { name: "description", content: "Visual instructions for opening your personal homepage automatically in Chrome, Safari, Edge, or Firefox." },
+    { property: "og:title", content: "Set your browser homepage — Browser Homepage" },
+    { property: "og:description", content: "Choose your device and browser for exact homepage setup steps." },
+    { property: "og:type", content: "article" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: SetupPage,
 });
 
-const GUIDES = [
-  {
-    browser: "Chrome",
-    steps: [
-      "Open Settings, then 'On startup'.",
-      "Choose 'Open a specific page or set of pages' and click 'Add a new page'.",
-      "Paste your start page link and save.",
-      "For the home button: Settings → Appearance → Show home button → paste the link.",
-    ],
-  },
-  {
-    browser: "Safari",
-    steps: [
-      "Open Safari → Settings → General.",
-      "Set 'Safari opens with' to 'A new window'.",
-      "Paste your link in the 'Homepage' field.",
-      "Set 'New windows open with' and 'New tabs open with' to 'Homepage'.",
-    ],
-  },
-  {
-    browser: "Edge",
-    steps: [
-      "Open Settings → Start, home, and new tabs.",
-      "Choose 'Open these pages' and click 'Add a new page'.",
-      "Paste your start page link and save.",
-    ],
-  },
-  {
-    browser: "Firefox",
-    steps: [
-      "Open Settings → Home.",
-      "Set 'Homepage and new windows' to 'Custom URLs'.",
-      "Paste your start page link.",
-      "Set 'New tabs' to 'Custom URLs' too if you want it on every tab.",
-    ],
-  },
-];
-
 function SetupPage() {
   return (
-    <div className="min-h-screen px-5 py-16">
-      <div className="mx-auto max-w-2xl">
-        <Link to="/" className="font-display text-lg font-bold tracking-tight">
-          Ant<span className="text-primary">Labs</span>
-        </Link>
-        <h1 className="mt-8 font-display text-3xl tracking-tight">Make it your homepage</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Browsers don't let a website set itself as your homepage, so it takes about twenty
-          seconds. Copy your start page link from the dashboard, then follow your browser below.
-        </p>
-
-        <div className="mt-10 space-y-4">
-          {GUIDES.map((guide) => (
-            <div key={guide.browser} className="rounded-xl border border-border bg-card p-5">
-              <h2 className="font-display text-lg">{guide.browser}</h2>
-              <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-muted-foreground">
-                {guide.steps.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-8 rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
-          <strong className="text-foreground">Using the downloaded file instead?</strong> Save it
-          somewhere permanent, open it in your browser, then copy the address from the address bar
-          (it starts with <code className="text-primary">file://</code>) and use it in the steps
-          above.
-        </div>
-
-        <Link to="/dashboard" className="mt-8 inline-block text-sm text-primary underline">
-          Back to your dashboard
-        </Link>
+    <div className="min-h-screen px-5 py-8">
+      <div className="mx-auto max-w-5xl">
+        <div className="flex items-center justify-between"><Link to="/"><Brand className="text-lg" /></Link><Button asChild variant="ghost" size="sm"><Link to="/dashboard">Back to my page</Link></Button></div>
+        <div className="mt-14 max-w-2xl"><p className="text-xs font-semibold uppercase text-primary">About 20 seconds</p><h1 className="mt-3 font-display text-4xl sm:text-5xl">See your links whenever your browser opens.</h1><p className="mt-4 text-muted-foreground">Choose your computer and browser below. Browser security requires you to confirm the change yourself, but these visual steps take you directly through it.</p></div>
+        <div className="mt-10 border border-border bg-card p-5 sm:p-8"><HomepageSetupGuide standalone /></div>
+        <div className="mt-6 border border-border p-5 text-sm text-muted-foreground"><strong className="text-foreground">Using the downloaded file?</strong> Save it somewhere permanent, open it, copy its <code className="text-primary">file://</code> address, and use that address in the same steps.</div>
       </div>
     </div>
   );

@@ -173,7 +173,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 <main>
   <header>${avatar}<h1>${esc(profile.display_name || profile.slug)}</h1>${profile.tagline ? `<p class="tag">${esc(profile.tagline)}</p>` : ""}</header>
   ${sections}
-  <footer>Built with AntLabs</footer>
+  <footer>Built with Browser Homepage</footer>
 </main>
 </body>
 </html>`;

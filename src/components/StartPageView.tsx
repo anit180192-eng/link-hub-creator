@@ -97,7 +97,7 @@ export function StartPageView({
           ))
         )}
 
-        <footer className={`mt-14 text-center text-xs ${mutedCls}`}>Built with AntLabs</footer>
+        <footer className={`mt-14 text-center text-xs ${mutedCls}`}>Built with Browser Homepage</footer>
       </main>
     </div>
   );
