@@ -58,6 +58,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 type ProfileRow = StartPageProfile & { id: string; published: boolean };
 
+const NO_FOLDER = "__none__";
+
 function Dashboard() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
