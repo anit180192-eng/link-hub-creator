@@ -12,7 +12,7 @@ export const Route = createFileRoute("/p/$slug")({
     if (!loaderData) {
       return {
         meta: [
-          { title: "Page not found — Browser Homepage" },
+          { title: "Page not found — Homepage Builder" },
           { name: "robots", content: "noindex" },
         ],
       };

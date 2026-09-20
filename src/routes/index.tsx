@@ -20,9 +20,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Browser Homepage — all your important links in one place" },
+      { title: "Homepage Builder — all your important links in one place" },
       { name: "description", content: "Create one personal browser homepage for your social profiles, channels, work tools, and favorite websites." },
-      { property: "og:title", content: "Browser Homepage — all your important links in one place" },
+      { property: "og:title", content: "Homepage Builder — all your important links in one place" },
       { property: "og:description", content: "Build a personal start page and make it the first thing you see in your browser." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -60,7 +60,7 @@ function Landing() {
 
       <main>
         <section className="border-y border-border">
-          <div className="mx-auto grid max-w-7xl lg:min-h-[650px] lg:grid-cols-[1.25fr_0.75fr]">
+          <div className="mx-auto grid max-w-7xl md:min-h-[650px] md:grid-cols-[1.1fr_0.9fr] lg:grid-cols-[1.25fr_0.75fr]">
             <div className="flex flex-col justify-center px-5 py-14 lg:px-8 lg:py-20">
               <p className="flex items-center gap-2 text-xs font-semibold uppercase text-primary">
                 <span className="h-2 w-2 rounded-full bg-primary" /> Your browser, organized
@@ -88,7 +88,7 @@ function Landing() {
               </div>
             </div>
 
-            <aside id="sign-in" className="border-t border-border bg-muted/30 p-5 lg:border-l lg:border-t-0 lg:p-8">
+            <aside id="sign-in" className="border-t border-border bg-muted/30 p-5 md:border-l md:border-t-0 md:p-6 lg:p-8">
               {signedIn ? (
                 <div className="flex h-full min-h-96 flex-col justify-between border border-border bg-card p-8">
                   <div><p className="text-xs font-semibold uppercase text-primary">Welcome back</p><h2 className="mt-3 font-display text-3xl">Your homepage is ready when you are.</h2></div>
@@ -119,7 +119,7 @@ function Landing() {
 
         <section className="border-t border-border bg-card">
           <div className="mx-auto grid max-w-7xl gap-8 px-5 py-16 sm:grid-cols-3 lg:px-8">
-            {[ ["01", "Add what matters", "Paste Instagram accounts, YouTube channels, LinkedIn, work tools, and any website."], ["02", "Make it yours", "Choose a grid or list, add your name and photo, then arrange links into useful groups."], ["03", "Open it every time", "Publish one link, then follow the guide for Chrome, Safari, Edge, or Firefox."] ].map(([number, title, body]) => (
+            {[ ["01", "Add what matters", "Paste Instagram accounts, YouTube channels, LinkedIn, work tools, and any website."], ["02", "Sort them into folders", "Make a folder per brand, project or person, then drop each Instagram, YouTube or website link inside it."], ["03", "Open it every time", "Publish one link, then follow the guide for Chrome, Safari, Edge, or Firefox."] ].map(([number, title, body]) => (
               <div key={number} className="border-l border-border pl-5"><span className="text-xs font-bold text-primary">{number}</span><h3 className="mt-4 font-display text-xl">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p></div>
             ))}
           </div>

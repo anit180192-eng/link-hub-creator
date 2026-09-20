@@ -5,10 +5,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const GUIDES = {
-  chrome: { name: "Chrome", path: "Settings → On startup", steps: ["Open Chrome Settings.", "Choose On startup.", "Select Open a specific page.", "Paste your Browser Homepage link and save."] },
-  edge: { name: "Edge", path: "Settings → Start, home, and new tabs", steps: ["Open Edge Settings.", "Choose Start, home, and new tabs.", "Select Open these pages.", "Add your Browser Homepage link."] },
+  chrome: { name: "Chrome", path: "Settings → On startup", steps: ["Open Chrome Settings.", "Choose On startup.", "Select Open a specific page.", "Paste your Homepage Builder link and save."] },
+  edge: { name: "Edge", path: "Settings → Start, home, and new tabs", steps: ["Open Edge Settings.", "Choose Start, home, and new tabs.", "Select Open these pages.", "Add your Homepage Builder link."] },
   safari: { name: "Safari", path: "Safari → Settings → General", steps: ["Open Safari Settings.", "Choose General.", "Paste your link in Homepage.", "Set new windows and tabs to Homepage."] },
-  firefox: { name: "Firefox", path: "Settings → Home", steps: ["Open Firefox Settings.", "Choose Home.", "Select Custom URLs.", "Paste your Browser Homepage link."] },
+  firefox: { name: "Firefox", path: "Settings → Home", steps: ["Open Firefox Settings.", "Choose Home.", "Select Custom URLs.", "Paste your Homepage Builder link."] },
 } as const;
 
 type Browser = keyof typeof GUIDES;
@@ -90,7 +90,7 @@ export function HomepageSetupGuide({ triggerLabel = "Set as my homepage", standa
     <Dialog>
       <DialogTrigger asChild><Button size="lg" variant="outline"><Copy /> {triggerLabel}</Button></DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-        <DialogHeader><DialogTitle className="font-display text-2xl">Make Browser Homepage open automatically</DialogTitle><DialogDescription>We found your device. Choose your browser for the exact steps.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle className="font-display text-2xl">Make Homepage Builder open automatically</DialogTitle><DialogDescription>We found your device. Choose your browser for the exact steps.</DialogDescription></DialogHeader>
         {content}
       </DialogContent>
     </Dialog>
