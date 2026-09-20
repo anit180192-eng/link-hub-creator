@@ -42,12 +42,12 @@ import {
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your homepage — Browser Homepage" },
+      { title: "Your homepage — Homepage Builder" },
       {
         name: "description",
         content: "Add your accounts, pick a theme, and publish your personal browser start page.",
       },
-      { property: "og:title", content: "Your homepage — Browser Homepage" },
+      { property: "og:title", content: "Your homepage — Homepage Builder" },
       { property: "og:description", content: "Add your accounts and publish your start page." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

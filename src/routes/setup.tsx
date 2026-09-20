@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/setup")({
   head: () => ({ meta: [
-    { title: "Set your browser homepage — Browser Homepage" },
+    { title: "Set your browser homepage — Homepage Builder" },
     { name: "description", content: "Visual instructions for opening your personal homepage automatically in Chrome, Safari, Edge, or Firefox." },
-    { property: "og:title", content: "Set your browser homepage — Browser Homepage" },
+    { property: "og:title", content: "Set your browser homepage — Homepage Builder" },
     { property: "og:description", content: "Choose your device and browser for exact homepage setup steps." },
     { property: "og:type", content: "article" },
     { name: "twitter:card", content: "summary" },

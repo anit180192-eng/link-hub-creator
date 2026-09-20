@@ -80,14 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Browser Homepage — all your links in one place" },
+      { title: "Homepage Builder — all your links in one place" },
       {
         name: "description",
         content:
           "Collect every important account and website in one personal homepage for your browser.",
       },
-      { name: "author", content: "Browser Homepage" },
-      { property: "og:title", content: "Browser Homepage — all your links in one place" },
+      { name: "author", content: "Homepage Builder" },
+      { property: "og:title", content: "Homepage Builder — all your links in one place" },
       {
         property: "og:description",
         content:

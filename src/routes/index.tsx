@@ -20,9 +20,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Browser Homepage — all your important links in one place" },
+      { title: "Homepage Builder — all your important links in one place" },
       { name: "description", content: "Create one personal browser homepage for your social profiles, channels, work tools, and favorite websites." },
-      { property: "og:title", content: "Browser Homepage — all your important links in one place" },
+      { property: "og:title", content: "Homepage Builder — all your important links in one place" },
       { property: "og:description", content: "Build a personal start page and make it the first thing you see in your browser." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
