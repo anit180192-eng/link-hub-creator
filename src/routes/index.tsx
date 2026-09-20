@@ -119,7 +119,7 @@ function Landing() {
 
         <section className="border-t border-border bg-card">
           <div className="mx-auto grid max-w-7xl gap-8 px-5 py-16 sm:grid-cols-3 lg:px-8">
-            {[ ["01", "Add what matters", "Paste Instagram accounts, YouTube channels, LinkedIn, work tools, and any website."], ["02", "Make it yours", "Choose a grid or list, add your name and photo, then arrange links into useful groups."], ["03", "Open it every time", "Publish one link, then follow the guide for Chrome, Safari, Edge, or Firefox."] ].map(([number, title, body]) => (
+            {[ ["01", "Add what matters", "Paste Instagram accounts, YouTube channels, LinkedIn, work tools, and any website."], ["02", "Sort them into folders", "Make a folder per brand, project or person, then drop each Instagram, YouTube or website link inside it."], ["03", "Open it every time", "Publish one link, then follow the guide for Chrome, Safari, Edge, or Firefox."] ].map(([number, title, body]) => (
               <div key={number} className="border-l border-border pl-5"><span className="text-xs font-bold text-primary">{number}</span><h3 className="mt-4 font-display text-xl">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p></div>
             ))}
           </div>
