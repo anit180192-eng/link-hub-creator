@@ -8,7 +8,10 @@ import {
   Copy,
   Download,
   ExternalLink,
+  Folder,
+  FolderPlus,
   LogOut,
+  Pencil,
   Plus,
   Trash2,
 } from "lucide-react";
