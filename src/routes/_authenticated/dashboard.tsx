@@ -316,11 +316,34 @@ function Dashboard() {
             </div>
           </section>
 
-          {/* Links */}
+          {/* Folders + links */}
           <section className="rounded-xl border border-border bg-card p-6">
-            <h2 className="font-display text-lg">Your links</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-lg">Your folders &amp; links</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Group related accounts together — e.g. a folder per brand, project or person.
+                </p>
+              </div>
+            </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-[150px_1fr_150px_auto]">
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Input
+                className="w-64"
+                placeholder="New folder name — e.g. Bhakti Raga Media"
+                value={newFolder}
+                maxLength={40}
+                onChange={(e) => setNewFolder(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") createFolder();
+                }}
+              />
+              <Button variant="outline" onClick={createFolder}>
+                <FolderPlus className="mr-1 h-4 w-4" /> Add folder
+              </Button>
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-[150px_1fr_150px_auto]">
               <Select
                 value={newLink.platform}
                 onValueChange={(platform) => setNewLink({ ...newLink, platform })}
@@ -351,65 +374,139 @@ function Dashboard() {
               <Button onClick={() => addLink.mutate()} disabled={addLink.isPending}>
                 <Plus className="h-4 w-4" />
               </Button>
-              <Input
-                className="sm:col-span-4"
-                placeholder="Group (optional) — e.g. Social, Work, Reading"
-                value={newLink.group_name}
-                maxLength={40}
-                onChange={(e) => setNewLink({ ...newLink, group_name: e.target.value })}
-              />
+              <div className="sm:col-span-4">
+                <Select
+                  value={newLink.group_name || NO_FOLDER}
+                  onValueChange={(value) =>
+                    setNewLink({ ...newLink, group_name: value === NO_FOLDER ? "" : value })
+                  }
+                >
+                  <SelectTrigger className="sm:w-72">
+                    <SelectValue placeholder="Put in folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_FOLDER}>No folder</SelectItem>
+                    {folders.map((folder) => (
+                      <SelectItem key={folder} value={folder}>
+                        {folder}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <ul className="mt-6 space-y-2">
-              {links.length === 0 ? (
-                <li className="text-sm text-muted-foreground">
-                  Nothing yet. Add your first account above.
-                </li>
-              ) : (
-                links.map((link, index) => (
-                  <li
-                    key={link.id}
-                    className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {link.label || link.platform}
-                        {link.group_name ? (
-                          <span className="ml-2 rounded bg-secondary px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
-                            {link.group_name}
-                          </span>
-                        ) : null}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">{link.url}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => moveLink.mutate({ index, dir: -1 })}
-                      aria-label="Move up"
-                    >
-                      <ArrowUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => moveLink.mutate({ index, dir: 1 })}
-                      aria-label="Move down"
-                    >
-                      <ArrowDown className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeLink.mutate(link.id)}
-                      aria-label="Delete link"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </li>
-                ))
-              )}
-            </ul>
+            <div className="mt-6 space-y-5">
+              {links.length === 0 && folders.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Nothing yet. Create a folder, then add your first account above.
+                </p>
+              ) : null}
+
+              {sections.map(([folder, items]) => (
+                <div key={folder || "__none"} className="rounded-lg border border-border">
+                  <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+                    <Folder className="h-4 w-4 shrink-0 text-primary" />
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                      {folder || "Ungrouped links"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {items.length} {items.length === 1 ? "link" : "links"}
+                    </span>
+                    {folder ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Rename folder"
+                          onClick={() => {
+                            const next = window.prompt("Rename folder", folder);
+                            if (next !== null) renameFolder.mutate({ from: folder, to: next });
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Remove folder"
+                          onClick={() => renameFolder.mutate({ from: folder, to: "" })}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : null}
+                  </div>
+
+                  <ul className="divide-y divide-border">
+                    {items.length === 0 ? (
+                      <li className="px-3 py-3 text-sm text-muted-foreground">
+                        Empty folder — add a link above and choose “{folder}”.
+                      </li>
+                    ) : (
+                      items.map((link) => {
+                        const index = links.findIndex((l) => l.id === link.id);
+                        return (
+                          <li key={link.id} className="flex items-center gap-2 px-3 py-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium">
+                                {link.label || link.platform}
+                              </p>
+                              <p className="truncate text-xs text-muted-foreground">{link.url}</p>
+                            </div>
+                            <Select
+                              value={link.group_name || NO_FOLDER}
+                              onValueChange={(value) =>
+                                moveToFolder.mutate({
+                                  id: link.id,
+                                  group_name: value === NO_FOLDER ? "" : value,
+                                })
+                              }
+                            >
+                              <SelectTrigger className="h-8 w-36 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value={NO_FOLDER}>No folder</SelectItem>
+                                {folders.map((f) => (
+                                  <SelectItem key={f} value={f}>
+                                    {f}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => moveLink.mutate({ index, dir: -1 })}
+                              aria-label="Move up"
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => moveLink.mutate({ index, dir: 1 })}
+                              aria-label="Move down"
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeLink.mutate(link.id)}
+                              aria-label="Delete link"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </li>
+                        );
+                      })
+                    )}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </section>
 
           {/* Publish */}
