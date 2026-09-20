@@ -114,6 +114,23 @@ function Dashboard() {
     url: "",
     group_name: "",
   });
+  const [newFolder, setNewFolder] = useState("");
+  const [extraFolders, setExtraFolders] = useState<string[]>([]);
+
+  const folders = Array.from(
+    new Set([...links.map((l) => l.group_name.trim()).filter(Boolean), ...extraFolders]),
+  );
+
+  const sections: [string, StartPageLink[]][] = [
+    ...folders.map(
+      (folder) => [folder, links.filter((l) => l.group_name.trim() === folder)] as [
+        string,
+        StartPageLink[],
+      ],
+    ),
+  ];
+  const ungrouped = links.filter((l) => !l.group_name.trim());
+  if (ungrouped.length) sections.push(["", ungrouped]);
 
   const saveProfile = useMutation({
     mutationFn: async (patch: Partial<ProfileRow>) => {
