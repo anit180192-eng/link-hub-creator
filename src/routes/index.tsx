@@ -60,7 +60,7 @@ function Landing() {
 
       <main>
         <section className="border-y border-border">
-          <div className="mx-auto grid max-w-7xl lg:min-h-[650px] lg:grid-cols-[1.25fr_0.75fr]">
+          <div className="mx-auto grid max-w-7xl md:min-h-[650px] md:grid-cols-[1.1fr_0.9fr] lg:grid-cols-[1.25fr_0.75fr]">
             <div className="flex flex-col justify-center px-5 py-14 lg:px-8 lg:py-20">
               <p className="flex items-center gap-2 text-xs font-semibold uppercase text-primary">
                 <span className="h-2 w-2 rounded-full bg-primary" /> Your browser, organized
