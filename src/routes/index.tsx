@@ -88,7 +88,7 @@ function Landing() {
               </div>
             </div>
 
-            <aside id="sign-in" className="border-t border-border bg-muted/30 p-5 lg:border-l lg:border-t-0 lg:p-8">
+            <aside id="sign-in" className="border-t border-border bg-muted/30 p-5 md:border-l md:border-t-0 md:p-6 lg:p-8">
               {signedIn ? (
                 <div className="flex h-full min-h-96 flex-col justify-between border border-border bg-card p-8">
                   <div><p className="text-xs font-semibold uppercase text-primary">Welcome back</p><h2 className="mt-3 font-display text-3xl">Your homepage is ready when you are.</h2></div>
