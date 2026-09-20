@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Apple, Check, Chrome, Copy, Laptop, Monitor, Settings2 } from "lucide-react";
-import { toast } from "sonner";
+import { Apple, Check, Copy, Laptop, Monitor, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

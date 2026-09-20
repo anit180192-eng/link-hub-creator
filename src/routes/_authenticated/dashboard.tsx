@@ -63,7 +63,8 @@ function Dashboard() {
     queryKey: ["profile"],
     queryFn: async (): Promise<ProfileRow> => {
       const { data: userData } = await supabase.auth.getUser();
-      const user = userData.user!;
+      const user = userData.user;
+      if (!user) throw new Error("Please sign in again");
       const existing = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       if (existing.error) throw existing.error;
       if (existing.data) return existing.data as ProfileRow;
