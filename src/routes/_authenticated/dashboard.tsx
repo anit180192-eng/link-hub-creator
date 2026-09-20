@@ -172,6 +172,45 @@ function Dashboard() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["links"] }),
   });
 
+  const moveToFolder = useMutation({
+    mutationFn: async ({ id, group_name }: { id: string; group_name: string }) => {
+      const { error } = await supabase.from("links").update({ group_name }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["links"] }),
+    onError: () => toast.error("Couldn't move that link"),
+  });
+
+  const renameFolder = useMutation({
+    mutationFn: async ({ from, to }: { from: string; to: string }) => {
+      const clean = to.trim().slice(0, 40);
+      const { error } = await supabase
+        .from("links")
+        .update({ group_name: clean })
+        .eq("group_name", from);
+      if (error) throw error;
+      setExtraFolders((prev) => {
+        const rest = prev.filter((f) => f !== from);
+        return clean && !rest.includes(clean) ? [...rest, clean] : rest;
+      });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["links"] }),
+    onError: () => toast.error("Couldn't update that folder"),
+  });
+
+  function createFolder() {
+    const name = newFolder.trim().slice(0, 40);
+    if (!name) return;
+    if (folders.includes(name)) {
+      toast.error("You already have a folder with that name");
+      return;
+    }
+    setExtraFolders((prev) => [...prev, name]);
+    setNewLink((prev) => ({ ...prev, group_name: name }));
+    setNewFolder("");
+    toast.success(`Folder “${name}” created`);
+  }
+
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
