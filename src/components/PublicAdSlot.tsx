@@ -62,7 +62,7 @@ export function PublicAdSlot({ dark }: { dark: boolean }) {
   const labelCls = dark ? "text-muted-foreground" : "text-[#61656b]";
 
   return (
-    <div className="mt-12">
+    <div className="mx-auto mt-12 max-w-[728px]">
       <p className={`mb-2 text-center text-[10px] uppercase tracking-[0.18em] ${labelCls}`}>
         Advertisement
       </p>
