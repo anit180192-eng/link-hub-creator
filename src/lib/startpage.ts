@@ -204,11 +204,16 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 
   const sections = groupLinks(safe)
     .map(([group, items]) => {
-      const heading = group
-        ? `<h2 class="group">${esc(group)}</h2>`
-        : safe.length && groupLinks(safe).length > 1
-          ? `<h2 class="group">Links</h2>`
+      const showHeading = Boolean(group) || (safe.length > 0 && groupLinks(safe).length > 1);
+      const openAll =
+        showHeading && items.length > 1
+          ? `<button type="button" class="openall" data-urls="${esc(
+              items.map((l) => normalizeUrl(l.url)).join(" "),
+            )}">Open all (${items.length})</button>`
           : "";
+      const heading = showHeading
+        ? `<div class="grouphead"><h2 class="group">${esc(group || "Links")}</h2>${openAll}</div>`
+        : "";
       const body = items
         .map((link) => {
           const href = esc(normalizeUrl(link.url));
@@ -265,6 +270,18 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 </script>`
     : "";
 
+  const openAllScript = `<script>
+(function(){
+  document.querySelectorAll('.openall').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      (btn.getAttribute('data-urls')||'').split(' ').filter(Boolean).forEach(function(u){
+        window.open(u, '_blank', 'noopener,noreferrer');
+      });
+    });
+  });
+})();
+</script>`;
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -279,7 +296,10 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   .avatar { width:76px; height:76px; border-radius:999px; object-fit:cover; border:2px solid ${accent}; margin-bottom:14px; }
   h1 { font-size: 30px; margin:0 0 6px; letter-spacing:-0.02em; }
   p.tag { margin:0; color:${muted}; font-size:15px; }
-  h2.group { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:${muted}; margin:32px 0 12px; }
+  h2.group { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:${muted}; margin:0; }
+  .grouphead { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:32px 0 12px; }
+  .openall { cursor:pointer; background:${card}; color:${fg}; border:1px solid ${border}; border-radius:999px; padding:5px 12px; font:inherit; font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; transition:.15s; }
+  .openall:hover { border-color:${accent}; }
   .clocks { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:32px; }
   .clock { background:${card}; border:1px solid ${border}; border-radius:14px; padding:10px 16px; min-width:120px; text-align:center; }
   .clock .cl { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:${muted}; }
@@ -309,6 +329,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   <footer>Built with Landing Page Builder by AuruNex</footer>
 </main>
 ${clockScript}
+${openAllScript}
 </body>
 </html>`;
 }
