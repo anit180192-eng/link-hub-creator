@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
-import { LandingPageSetupGuide } from "@/components/LandingPageSetupGuide";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
