@@ -14,6 +14,7 @@ import {
 import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
 import { Button } from "@/components/ui/button";
+import { LandingAdSlot } from "@/components/LandingAdSlot";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
