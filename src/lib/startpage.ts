@@ -103,12 +103,12 @@ function esc(value: string) {
 /** Builds a standalone HTML document for download / local homepage use. */
 export function renderStartPageHtml(profile: StartPageProfile, links: StartPageLink[]) {
   const dark = profile.dark_mode;
-  const bg = dark ? "#16181d" : "#f6f6f2";
-  const fg = dark ? "#f3f4f1" : "#16181d";
-  const card = dark ? "#212429" : "#ffffff";
-  const border = dark ? "#2f333a" : "#e4e4dd";
-  const muted = dark ? "#9aa0a6" : "#61656b";
-  const accent = "#9ae600";
+  const bg = dark ? "#08151F" : "#f6f6f2";
+  const fg = dark ? "#F4F5F2" : "#16181d";
+  const card = dark ? "#122633" : "#ffffff";
+  const border = dark ? "#355361" : "#e4e4dd";
+  const muted = dark ? "#B3C1CA" : "#61656b";
+  const accent = dark ? "#E3C581" : "#69C9C0";
   const isGrid = profile.theme === "grid";
   const safe = links.filter((l) => isSafeUrl(l.url));
 
@@ -165,7 +165,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   .row span span { display:block; }
   .t { font-weight:600; font-size:15px; }
   .s { font-size:12px; color:${muted}; }
-  .mono { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; border-radius:8px; background:${accent}; color:#16181d; font-weight:700; }
+  .mono { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; border-radius:8px; background:${accent}; color:#08151F; font-weight:700; }
   footer { margin-top:56px; text-align:center; font-size:12px; color:${muted}; }
 </style>
 </head>
