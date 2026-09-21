@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StartPageView } from "@/components/StartPageView";
+import { AdSpace } from "@/components/AdSpace";
 import {
   MAX_CLOCKS,
   PLATFORMS,
@@ -853,6 +854,7 @@ function Dashboard() {
           <div className="overflow-hidden rounded-xl border border-border">
             <StartPageView profile={form} links={links} compact />
           </div>
+          <AdSpace />
         </aside>
       </main>
     </div>
