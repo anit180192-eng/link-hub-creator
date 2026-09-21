@@ -853,6 +853,7 @@ function Dashboard() {
           <div className="overflow-hidden rounded-xl border border-border">
             <StartPageView profile={form} links={links} compact />
           </div>
+          <AdSpace />
         </aside>
       </main>
     </div>
