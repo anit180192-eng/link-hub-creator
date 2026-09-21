@@ -284,7 +284,10 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   .avatar { width:76px; height:76px; border-radius:999px; object-fit:cover; border:2px solid ${accent}; margin-bottom:14px; }
   h1 { font-size: 30px; margin:0 0 6px; letter-spacing:-0.02em; }
   p.tag { margin:0; color:${muted}; font-size:15px; }
-  h2.group { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:${muted}; margin:32px 0 12px; }
+  h2.group { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:${muted}; margin:0; }
+  .grouphead { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:32px 0 12px; }
+  .openall { cursor:pointer; background:${card}; color:${fg}; border:1px solid ${border}; border-radius:999px; padding:5px 12px; font:inherit; font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; transition:.15s; }
+  .openall:hover { border-color:${accent}; }
   .clocks { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:32px; }
   .clock { background:${card}; border:1px solid ${border}; border-radius:14px; padding:10px 16px; min-width:120px; text-align:center; }
   .clock .cl { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:${muted}; }
