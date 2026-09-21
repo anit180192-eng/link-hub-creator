@@ -19,3 +19,4 @@
 ## Current
 - [x] Redesign generated landing pages as a warm Swiss-editorial personal hub
 - [x] Rework generated pages into a compact executive dashboard
+- [x] Improve the live preview and compact logo-only links
