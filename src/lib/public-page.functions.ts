@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import type { StartPageLink, StartPageProfile } from "@/lib/startpage";
+import { parseClocks, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 
 export type PublicPage = {
   profile: StartPageProfile;
@@ -28,10 +28,11 @@ export const getPublicPage = createServerFn({ method: "GET" })
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("id, slug, display_name, tagline, avatar_url, theme, dark_mode")
+      .select("id, slug, display_name, tagline, avatar_url, theme, dark_mode, clocks")
       .eq("slug", slug)
       .eq("published", true)
       .maybeSingle();
+
 
     if (!profile) return null;
 
@@ -49,6 +50,8 @@ export const getPublicPage = createServerFn({ method: "GET" })
         avatar_url: profile.avatar_url,
         theme: profile.theme,
         dark_mode: profile.dark_mode,
+        clocks: parseClocks(profile.clocks),
+
       },
       links: (links ?? []) as StartPageLink[],
     };
