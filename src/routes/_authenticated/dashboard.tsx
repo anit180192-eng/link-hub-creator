@@ -744,7 +744,10 @@ function Dashboard() {
                               <div className="flex items-center gap-2">
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate text-sm font-medium">{link.label || link.platform}</p>
-                                  <p className="truncate text-xs text-muted-foreground">{link.url}</p>
+                                  <p className="truncate text-xs text-muted-foreground">
+                                    {link.icon_only ? "Logo only · " : ""}
+                                    {link.url}
+                                  </p>
                                 </div>
                                 <Select
                                   value={link.group_name || NO_FOLDER}
