@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ADSENSE_SCRIPT_SRC, adsConfigured } from "@/lib/ads-config";
 
 
 function NotFoundComponent() {
