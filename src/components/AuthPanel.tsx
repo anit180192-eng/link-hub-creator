@@ -75,7 +75,7 @@ export function AuthPanel({ className }: { className?: string }) {
         <div>
           <p className="text-xs font-semibold uppercase text-primary">Your page starts here</p>
           <h2 className="mt-2 font-display text-2xl">
-            {mode === "signin" ? "Sign in to your homepage" : "Create your free account"}
+            {mode === "signin" ? "Sign in to your landing page" : "Create your free account"}
           </h2>
         </div>
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-secondary text-primary">
@@ -85,7 +85,7 @@ export function AuthPanel({ className }: { className?: string }) {
       <p className="mt-2 text-sm text-muted-foreground">
         {mode === "signin"
           ? "Open the page where all your important links live."
-          : "Save your links and use the same homepage on every browser."}
+          : "Save your links and use the same landing page on every browser."}
       </p>
 
       {sent ? (
@@ -110,7 +110,7 @@ export function AuthPanel({ className }: { className?: string }) {
               <Input id="auth-password" type="password" autoComplete={mode === "signin" ? "current-password" : "new-password"} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 6 characters" />
             </div>
             <Button type="submit" className="w-full" disabled={busy}>
-              {busy ? "Please wait…" : mode === "signin" ? "Sign in and open my page" : "Create my homepage"}
+              {busy ? "Please wait…" : mode === "signin" ? "Sign in and open my page" : "Create my landing page"}
             </Button>
           </form>
           <Button type="button" variant="link" className="mt-4 w-full text-muted-foreground" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setSent(false); }}>

@@ -5,10 +5,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const GUIDES = {
-  chrome: { name: "Chrome", path: "Settings → On startup", steps: ["Open Chrome Settings.", "Choose On startup.", "Select Open a specific page.", "Paste your Homepage Builder link and save."] },
-  edge: { name: "Edge", path: "Settings → Start, home, and new tabs", steps: ["Open Edge Settings.", "Choose Start, home, and new tabs.", "Select Open these pages.", "Add your Homepage Builder link."] },
+  chrome: { name: "Chrome", path: "Settings → On startup", steps: ["Open Chrome Settings.", "Choose On startup.", "Select Open a specific page.", "Paste your Landing Page Builder link and save."] },
+  edge: { name: "Edge", path: "Settings → Start, home, and new tabs", steps: ["Open Edge Settings.", "Choose Start, home, and new tabs.", "Select Open these pages.", "Add your Landing Page Builder link."] },
   safari: { name: "Safari", path: "Safari → Settings → General", steps: ["Open Safari Settings.", "Choose General.", "Paste your link in Homepage.", "Set new windows and tabs to Homepage."] },
-  firefox: { name: "Firefox", path: "Settings → Home", steps: ["Open Firefox Settings.", "Choose Home.", "Select Custom URLs.", "Paste your Homepage Builder link."] },
+  firefox: { name: "Firefox", path: "Settings → Home", steps: ["Open Firefox Settings.", "Choose Home.", "Select Custom URLs.", "Paste your Landing Page Builder link."] },
 } as const;
 
 type Browser = keyof typeof GUIDES;
@@ -28,7 +28,7 @@ function detectBrowser(): Browser {
   return "chrome";
 }
 
-export function HomepageSetupGuide({ triggerLabel = "Set as my homepage", standalone = false }: { triggerLabel?: string; standalone?: boolean }) {
+export function LandingPageSetupGuide({ triggerLabel = "Set as my landing page", standalone = false }: { triggerLabel?: string; standalone?: boolean }) {
   const [os, setOS] = useState<OS>("windows");
   const [browser, setBrowser] = useState<Browser>("chrome");
 
@@ -61,7 +61,7 @@ export function HomepageSetupGuide({ triggerLabel = "Set as my homepage", standa
                   <div className="h-7 w-2/3 rounded-md bg-secondary" />
                   <div className="border border-primary bg-background p-3">
                     <div className="flex items-center gap-2 text-xs"><span className="h-3 w-3 rounded-full border-4 border-primary" /> Open a specific page</div>
-                    <div className="mt-3 flex h-8 items-center justify-between border border-border bg-card px-2 text-[10px] text-muted-foreground"><span>your-homepage-link</span><Check className="h-3 w-3 text-primary" /></div>
+                    <div className="mt-3 flex h-8 items-center justify-between border border-border bg-card px-2 text-[10px] text-muted-foreground"><span>your-landing-page-link</span><Check className="h-3 w-3 text-primary" /></div>
                   </div>
                   <div className="h-7 w-1/2 rounded-md bg-secondary" />
                 </div>
@@ -77,7 +77,7 @@ export function HomepageSetupGuide({ triggerLabel = "Set as my homepage", standa
             </div>
             <div className="mt-5 flex items-start gap-3 bg-secondary p-4 text-sm text-secondary-foreground">
               <Laptop className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <p>For security, {guide.name} requires this final confirmation. A website cannot change your homepage automatically.</p>
+              <p>For security, {guide.name} requires this final confirmation. A website cannot change your landing page automatically.</p>
             </div>
           </TabsContent>
         ))}
@@ -90,7 +90,7 @@ export function HomepageSetupGuide({ triggerLabel = "Set as my homepage", standa
     <Dialog>
       <DialogTrigger asChild><Button size="lg" variant="outline"><Copy /> {triggerLabel}</Button></DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-        <DialogHeader><DialogTitle className="font-display text-2xl">Make Homepage Builder open automatically</DialogTitle><DialogDescription>We found your device. Choose your browser for the exact steps.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle className="font-display text-2xl">Make Landing Page Builder open automatically</DialogTitle><DialogDescription>We found your device. Choose your browser for the exact steps.</DialogDescription></DialogHeader>
         {content}
       </DialogContent>
     </Dialog>

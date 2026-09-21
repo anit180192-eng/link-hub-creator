@@ -80,18 +80,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Homepage Builder — all your links in one place" },
+      { title: "Landing Page Builder — all your links in one place" },
       {
         name: "description",
         content:
-          "Collect every important account and website in one personal homepage for your browser.",
+          "Collect every important account and website in one personal landing page for your browser.",
       },
-      { name: "author", content: "Homepage Builder" },
-      { property: "og:title", content: "Homepage Builder — all your links in one place" },
+      { name: "author", content: "Landing Page Builder" },
+      { property: "og:title", content: "Landing Page Builder — all your links in one place" },
       {
         property: "og:description",
         content:
-          "Collect every important account and website in one personal homepage for your browser.",
+          "Collect every important account and website in one personal landing page for your browser.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
