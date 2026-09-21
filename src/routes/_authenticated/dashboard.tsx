@@ -274,7 +274,17 @@ function Dashboard() {
       ),
   });
 
+  function saveClocks(next: StartPageClock[]) {
+    const cleaned = next.slice(0, MAX_CLOCKS).map((c) => ({
+      tz: c.tz,
+      label: (c.label || timezoneLabel(c.tz)).trim().slice(0, 24) || timezoneLabel(c.tz),
+    }));
+    setForm((current) => (current ? { ...current, clocks: cleaned } : current));
+    saveProfile.mutate({ clocks: cleaned } as Partial<ProfileRow>);
+  }
+
   function createFolder() {
+
     const name = newFolder.trim().slice(0, 40);
     if (!name) return;
     if (folders.includes(name)) {
