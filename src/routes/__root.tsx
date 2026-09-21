@@ -111,6 +111,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    scripts: adsConfigured && ADSENSE_SCRIPT_SRC
+      ? [{ src: ADSENSE_SCRIPT_SRC, async: true, crossOrigin: "anonymous" }]
+      : undefined,
   }),
 
   shellComponent: RootShell,
