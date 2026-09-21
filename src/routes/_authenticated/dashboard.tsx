@@ -129,6 +129,9 @@ function Dashboard() {
   const [extraFolders, setExtraFolders] = useState<string[]>([]);
   const [editingLink, setEditingLink] = useState<StartPageLink | null>(null);
 
+  const clocks = parseClocks(form?.clocks);
+
+
   const folders = Array.from(
     new Set([...links.map((l) => l.group_name.trim()).filter(Boolean), ...extraFolders]),
   );
