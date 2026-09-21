@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StartPageView } from "@/components/StartPageView";
+import { LivePagePreview } from "@/components/LivePagePreview";
 import { AdSpace } from "@/components/AdSpace";
 import {
   MAX_CLOCKS,
@@ -389,7 +389,7 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-6xl gap-8 px-5 py-10 lg:grid-cols-[1fr_420px]">
+      <main className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[minmax(0,1fr)_480px]">
         <div className="space-y-8">
           {/* Profile */}
           <section className="rounded-xl border border-border bg-card p-6">
@@ -916,9 +916,7 @@ function Dashboard() {
           <p className="mb-3 text-xs uppercase tracking-[0.14em] text-muted-foreground">
             Live preview
           </p>
-          <div className="overflow-hidden rounded-xl border border-border">
-            <StartPageView profile={form} links={links} compact />
-          </div>
+          <LivePagePreview profile={form} links={links} />
           <AdSpace />
         </aside>
       </main>

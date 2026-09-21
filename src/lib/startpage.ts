@@ -209,6 +209,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
     .map(([group, items], groupIndex) => {
       const heading = `<div class="grouphead"><span class="folder">▱</span><h2 class="group">${esc(group || "Personal")}</h2><span class="count">${String(items.length).padStart(2, "0")}</span></div>`;
       const body = items
+        .filter((link) => !link.icon_only)
         .map((link) => {
           const href = esc(normalizeUrl(link.url));
           const title = esc(linkTitle(link));
@@ -217,16 +218,22 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
           const img = icon
             ? `<img src="${esc(icon)}" alt="" width="28" height="28" />`
             : `<span class="mono">${esc(title.charAt(0).toUpperCase())}</span>`;
-          if (link.icon_only) {
-            const bigImg = icon
-              ? `<img src="${esc(icon)}" alt="${title}" width="40" height="40" />`
-              : `<span class="mono big">${esc(title.charAt(0).toUpperCase())}</span>`;
-            return `<a class="icononly" href="${href}" target="_blank" rel="noopener noreferrer" title="${title}" aria-label="${title}">${bigImg}</a>`;
-          }
           return `<a class="link" href="${href}" target="_blank" rel="noopener noreferrer">${img}<span class="copy"><span class="t">${title}</span><span class="s">${sub}</span></span><span class="arrow" aria-hidden="true">↗</span></a>`;
         })
         .join("");
-      return `<section class="${groupIndex === 0 ? "featured" : ""}">${heading}<div class="links">${body}</div></section>`;
+      const quickLinks = items
+        .filter((link) => link.icon_only)
+        .map((link) => {
+          const href = esc(normalizeUrl(link.url));
+          const title = esc(linkTitle(link));
+          const icon = faviconFor(link.url);
+          const img = icon
+            ? `<img src="${esc(icon)}" alt="" width="32" height="32" />`
+            : `<span class="mono quickmono">${esc(title.charAt(0).toUpperCase())}</span>`;
+          return `<a class="quicklink" href="${href}" target="_blank" rel="noopener noreferrer" title="${title}" aria-label="${title}">${img}</a>`;
+        })
+        .join("");
+      return `<section class="${groupIndex === 0 ? "featured" : ""}">${heading}${body ? `<div class="links">${body}</div>` : ""}${quickLinks ? `<div class="quicklinks">${quickLinks}</div>` : ""}</section>`;
     })
     .join("");
 
@@ -305,17 +312,24 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   .count { color:${muted}; font-size:10px; }
   .links { display:grid; gap:8px; }
   .link { height:64px; display:grid; grid-template-columns:28px minmax(0,1fr) 18px; align-items:center; gap:12px; padding:0 12px; }
-  a.link,.icononly { color:inherit; text-decoration:none; background:${bg}; border:1px solid ${border}; border-radius:6px; transition:transform .2s,border-color .2s,box-shadow .2s; }
-  a.link:hover,.icononly:hover { border-color:${accent}; transform:translateY(-2px); box-shadow:0 0 14px rgba(227,197,129,.14); }
+  a.link,.quicklink { color:inherit; text-decoration:none; background:${bg}; border:1px solid ${border}; border-radius:6px; transition:transform .2s,border-color .2s,box-shadow .2s; }
+  a.link:hover,.quicklink:hover { border-color:${accent}; transform:translateY(-3px); box-shadow:0 0 16px rgba(227,197,129,.18); }
+  a.link:focus-visible,.quicklink:focus-visible { outline:2px solid ${accent}; outline-offset:2px; }
+  a.link:active { transform:translateY(0); }
   .link img { width:28px; height:28px; }
   .copy,.copy span { min-width:0; display:block; }
   .t { font-weight:600; font-size:14px; }
   .s { font-size:11px; color:${muted}; }
-  .arrow { color:${muted}; font-size:16px; }
-  .icononly { display:flex; align-items:center; justify-content:center; height:64px; }
-  .icononly img { width:40px; height:40px; }
+  .arrow { color:${muted}; font-size:16px; transition:transform .2s,color .2s; }
+  a.link:hover .arrow { color:${accent}; transform:translate(3px,-3px); }
+  .quicklinks { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .links + .quicklinks { margin-top:8px; }
+  .quicklink { width:56px; height:56px; flex:0 0 56px; display:flex; align-items:center; justify-content:center; }
+  .quicklink:active { transform:scale(.95); }
+  .quicklink img { width:32px; height:32px; transition:transform .2s; }
+  .quicklink:hover img { transform:scale(1.1); }
   .mono { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; background:${accent}; color:${bg}; font-weight:700; }
-  .mono.big { width:40px; height:40px; font-size:18px; }
+  .quickmono { width:32px; height:32px; }
   footer { grid-column:1/-1; display:flex; justify-content:space-between; gap:12px; border-top:1px solid ${border}; margin-top:16px; padding-top:16px; color:${muted}; font-size:10px; text-transform:uppercase; }
   footer a { color:inherit; text-decoration:none; }
   @media (max-width:760px) { main{padding:20px 16px}.frame{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:12px}.clockcard{margin-top:0}.sections{grid-template-columns:1fr}section.featured:nth-last-child(odd){grid-column:auto}section.featured:nth-last-child(odd) .links{grid-template-columns:1fr}footer{flex-direction:column}.brand{margin-bottom:0}.avatar{width:48px;height:48px} }

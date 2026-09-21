@@ -163,3 +163,35 @@
     color: var(--color-foreground);
   }
 }
+
+@layer components {
+  .page-preview-stage {
+    position: relative;
+    overflow: auto;
+    height: 34rem;
+    container-type: inline-size;
+    background: var(--hub-background);
+  }
+
+  .page-preview-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: top left;
+  }
+
+  .page-preview-canvas--desktop {
+    width: 1120px;
+    transform: scale(calc(100cqw / 1120));
+  }
+
+  .page-preview-canvas--mobile {
+    width: 390px;
+    left: 50%;
+    transform: translateX(-50%) scale(min(1, calc(100cqw / 390)));
+  }
+
+  .page-preview-stage--mobile {
+    background: var(--muted);
+  }
+}
