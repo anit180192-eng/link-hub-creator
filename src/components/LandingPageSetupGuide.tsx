@@ -5,10 +5,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const GUIDES = {
-  chrome: { name: "Chrome", path: "Settings → On startup", steps: ["Open Chrome Settings.", "Choose On startup.", "Select Open a specific page.", "Paste your Landing Page Builder link and save."] },
-  edge: { name: "Edge", path: "Settings → Start, home, and new tabs", steps: ["Open Edge Settings.", "Choose Start, home, and new tabs.", "Select Open these pages.", "Add your Landing Page Builder link."] },
+  chrome: { name: "Chrome", path: "Settings → On startup", steps: ["Open Chrome Settings.", "Choose On startup.", "Select Open a specific page.", "Paste your landing page link and save."] },
+  edge: { name: "Edge", path: "Settings → Start, home, and new tabs", steps: ["Open Edge Settings.", "Choose Start, home, and new tabs.", "Select Open these pages.", "Add your landing page link."] },
   safari: { name: "Safari", path: "Safari → Settings → General", steps: ["Open Safari Settings.", "Choose General.", "Paste your link in Homepage.", "Set new windows and tabs to Homepage."] },
-  firefox: { name: "Firefox", path: "Settings → Home", steps: ["Open Firefox Settings.", "Choose Home.", "Select Custom URLs.", "Paste your Landing Page Builder link."] },
+  firefox: { name: "Firefox", path: "Settings → Home", steps: ["Open Firefox Settings.", "Choose Home.", "Select Custom URLs.", "Paste your landing page link."] },
 } as const;
 
 type Browser = keyof typeof GUIDES;
@@ -28,7 +28,15 @@ function detectBrowser(): Browser {
   return "chrome";
 }
 
-export function LandingPageSetupGuide({ triggerLabel = "Set as my landing page", standalone = false }: { triggerLabel?: string; standalone?: boolean }) {
+export function LandingPageSetupGuide({
+  triggerLabel = "Set as my landing page",
+  standalone = false,
+  url,
+}: {
+  triggerLabel?: string;
+  standalone?: boolean;
+  url?: string | undefined;
+}) {
   const [os, setOS] = useState<OS>("windows");
   const [browser, setBrowser] = useState<Browser>("chrome");
 
@@ -40,6 +48,24 @@ export function LandingPageSetupGuide({ triggerLabel = "Set as my landing page",
   const guide = GUIDES[browser];
   const content = (
     <div className="mt-5">
+      {url ? (
+        <div className="mb-5 rounded-lg border border-border bg-muted/40 p-4">
+          <p className="text-xs font-semibold uppercase text-primary">Your link</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <code className="min-w-0 flex-1 truncate text-xs text-foreground">{url}</code>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => navigator.clipboard.writeText(url)}
+            >
+              <Copy className="mr-1 h-4 w-4" /> Copy link
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Paste this into the setting below so your browser opens your own page.
+          </p>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
         <div className="flex rounded-md bg-muted p-1" aria-label="Operating system">
           <Button size="sm" variant={os === "windows" ? "secondary" : "ghost"} onClick={() => setOS("windows")}><Monitor /> Windows</Button>
@@ -61,7 +87,7 @@ export function LandingPageSetupGuide({ triggerLabel = "Set as my landing page",
                   <div className="h-7 w-2/3 rounded-md bg-secondary" />
                   <div className="border border-primary bg-background p-3">
                     <div className="flex items-center gap-2 text-xs"><span className="h-3 w-3 rounded-full border-4 border-primary" /> Open a specific page</div>
-                    <div className="mt-3 flex h-8 items-center justify-between border border-border bg-card px-2 text-[10px] text-muted-foreground"><span>your-landing-page-link</span><Check className="h-3 w-3 text-primary" /></div>
+                    <div className="mt-3 flex h-8 items-center justify-between border border-border bg-card px-2 text-[10px] text-muted-foreground"><span className="truncate">{url ?? "your-landing-page-link"}</span><Check className="h-3 w-3 text-primary" /></div>
                   </div>
                   <div className="h-7 w-1/2 rounded-md bg-secondary" />
                 </div>
@@ -90,7 +116,7 @@ export function LandingPageSetupGuide({ triggerLabel = "Set as my landing page",
     <Dialog>
       <DialogTrigger asChild><Button size="lg" variant="outline"><Copy /> {triggerLabel}</Button></DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-        <DialogHeader><DialogTitle className="font-display text-2xl">Make Landing Page Builder open automatically</DialogTitle><DialogDescription>We found your device. Choose your browser for the exact steps.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle className="font-display text-2xl">Make your landing page open automatically</DialogTitle><DialogDescription>We found your device. Choose your browser for the exact steps.</DialogDescription></DialogHeader>
         {content}
       </DialogContent>
     </Dialog>

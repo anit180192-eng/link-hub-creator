@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
-import { LandingPageSetupGuide } from "@/components/LandingPageSetupGuide";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -84,7 +83,7 @@ function Landing() {
                 ) : (
                   <a href="#sign-in"><Button size="lg">Create my landing page <ArrowRight /></Button></a>
                 )}
-                <LandingPageSetupGuide />
+                <Button asChild size="lg" variant="outline"><Link to="/setup">How it becomes your landing page</Link></Button>
               </div>
             </div>
 

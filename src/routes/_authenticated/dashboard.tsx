@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { LandingPageSetupGuide } from "@/components/LandingPageSetupGuide";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -695,6 +696,17 @@ function Dashboard() {
                 </Button>
               </div>
             ) : null}
+
+            <div className="mt-5 border-t border-border pt-5">
+              <p className="text-sm text-muted-foreground">
+                {form.published
+                  ? "Now make this page open every time your browser starts."
+                  : "Publish first, then follow the steps to open it every time your browser starts."}
+              </p>
+              <div className="mt-3">
+                <LandingPageSetupGuide url={form.published ? publicUrl : undefined} />
+              </div>
+            </div>
           </section>
         </div>
 
