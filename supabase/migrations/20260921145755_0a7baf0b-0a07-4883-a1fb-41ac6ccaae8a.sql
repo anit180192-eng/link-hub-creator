@@ -1,0 +1,1 @@
+ALTER TABLE public.links ADD COLUMN IF NOT EXISTS icon_only boolean NOT NULL DEFAULT false;

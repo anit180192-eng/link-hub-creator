@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           created_at: string
           group_name: string
+          icon_only: boolean
           id: string
           label: string
           platform: string
@@ -29,6 +30,7 @@ export type Database = {
         Insert: {
           created_at?: string
           group_name?: string
+          icon_only?: boolean
           id?: string
           label?: string
           platform?: string
@@ -40,6 +42,7 @@ export type Database = {
         Update: {
           created_at?: string
           group_name?: string
+          icon_only?: boolean
           id?: string
           label?: string
           platform?: string
