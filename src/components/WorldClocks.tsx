@@ -20,27 +20,27 @@ export function WorldClocks({
   if (!clocks.length) return null;
 
   return (
-    <div
-      className={`grid grid-cols-2 border-b border-hub-border sm:flex sm:flex-wrap ${compact ? "" : "lg:grid lg:grid-cols-3"}`}
-      aria-label="World clocks"
-    >
-      {clocks.map((clock) => {
-        const parts = now ? clockParts(clock.tz, now) : { time: "--:--", day: "" };
-        return (
-          <div
-            key={`${clock.tz}-${clock.label}`}
-            className="min-w-[118px] border-r border-hub-border px-5 py-4 last:border-r-0 sm:flex-1 lg:px-6"
-          >
-            <span className="block text-[10px] font-semibold uppercase text-hub-muted">
-              {clock.label}
-            </span>
-            <span className="mt-1 block font-display text-xl font-medium tabular-nums text-hub-foreground">
-              {parts.time}
-            </span>
-            <span className="block text-[10px] text-hub-muted">{parts.day}</span>
-          </div>
-        );
-      })}
+    <div className="rounded-lg border border-hub-border bg-hub-surface p-4" aria-label="World clocks">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-[10px] font-semibold uppercase text-hub-muted">World time</span>
+        <span className="flex items-center gap-1.5 text-[10px] text-hub-muted">
+          <span className="h-1.5 w-1.5 rounded-full bg-hub-accent" aria-hidden="true" /> Live
+        </span>
+      </div>
+      <div className={compact ? "grid grid-cols-2 gap-x-4" : "divide-y divide-hub-border"}>
+        {clocks.map((clock) => {
+          const parts = now ? clockParts(clock.tz, now) : { time: "--:--", day: "" };
+          return (
+            <div key={`${clock.tz}-${clock.label}`} className="flex min-h-11 items-center justify-between gap-3 py-2">
+              <span className="min-w-0">
+                <span className="block truncate text-xs font-medium text-hub-foreground">{clock.label}</span>
+                <span className="block text-[10px] text-hub-muted">{parts.day}</span>
+              </span>
+              <span className="font-display text-base font-semibold tabular-nums text-hub-foreground">{parts.time}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
