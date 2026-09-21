@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import type { StartPageLink, StartPageProfile } from "@/lib/startpage";
+import { parseClocks, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 
 export type PublicPage = {
   profile: StartPageProfile;
@@ -50,7 +50,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
         avatar_url: profile.avatar_url,
         theme: profile.theme,
         dark_mode: profile.dark_mode,
-        clocks: profile.clocks,
+        clocks: parseClocks(profile.clocks),
 
       },
       links: (links ?? []) as StartPageLink[],
