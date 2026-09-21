@@ -759,6 +759,15 @@ function Dashboard() {
                                     {folders.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
                                   </SelectContent>
                                 </Select>
+                                <Button
+                                  variant={link.icon_only ? "secondary" : "ghost"}
+                                  size="icon"
+                                  onClick={() => updateLink.mutate({ ...link, icon_only: !link.icon_only })}
+                                  aria-label={link.icon_only ? "Show logo and label" : "Show logo only"}
+                                  title={link.icon_only ? "Showing logo only" : "Show logo only"}
+                                >
+                                  <ImageIcon className="h-4 w-4" />
+                                </Button>
                                 <Button variant="ghost" size="icon" onClick={() => setEditingLink({ ...link })} aria-label="Edit link">
                                   <Pencil className="h-4 w-4" />
                                 </Button>
