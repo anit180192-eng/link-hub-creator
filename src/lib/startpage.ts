@@ -7,6 +7,7 @@ export type StartPageLink = {
   url: string;
   group_name: string;
   position: number;
+  icon_only?: boolean;
 };
 
 export type StartPageClock = {
@@ -217,6 +218,12 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
           const img = icon
             ? `<img src="${esc(icon)}" alt="" width="28" height="28" />`
             : `<span class="mono">${esc(title.charAt(0).toUpperCase())}</span>`;
+          if (link.icon_only) {
+            const bigImg = icon
+              ? `<img src="${esc(icon)}" alt="${title}" width="40" height="40" />`
+              : `<span class="mono big">${esc(title.charAt(0).toUpperCase())}</span>`;
+            return `<a class="icononly" href="${href}" target="_blank" rel="noopener noreferrer" title="${title}" aria-label="${title}">${bigImg}</a>`;
+          }
           return isGrid
             ? `<a class="tile" href="${href}" target="_blank" rel="noopener noreferrer">${img}<span class="t">${title}</span><span class="s">${sub}</span></a>`
             : `<a class="row" href="${href}" target="_blank" rel="noopener noreferrer">${img}<span><span class="t">${title}</span><span class="s">${sub}</span></span></a>`;
@@ -287,7 +294,10 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   .row span span { display:block; }
   .t { font-weight:600; font-size:15px; }
   .s { font-size:12px; color:${muted}; }
+  .icononly { display:flex; align-items:center; justify-content:center; padding:18px; min-height:84px; }
+  .icononly img { width:40px; height:40px; }
   .mono { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; border-radius:8px; background:${accent}; color:#08151F; font-weight:700; }
+  .mono.big { width:40px; height:40px; font-size:18px; border-radius:10px; }
   footer { margin-top:56px; text-align:center; font-size:12px; color:${muted}; }
 </style>
 </head>

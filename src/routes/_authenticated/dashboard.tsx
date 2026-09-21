@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Folder,
   FolderPlus,
+  Image as ImageIcon,
   LogOut,
   Pencil,
   Plus,
@@ -105,7 +106,7 @@ function Dashboard() {
     queryFn: async (): Promise<StartPageLink[]> => {
       const { data, error } = await supabase
         .from("links")
-        .select("id, platform, label, url, group_name, position")
+        .select("id, platform, label, url, group_name, position, icon_only")
         .order("position", { ascending: true });
       if (error) throw error;
       return (data ?? []) as StartPageLink[];
@@ -200,6 +201,7 @@ function Dashboard() {
           label: link.label.trim().slice(0, 60),
           url: normalizeUrl(link.url).slice(0, 500),
           group_name: link.group_name.trim().slice(0, 40),
+          icon_only: !!link.icon_only,
         })
         .eq("id", link.id);
       if (error) throw error;
@@ -721,6 +723,17 @@ function Dashboard() {
                                       {folders.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
                                     </SelectContent>
                                   </Select>
+                                  <label className="flex items-center gap-2 rounded-md border border-border px-3 text-sm">
+                                    <Switch
+                                      checked={!!editingLink.icon_only}
+                                      onCheckedChange={(icon_only) =>
+                                        setEditingLink({ ...editingLink, icon_only })
+                                      }
+                                      aria-label="Show logo only"
+                                    />
+                                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                    Show logo only
+                                  </label>
                                   <Button onClick={() => updateLink.mutate(editingLink)} disabled={updateLink.isPending}>
                                     <Check className="h-4 w-4" /> Save changes
                                   </Button>
@@ -731,7 +744,10 @@ function Dashboard() {
                               <div className="flex items-center gap-2">
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate text-sm font-medium">{link.label || link.platform}</p>
-                                  <p className="truncate text-xs text-muted-foreground">{link.url}</p>
+                                  <p className="truncate text-xs text-muted-foreground">
+                                    {link.icon_only ? "Logo only · " : ""}
+                                    {link.url}
+                                  </p>
                                 </div>
                                 <Select
                                   value={link.group_name || NO_FOLDER}
@@ -743,6 +759,15 @@ function Dashboard() {
                                     {folders.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
                                   </SelectContent>
                                 </Select>
+                                <Button
+                                  variant={link.icon_only ? "secondary" : "ghost"}
+                                  size="icon"
+                                  onClick={() => updateLink.mutate({ ...link, icon_only: !link.icon_only })}
+                                  aria-label={link.icon_only ? "Show logo and label" : "Show logo only"}
+                                  title={link.icon_only ? "Showing logo only" : "Show logo only"}
+                                >
+                                  <ImageIcon className="h-4 w-4" />
+                                </Button>
                                 <Button variant="ghost" size="icon" onClick={() => setEditingLink({ ...link })} aria-label="Edit link">
                                   <Pencil className="h-4 w-4" />
                                 </Button>

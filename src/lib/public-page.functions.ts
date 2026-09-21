@@ -38,7 +38,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
 
     const { data: links } = await supabase
       .from("links")
-      .select("id, platform, label, url, group_name, position")
+      .select("id, platform, label, url, group_name, position, icon_only")
       .eq("user_id", profile.id)
       .order("position", { ascending: true });
 
