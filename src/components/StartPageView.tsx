@@ -23,11 +23,11 @@ export function StartPageView({
   const safe = links.filter((l) => isSafeUrl(l.url));
   const groups = groupLinks(safe);
 
-  const shell = dark ? "bg-[#16181d] text-[#f3f4f1]" : "bg-[#f6f6f2] text-[#16181d]";
+  const shell = dark ? "bg-background text-foreground" : "bg-[#f6f6f2] text-[#16181d]";
   const cardCls = dark
-    ? "bg-[#212429] border-[#2f333a] hover:border-primary"
+    ? "bg-card border-border hover:border-accent"
     : "bg-white border-[#e4e4dd] hover:border-primary";
-  const mutedCls = dark ? "text-[#9aa0a6]" : "text-[#61656b]";
+  const mutedCls = dark ? "text-muted-foreground" : "text-[#61656b]";
 
   return (
     <div className={`${shell} ${compact ? "rounded-xl" : "min-h-screen"}`}>

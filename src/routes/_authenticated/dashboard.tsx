@@ -118,6 +118,7 @@ function Dashboard() {
   });
   const [newFolder, setNewFolder] = useState("");
   const [extraFolders, setExtraFolders] = useState<string[]>([]);
+  const [editingLink, setEditingLink] = useState<StartPageLink | null>(null);
 
   const folders = Array.from(
     new Set([...links.map((l) => l.group_name.trim()).filter(Boolean), ...extraFolders]),
@@ -176,12 +177,35 @@ function Dashboard() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["links"] }),
   });
 
+  const updateLink = useMutation({
+    mutationFn: async (link: StartPageLink) => {
+      if (!isSafeUrl(link.url)) throw new Error("Enter a valid web address");
+      const { error } = await supabase
+        .from("links")
+        .update({
+          platform: link.platform,
+          label: link.label.trim().slice(0, 60),
+          url: normalizeUrl(link.url).slice(0, 500),
+          group_name: link.group_name.trim().slice(0, 40),
+        })
+        .eq("id", link.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setEditingLink(null);
+      queryClient.invalidateQueries({ queryKey: ["links"] });
+      toast.success("Link updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const moveLink = useMutation({
     mutationFn: async ({ index, dir }: { index: number; dir: -1 | 1 }) => {
       const target = index + dir;
       if (target < 0 || target >= links.length) return;
-      const a = links[index]!;
-      const b = links[target]!;
+      const a = links[index];
+      const b = links[target];
+      if (!a || !b) return;
       const updates = [
         supabase.from("links").update({ position: target }).eq("id", a.id),
         supabase.from("links").update({ position: index }).eq("id", b.id),
@@ -215,6 +239,30 @@ function Dashboard() {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["links"] }),
     onError: () => toast.error("Couldn't update that folder"),
+  });
+
+  const publishPage = useMutation({
+    mutationFn: async (published: boolean) => {
+      const slug = slugify(form?.slug ?? "");
+      if (!profile || !slug) throw new Error("Choose a username before publishing");
+      const { error } = await supabase
+        .from("profiles")
+        .update({ slug, published })
+        .eq("id", profile.id);
+      if (error) throw error;
+      return { published, slug };
+    },
+    onSuccess: ({ published, slug }) => {
+      setForm((current) => (current ? { ...current, slug, published } : current));
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      toast.success(published ? "Your unique homepage is live" : "Your page is now private");
+    },
+    onError: (e: Error) =>
+      toast.error(
+        e.message.includes("duplicate")
+          ? "That username is already taken. Choose another."
+          : e.message,
+      ),
   });
 
   function createFolder() {
@@ -304,14 +352,27 @@ function Dashboard() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="slug">Page address</Label>
-                <Input
-                  id="slug"
-                  value={form.slug}
-                  maxLength={40}
-                  onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })}
-                  onBlur={() => form.slug && saveProfile.mutate({ slug: form.slug })}
-                />
+                <Label htmlFor="slug">Homepage username</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="slug"
+                    value={form.slug}
+                    maxLength={40}
+                    aria-describedby="slug-help"
+                    onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!form.slug || saveProfile.isPending}
+                    onClick={() => saveProfile.mutate({ slug: form.slug })}
+                  >
+                    Save
+                  </Button>
+                </div>
+                <p id="slug-help" className="text-xs text-muted-foreground">
+                  Your unique link ends in /p/{form.slug || "your-name"}. If it is taken, we'll ask you to choose another.
+                </p>
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label htmlFor="tagline">Tagline</Label>
@@ -508,58 +569,82 @@ function Dashboard() {
                       items.map((link) => {
                         const index = links.findIndex((l) => l.id === link.id);
                         return (
-                          <li key={link.id} className="flex items-center gap-2 px-3 py-2">
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium">
-                                {link.label || link.platform}
-                              </p>
-                              <p className="truncate text-xs text-muted-foreground">{link.url}</p>
-                            </div>
-                            <Select
-                              value={link.group_name || NO_FOLDER}
-                              onValueChange={(value) =>
-                                moveToFolder.mutate({
-                                  id: link.id,
-                                  group_name: value === NO_FOLDER ? "" : value,
-                                })
-                              }
-                            >
-                              <SelectTrigger className="h-8 w-36 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value={NO_FOLDER}>No folder</SelectItem>
-                                {folders.map((f) => (
-                                  <SelectItem key={f} value={f}>
-                                    {f}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => moveLink.mutate({ index, dir: -1 })}
-                              aria-label="Move up"
-                            >
-                              <ArrowUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => moveLink.mutate({ index, dir: 1 })}
-                              aria-label="Move down"
-                            >
-                              <ArrowDown className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeLink.mutate(link.id)}
-                              aria-label="Delete link"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                          <li key={link.id} className="px-3 py-3">
+                            {editingLink?.id === link.id ? (
+                              <div className="grid gap-2 sm:grid-cols-[130px_1fr_1fr]">
+                                <Select
+                                  value={editingLink.platform}
+                                  onValueChange={(platform) =>
+                                    setEditingLink({ ...editingLink, platform })
+                                  }
+                                >
+                                  <SelectTrigger aria-label="Link type"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {PLATFORMS.map((p) => <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  aria-label="Link address"
+                                  value={editingLink.url}
+                                  maxLength={500}
+                                  onChange={(e) => setEditingLink({ ...editingLink, url: e.target.value })}
+                                />
+                                <Input
+                                  aria-label="Link label"
+                                  placeholder="Label (optional)"
+                                  value={editingLink.label}
+                                  maxLength={60}
+                                  onChange={(e) => setEditingLink({ ...editingLink, label: e.target.value })}
+                                />
+                                <div className="flex flex-wrap gap-2 sm:col-span-3">
+                                  <Select
+                                    value={editingLink.group_name || NO_FOLDER}
+                                    onValueChange={(value) =>
+                                      setEditingLink({ ...editingLink, group_name: value === NO_FOLDER ? "" : value })
+                                    }
+                                  >
+                                    <SelectTrigger className="w-44" aria-label="Folder"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value={NO_FOLDER}>No folder</SelectItem>
+                                      {folders.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                                    </SelectContent>
+                                  </Select>
+                                  <Button onClick={() => updateLink.mutate(editingLink)} disabled={updateLink.isPending}>
+                                    <Check className="h-4 w-4" /> Save changes
+                                  </Button>
+                                  <Button variant="ghost" onClick={() => setEditingLink(null)}>Cancel</Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm font-medium">{link.label || link.platform}</p>
+                                  <p className="truncate text-xs text-muted-foreground">{link.url}</p>
+                                </div>
+                                <Select
+                                  value={link.group_name || NO_FOLDER}
+                                  onValueChange={(value) => moveToFolder.mutate({ id: link.id, group_name: value === NO_FOLDER ? "" : value })}
+                                >
+                                  <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value={NO_FOLDER}>No folder</SelectItem>
+                                    {folders.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                                <Button variant="ghost" size="icon" onClick={() => setEditingLink({ ...link })} aria-label="Edit link">
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" onClick={() => moveLink.mutate({ index, dir: -1 })} aria-label="Move up">
+                                  <ArrowUp className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" onClick={() => moveLink.mutate({ index, dir: 1 })} aria-label="Move down">
+                                  <ArrowDown className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" onClick={() => removeLink.mutate(link.id)} aria-label="Delete link">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
                           </li>
                         );
                       })
@@ -579,12 +664,8 @@ function Dashboard() {
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Button
-                onClick={() => {
-                  const published = !form.published;
-                  setForm({ ...form, published });
-                  saveProfile.mutate({ published });
-                  toast.success(published ? "Your page is live" : "Your page is now private");
-                }}
+                disabled={publishPage.isPending || !form.slug}
+                onClick={() => publishPage.mutate(!form.published)}
               >
                 {form.published ? <Check className="mr-1 h-4 w-4" /> : null}
                 {form.published ? "Published" : "Create & publish"}
