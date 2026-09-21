@@ -15,3 +15,6 @@
 - [x] "Set as landing page" guide inside dashboard
 - [x] Brand footer "Built with Landing Page Builder by AuruNex"
 - [x] Rename to "Landing Page Builder"
+
+## Current
+- [x] Redesign generated landing pages as a warm Swiss-editorial personal hub

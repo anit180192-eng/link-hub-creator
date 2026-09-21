@@ -192,28 +192,22 @@ function esc(value: string) {
 
 /** Builds a standalone HTML document for download / local landing page use. */
 export function renderStartPageHtml(profile: StartPageProfile, links: StartPageLink[]) {
-  const dark = profile.dark_mode;
-  const bg = dark ? "#08151F" : "#f6f6f2";
-  const fg = dark ? "#F4F5F2" : "#16181d";
-  const card = dark ? "#122633" : "#ffffff";
-  const border = dark ? "#355361" : "#e4e4dd";
-  const muted = dark ? "#B3C1CA" : "#61656b";
-  const accent = dark ? "#E3C581" : "#69C9C0";
-  const isGrid = profile.theme === "grid";
+  const bg = "#121313";
+  const fg = "#F1EFEB";
+  const card = "#24201E";
+  const border = "#514943";
+  const muted = "#AAA6A0";
+  const accent = "#C98762";
   const safe = links.filter((l) => isSafeUrl(l.url));
+  const name = profile.display_name || profile.slug;
+  const tagline = profile.tagline.trim().toLowerCase() === "everything at once :)"
+    ? "Personal links, projects, and creative work."
+    : profile.tagline || "Personal links, projects, and creative work.";
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("");
 
   const sections = groupLinks(safe)
-    .map(([group, items]) => {
-      const showHeading = Boolean(group) || (safe.length > 0 && groupLinks(safe).length > 1);
-      const openAll =
-        showHeading && items.length > 1
-          ? `<button type="button" class="openall" data-urls="${esc(
-              items.map((l) => normalizeUrl(l.url)).join(" "),
-            )}">Open all (${items.length})</button>`
-          : "";
-      const heading = showHeading
-        ? `<div class="grouphead"><h2 class="group">${esc(group || "Links")}</h2>${openAll}</div>`
-        : "";
+    .map(([group, items], groupIndex) => {
+      const heading = `<div class="grouphead"><h2 class="group">${esc(group || "Personal")}</h2><span>0${groupIndex + 1}</span></div>`;
       const body = items
         .map((link) => {
           const href = esc(normalizeUrl(link.url));
@@ -229,18 +223,16 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
               : `<span class="mono big">${esc(title.charAt(0).toUpperCase())}</span>`;
             return `<a class="icononly" href="${href}" target="_blank" rel="noopener noreferrer" title="${title}" aria-label="${title}">${bigImg}</a>`;
           }
-          return isGrid
-            ? `<a class="tile" href="${href}" target="_blank" rel="noopener noreferrer">${img}<span class="t">${title}</span><span class="s">${sub}</span></a>`
-            : `<a class="row" href="${href}" target="_blank" rel="noopener noreferrer">${img}<span><span class="t">${title}</span><span class="s">${sub}</span></span></a>`;
+          return `<a class="link" href="${href}" target="_blank" rel="noopener noreferrer">${img}<span class="copy"><span class="t">${title}</span><span class="s">${sub}</span></span><span class="arrow" aria-hidden="true">↗</span></a>`;
         })
         .join("");
-      return `<section>${heading}<div class="${isGrid ? "grid" : "list"}">${body}</div></section>`;
+      return `<section>${heading}<div class="links">${body}</div></section>`;
     })
     .join("");
 
   const avatar = profile.avatar_url
     ? `<img class="avatar" src="${esc(profile.avatar_url)}" alt="" />`
-    : "";
+    : `<div class="avatar monogram">${esc(initials)}</div>`;
 
   const clocks = parseClocks(profile.clocks);
   const clockStrip = clocks.length
@@ -270,66 +262,67 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 </script>`
     : "";
 
-  const openAllScript = `<script>
-(function(){
-  document.querySelectorAll('.openall').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      (btn.getAttribute('data-urls')||'').split(' ').filter(Boolean).forEach(function(u){
-        window.open(u, '_blank', 'noopener,noreferrer');
-      });
-    });
-  });
-})();
-</script>`;
-
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${esc(profile.display_name || profile.slug)} — Start page</title>
+<title>${esc(name)} — Personal hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
-  body { margin:0; background:${bg}; color:${fg}; font-family: "DM Sans", ui-sans-serif, system-ui, -apple-system, sans-serif; }
-  main { max-width: 880px; margin: 0 auto; padding: 64px 20px 80px; }
-  header { text-align:${isGrid ? "left" : "center"}; margin-bottom: 40px; }
-  .avatar { width:76px; height:76px; border-radius:999px; object-fit:cover; border:2px solid ${accent}; margin-bottom:14px; }
-  h1 { font-size: 30px; margin:0 0 6px; letter-spacing:-0.02em; }
-  p.tag { margin:0; color:${muted}; font-size:15px; }
-  h2.group { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:${muted}; margin:0; }
-  .grouphead { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:32px 0 12px; }
-  .openall { cursor:pointer; background:${card}; color:${fg}; border:1px solid ${border}; border-radius:999px; padding:5px 12px; font:inherit; font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; transition:.15s; }
-  .openall:hover { border-color:${accent}; }
-  .clocks { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:32px; }
-  .clock { background:${card}; border:1px solid ${border}; border-radius:14px; padding:10px 16px; min-width:120px; text-align:center; }
-  .clock .cl { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:${muted}; }
-  .clock .ct { display:block; font-size:22px; font-weight:600; font-variant-numeric:tabular-nums; margin-top:2px; }
-  .clock .cd { display:block; font-size:11px; color:${muted}; }
-  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:12px; }
-  .list { display:flex; flex-direction:column; gap:10px; max-width:520px; margin:0 auto; }
-  a { text-decoration:none; color:inherit; background:${card}; border:1px solid ${border}; border-radius:14px; transition:.15s; }
-  a:hover { border-color:${accent}; transform: translateY(-2px); }
-  .tile { display:flex; flex-direction:column; gap:6px; padding:18px; }
-  .row { display:flex; align-items:center; gap:14px; padding:14px 18px; }
-  .row span span { display:block; }
+  body { margin:0; background:${bg}; color:${fg}; font-family:"DM Sans",sans-serif; }
+  main { max-width:1180px; margin:0 auto; padding:56px 48px; }
+  .frame { display:grid; grid-template-columns:minmax(270px,.36fr) minmax(0,.64fr); border:1px solid ${border}; }
+  header { min-height:640px; border-right:1px solid ${border}; padding:44px; display:flex; flex-direction:column; justify-content:space-between; }
+  .brand { display:inline-flex; align-items:center; gap:6px; color:${muted}; font:600 11px "Space Grotesk",sans-serif; text-transform:uppercase; text-decoration:none; }
+  .brandmark { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; border:1px solid ${accent}; color:${accent}; font-size:9px; }
+  .identity { margin-top:72px; }
+  .avatar { width:112px; height:112px; object-fit:cover; border:1px solid ${border}; margin-bottom:32px; filter:grayscale(1); }
+  .monogram { display:flex; align-items:center; justify-content:center; background:${card}; color:${accent}; font:600 30px "Space Grotesk",sans-serif; filter:none; }
+  h1 { margin:0; font:600 68px/.95 "Space Grotesk",sans-serif; }
+  p.tag { max-width:280px; margin:24px 0 0; color:${muted}; font-size:14px; line-height:1.65; }
+  .index { display:flex; align-items:center; gap:12px; color:${muted}; font-size:10px; font-weight:600; text-transform:uppercase; }
+  .index:before { content:""; width:8px; height:8px; background:${accent}; }
+  .content { min-width:0; display:flex; flex-direction:column; }
+  .clocks { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); border-bottom:1px solid ${border}; }
+  .clock { padding:16px 24px; border-right:1px solid ${border}; }
+  .clock:last-child { border-right:0; }
+  .clock .cl { display:block; color:${muted}; font-size:10px; font-weight:600; text-transform:uppercase; }
+  .clock .ct { display:block; margin-top:4px; font:500 20px "Space Grotesk",sans-serif; font-variant-numeric:tabular-nums; }
+  .clock .cd { display:block; color:${muted}; font-size:10px; }
+  .sections { flex:1; padding:48px 40px; }
+  section + section { margin-top:56px; }
+  h2.group { margin:0; color:${muted}; font-size:11px; text-transform:uppercase; }
+  .grouphead { display:flex; justify-content:space-between; align-items:end; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid ${border}; color:${muted}; font-size:10px; }
+  .links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .link { height:92px; display:grid; grid-template-columns:32px minmax(0,1fr) 20px; align-items:center; gap:12px; padding:0 16px; }
+  a.link,.icononly { color:inherit; text-decoration:none; background:${card}; border:1px solid ${border}; transition:transform .2s,border-color .2s,box-shadow .2s; }
+  a.link:hover,.icononly:hover { border-color:${accent}; transform:translateY(-2px); box-shadow:0 0 18px rgba(201,135,98,.16); }
+  .link img { width:28px; height:28px; }
+  .copy,.copy span { min-width:0; display:block; }
   .t { font-weight:600; font-size:15px; }
   .s { font-size:12px; color:${muted}; }
-  .icononly { display:flex; align-items:center; justify-content:center; padding:18px; min-height:84px; }
+  .arrow { color:${muted}; font-size:18px; }
+  .icononly { display:flex; align-items:center; justify-content:center; height:92px; }
   .icononly img { width:40px; height:40px; }
-  .mono { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; border-radius:8px; background:${accent}; color:#08151F; font-weight:700; }
-  .mono.big { width:40px; height:40px; font-size:18px; border-radius:10px; }
-  footer { margin-top:56px; text-align:center; font-size:12px; color:${muted}; }
+  .mono { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; background:${accent}; color:${bg}; font-weight:700; }
+  .mono.big { width:40px; height:40px; font-size:18px; }
+  footer { display:flex; justify-content:space-between; gap:12px; border-top:1px solid ${border}; padding:20px 24px; color:${muted}; font-size:10px; text-transform:uppercase; }
+  footer a { color:inherit; text-decoration:none; }
+  @media (max-width:760px) { main{padding:20px 16px}.frame{display:block}header{min-height:340px;border-right:0;border-bottom:1px solid ${border};padding:28px}.identity{margin-top:56px}h1{font-size:50px}.content{}.sections{padding:32px 20px}.links{grid-template-columns:1fr}.clocks{grid-template-columns:repeat(2,1fr)}footer{flex-direction:column}.avatar{width:96px;height:96px} }
+  @media (prefers-reduced-motion:reduce) { *{transition:none!important} }
 </style>
 </head>
 <body>
-<main>
-  ${clockStrip}
-  <header>${avatar}<h1>${esc(profile.display_name || profile.slug)}</h1>${profile.tagline ? `<p class="tag">${esc(profile.tagline)}</p>` : ""}</header>
-  ${sections}
-  <footer>Built with Landing Page Builder by AuruNex</footer>
+<main><div class="frame">
+  <header><div><a class="brand" href="https://aurunex.com/" aria-label="AuruNex home"><span class="brandmark">A</span>AuruNex</a><div class="identity">${avatar}<h1>${esc(name)}</h1><p class="tag">${esc(tagline)}</p></div></div><span class="index">Personal index</span></header>
+  <div class="content">${clockStrip}<div class="sections">${sections}</div><footer><span>${esc(name)} · Personal hub</span><a href="https://aurunex.com/">Built with Landing Page Builder by AuruNex</a></footer></div>
+</div>
 </main>
 ${clockScript}
-${openAllScript}
 </body>
 </html>`;
 }

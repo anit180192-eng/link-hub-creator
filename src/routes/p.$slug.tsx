@@ -1,6 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { StartPageView } from "@/components/StartPageView";
-import { PublicAdSlot } from "@/components/PublicAdSlot";
 import { getPublicPage } from "@/lib/public-page.functions";
 
 export const Route = createFileRoute("/p/$slug")({
@@ -54,11 +53,5 @@ export const Route = createFileRoute("/p/$slug")({
 
 function PublicStartPage() {
   const { profile, links } = Route.useLoaderData();
-  return (
-    <StartPageView
-      profile={profile}
-      links={links}
-      adSlot={<PublicAdSlot dark={profile.dark_mode} />}
-    />
-  );
+  return <StartPageView profile={profile} links={links} />;
 }
