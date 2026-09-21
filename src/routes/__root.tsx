@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ADSENSE_SCRIPT_SRC, adsConfigured } from "@/lib/ads-config";
 
 
 function NotFoundComponent() {
@@ -110,6 +111,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    scripts: adsConfigured && ADSENSE_SCRIPT_SRC
+      ? [{ src: ADSENSE_SCRIPT_SRC, async: true, crossOrigin: "anonymous" }]
+      : undefined,
   }),
 
   shellComponent: RootShell,

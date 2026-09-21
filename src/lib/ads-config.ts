@@ -15,3 +15,8 @@ export const adsConfigured = Boolean(ADSENSE_CLIENT);
 
 /** Both publisher ID and ad slot configured — manual ad unit placement. */
 export const hasAdSlot = Boolean(ADSENSE_CLIENT && ADSENSE_SLOT);
+
+/** Full AdSense loader script URL for the <head> (used for site verification). */
+export const ADSENSE_SCRIPT_SRC = ADSENSE_CLIENT
+  ? `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`
+  : "";

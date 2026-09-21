@@ -37,15 +37,15 @@ export function AdUnit({ client, slot }: { client: string; slot: string }) {
   );
 }
 
-/** Injects the AdSense loader script (idempotent). */
+/** Injects the AdSense loader script (idempotent — skips if already in head). */
 function loadAdSenseScript(client: string) {
-  const scriptId = "adsbygoogle-js";
-  if (document.getElementById(scriptId)) return;
+  const src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+  if (document.querySelector(`script[src="${src}"]`)) return;
   const script = document.createElement("script");
-  script.id = scriptId;
+  script.id = "adsbygoogle-js";
   script.async = true;
   script.crossOrigin = "anonymous";
-  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+  script.src = src;
   document.head.appendChild(script);
 }
 
