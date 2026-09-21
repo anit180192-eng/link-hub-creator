@@ -204,11 +204,16 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 
   const sections = groupLinks(safe)
     .map(([group, items]) => {
-      const heading = group
-        ? `<h2 class="group">${esc(group)}</h2>`
-        : safe.length && groupLinks(safe).length > 1
-          ? `<h2 class="group">Links</h2>`
+      const showHeading = Boolean(group) || (safe.length > 0 && groupLinks(safe).length > 1);
+      const openAll =
+        showHeading && items.length > 1
+          ? `<button type="button" class="openall" data-urls="${esc(
+              items.map((l) => normalizeUrl(l.url)).join(" "),
+            )}">Open all (${items.length})</button>`
           : "";
+      const heading = showHeading
+        ? `<div class="grouphead"><h2 class="group">${esc(group || "Links")}</h2>${openAll}</div>`
+        : "";
       const body = items
         .map((link) => {
           const href = esc(normalizeUrl(link.url));
