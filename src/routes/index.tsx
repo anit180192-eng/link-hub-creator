@@ -14,6 +14,7 @@ import {
 import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
 import { Button } from "@/components/ui/button";
+import { LandingAdSlot } from "@/components/LandingAdSlot";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -116,6 +117,8 @@ function Landing() {
             </div>
           </div>
         </section>
+
+        <LandingAdSlot />
 
         <section className="border-t border-border bg-card">
           <div className="mx-auto grid max-w-7xl gap-8 px-5 py-16 sm:grid-cols-3 lg:px-8">
