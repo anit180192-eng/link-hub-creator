@@ -21,7 +21,7 @@ export type StartPageProfile = {
   avatar_url: string | null;
   theme: string;
   dark_mode: boolean;
-  clocks?: unknown;
+  clocks?: StartPageClock[];
 };
 
 export const MAX_CLOCKS = 5;
