@@ -270,6 +270,18 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 </script>`
     : "";
 
+  const openAllScript = `<script>
+(function(){
+  document.querySelectorAll('.openall').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      (btn.getAttribute('data-urls')||'').split(' ').filter(Boolean).forEach(function(u){
+        window.open(u, '_blank', 'noopener,noreferrer');
+      });
+    });
+  });
+})();
+</script>`;
+
   return `<!doctype html>
 <html lang="en">
 <head>
