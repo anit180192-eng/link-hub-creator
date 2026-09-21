@@ -439,6 +439,95 @@ function Dashboard() {
             </div>
           </section>
 
+          {/* World clocks */}
+          <section className="rounded-xl border border-border bg-card p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-lg">World clocks</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Show the time in up to {MAX_CLOCKS} countries at the top of your page. Add none if
+                  you'd rather keep it clean.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                disabled={clocks.length >= MAX_CLOCKS}
+                onClick={() => {
+                  const used = new Set(clocks.map((c) => c.tz));
+                  const next = TIMEZONES.find((t) => !used.has(t.tz)) ?? TIMEZONES[0]!;
+                  saveClocks([...clocks, { tz: next.tz, label: next.label }]);
+                }}
+              >
+                <Clock3 className="mr-1 h-4 w-4" /> Add clock
+              </Button>
+            </div>
+
+            {clocks.length === 0 ? (
+              <p className="mt-4 text-sm text-muted-foreground">
+                No clocks yet — your page shows just your links.
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-3">
+                {clocks.map((clock, index) => (
+                  <li key={index} className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Clock {index + 1}</span>
+                    <Select
+                      value={clock.tz}
+                      onValueChange={(tz) =>
+                        saveClocks(
+                          clocks.map((c, i) =>
+                            i === index
+                              ? { tz, label: c.label === timezoneLabel(c.tz) ? timezoneLabel(tz) : c.label }
+                              : c,
+                          ),
+                        )
+                      }
+                    >
+                      <SelectTrigger className="w-56" aria-label={`Country for clock ${index + 1}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {TIMEZONES.map((t) => (
+                          <SelectItem key={t.tz} value={t.tz}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      className="w-44"
+                      aria-label={`Label for clock ${index + 1}`}
+                      value={clock.label}
+                      maxLength={24}
+                      placeholder="Label shown on page"
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          clocks: clocks.map((c, i) =>
+                            i === index ? { ...c, label: e.target.value } : c,
+                          ),
+                        })
+                      }
+                      onBlur={() => saveClocks(clocks)}
+                    />
+                    <span className="text-xs tabular-nums text-muted-foreground">
+                      {clockParts(clock.tz).time}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Remove clock ${index + 1}`}
+                      onClick={() => saveClocks(clocks.filter((_, i) => i !== index))}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+
           {/* Folders + links */}
           <section className="rounded-xl border border-border bg-card p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
