@@ -5,6 +5,7 @@ import { Brand } from "@/components/Brand";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
+  staticData: { sitemap: false },
   head: () => ({ meta: [
     { title: "Sign in — Landing Page Builder" },
     { name: "description", content: "Sign in to create and manage your personal browser landing page." },

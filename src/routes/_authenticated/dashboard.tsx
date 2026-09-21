@@ -49,6 +49,7 @@ import {
 
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Your landing page — Landing Page Builder" },

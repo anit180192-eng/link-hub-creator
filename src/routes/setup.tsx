@@ -4,6 +4,7 @@ import { LandingPageSetupGuide } from "@/components/LandingPageSetupGuide";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/setup")({
+  staticData: { sitemap: true },
   head: () => ({ meta: [
     { title: "Set your browser landing page — Landing Page Builder" },
     { name: "description", content: "Visual instructions for opening your personal landing page automatically in Chrome, Safari, Edge, or Firefox." },
