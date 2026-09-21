@@ -7,6 +7,7 @@ export type StartPageLink = {
   url: string;
   group_name: string;
   position: number;
+  icon_only?: boolean;
 };
 
 export type StartPageClock = {
