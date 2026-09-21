@@ -1,3 +1,4 @@
+import { WorldClocks } from "@/components/WorldClocks";
 import {
   faviconFor,
   groupLinks,
@@ -5,9 +6,11 @@ import {
   isSafeUrl,
   linkTitle,
   normalizeUrl,
+  parseClocks,
   type StartPageLink,
   type StartPageProfile,
 } from "@/lib/startpage";
+
 
 export function StartPageView({
   profile,
