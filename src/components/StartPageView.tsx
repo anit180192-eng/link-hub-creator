@@ -35,7 +35,9 @@ export function StartPageView({
   return (
     <div className={`${shell} ${compact ? "rounded-xl" : "min-h-screen"}`}>
       <main className={`mx-auto max-w-[880px] ${compact ? "px-5 py-8" : "px-5 pb-20 pt-16"}`}>
+        <WorldClocks clocks={parseClocks(profile.clocks)} dark={dark} compact={compact} />
         <header className={isGrid ? "mb-10" : "mb-10 text-center"}>
+
           {profile.avatar_url ? (
             <img
               src={profile.avatar_url}
