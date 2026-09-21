@@ -133,7 +133,7 @@ export function StartPageView({
                 })}
             </div>
           </div>
-          <footer className="mt-4 flex flex-col gap-2 border-t border-hub-border pt-4 text-[10px] uppercase text-hub-muted sm:flex-row sm:items-center sm:justify-between">
+          <footer className="mt-4 flex flex-col gap-2 border-t border-hub-border pt-4 text-[10px] uppercase text-hub-muted sm:flex-row sm:items-center sm:justify-between md:col-span-2">
             <span>{name} · Personal hub</span>
             <a href="https://aurunex.com/" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-hub-accent">Built with Landing Page Builder by AuruNex</a>
           </footer>
