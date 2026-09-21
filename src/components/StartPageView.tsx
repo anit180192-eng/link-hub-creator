@@ -16,10 +16,12 @@ export function StartPageView({
   profile,
   links,
   compact = false,
+  adSlot = null,
 }: {
   profile: StartPageProfile;
   links: StartPageLink[];
   compact?: boolean;
+  adSlot?: React.ReactNode;
 }) {
   const dark = profile.dark_mode;
   const isGrid = profile.theme === "grid";
@@ -123,6 +125,7 @@ export function StartPageView({
           ))
         )}
 
+        {!compact ? adSlot : null}
         <footer className={`mt-14 text-center text-xs ${mutedCls}`}>Built with Landing Page Builder by AuruNex</footer>
       </main>
     </div>
