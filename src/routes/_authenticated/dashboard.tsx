@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Folder,
   FolderPlus,
+  Image as ImageIcon,
   LogOut,
   Pencil,
   Plus,
