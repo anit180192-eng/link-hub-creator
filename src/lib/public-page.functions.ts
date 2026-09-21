@@ -50,6 +50,8 @@ export const getPublicPage = createServerFn({ method: "GET" })
         avatar_url: profile.avatar_url,
         theme: profile.theme,
         dark_mode: profile.dark_mode,
+        clocks: profile.clocks,
+
       },
       links: (links ?? []) as StartPageLink[],
     };
