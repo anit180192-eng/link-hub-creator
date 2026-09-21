@@ -163,6 +163,34 @@ function Dashboard() {
       ),
   });
 
+  const uploadAvatar = useMutation({
+    mutationFn: async (file: File) => {
+      if (!profile) return;
+      if (!file.type.startsWith("image/")) throw new Error("Please choose an image file");
+      if (file.size > 5 * 1024 * 1024) throw new Error("Please choose an image under 5 MB");
+      const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase().slice(0, 5);
+      const path = `${profile.id}/avatar-${Date.now()}.${ext}`;
+      const up = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (up.error) throw up.error;
+      const signed = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signed.error) throw signed.error;
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: signed.data.signedUrl })
+        .eq("id", profile.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Photo updated");
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Couldn't upload that photo"),
+  });
+
   const addLink = useMutation({
     mutationFn: async () => {
       if (!profile) return;
