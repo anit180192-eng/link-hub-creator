@@ -35,7 +35,7 @@ export function LandingPageSetupGuide({
 }: {
   triggerLabel?: string;
   standalone?: boolean;
-  url?: string;
+  url?: string | undefined;
 }) {
   const [os, setOS] = useState<OS>("windows");
   const [browser, setBrowser] = useState<Browser>("chrome");
