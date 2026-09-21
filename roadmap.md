@@ -17,4 +17,4 @@
 - [x] Rename to "Landing Page Builder"
 
 ## Current
-- [ ] Redesign generated landing pages as a warm Swiss-editorial personal hub
+- [x] Redesign generated landing pages as a warm Swiss-editorial personal hub
