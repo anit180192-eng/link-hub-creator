@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StartPageView } from "@/components/StartPageView";
+import { AdSpace } from "@/components/AdSpace";
 import {
   MAX_CLOCKS,
   PLATFORMS,
