@@ -59,9 +59,24 @@ export function StartPageView({
           groups.map(([group, items]) => (
             <section key={group || "__default"}>
               {group || groups.length > 1 ? (
-                <h2 className={`mb-3 mt-8 text-xs uppercase tracking-[0.14em] ${mutedCls}`}>
-                  {group || "Links"}
-                </h2>
+                <div className="mb-3 mt-8 flex items-center justify-between gap-3">
+                  <h2 className={`text-xs uppercase tracking-[0.14em] ${mutedCls}`}>
+                    {group || "Links"}
+                  </h2>
+                  {items.length > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        items.forEach((l) =>
+                          window.open(normalizeUrl(l.url), "_blank", "noopener,noreferrer"),
+                        );
+                      }}
+                      className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] transition ${cardCls}`}
+                    >
+                      Open all ({items.length})
+                    </button>
+                  ) : null}
+                </div>
               ) : null}
               <div
                 className={
