@@ -48,6 +48,24 @@ export function LandingPageSetupGuide({
   const guide = GUIDES[browser];
   const content = (
     <div className="mt-5">
+      {url ? (
+        <div className="mb-5 rounded-lg border border-border bg-muted/40 p-4">
+          <p className="text-xs font-semibold uppercase text-primary">Your link</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <code className="min-w-0 flex-1 truncate text-xs text-foreground">{url}</code>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => navigator.clipboard.writeText(url)}
+            >
+              <Copy className="mr-1 h-4 w-4" /> Copy link
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Paste this into the setting below so your browser opens your own page.
+          </p>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
         <div className="flex rounded-md bg-muted p-1" aria-label="Operating system">
           <Button size="sm" variant={os === "windows" ? "secondary" : "ghost"} onClick={() => setOS("windows")}><Monitor /> Windows</Button>
