@@ -329,6 +329,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   <footer>Built with Landing Page Builder by AuruNex</footer>
 </main>
 ${clockScript}
+${openAllScript}
 </body>
 </html>`;
 }
