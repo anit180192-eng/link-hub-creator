@@ -3,6 +3,7 @@ import { StartPageView } from "@/components/StartPageView";
 import { getPublicPage } from "@/lib/public-page.functions";
 
 export const Route = createFileRoute("/p/$slug")({
+  staticData: { sitemap: false },
   loader: async ({ params }) => {
     const page = await getPublicPage({ data: params.slug });
     if (!page) throw notFound();
