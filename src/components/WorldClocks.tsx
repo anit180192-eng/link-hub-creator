@@ -3,7 +3,6 @@ import { clockParts, type StartPageClock } from "@/lib/startpage";
 
 export function WorldClocks({
   clocks,
-  dark,
   compact = false,
 }: {
   clocks: StartPageClock[];
@@ -20,23 +19,25 @@ export function WorldClocks({
 
   if (!clocks.length) return null;
 
-  const cardCls = dark ? "bg-card border-border" : "bg-white border-[#e4e4dd]";
-  const mutedCls = dark ? "text-muted-foreground" : "text-[#61656b]";
-
   return (
-    <div className={`mb-8 flex flex-wrap justify-center gap-2.5 ${compact ? "mb-6" : ""}`}>
+    <div
+      className={`grid grid-cols-2 border-b border-hub-border sm:flex sm:flex-wrap ${compact ? "" : "lg:grid lg:grid-cols-3"}`}
+      aria-label="World clocks"
+    >
       {clocks.map((clock) => {
         const parts = now ? clockParts(clock.tz, now) : { time: "--:--", day: "" };
         return (
           <div
             key={`${clock.tz}-${clock.label}`}
-            className={`min-w-[118px] rounded-[14px] border px-4 py-2.5 text-center ${cardCls}`}
+            className="min-w-[118px] border-r border-hub-border px-5 py-4 last:border-r-0 sm:flex-1 lg:px-6"
           >
-            <span className={`block text-[11px] uppercase tracking-[0.12em] ${mutedCls}`}>
+            <span className="block text-[10px] font-semibold uppercase text-hub-muted">
               {clock.label}
             </span>
-            <span className="block text-[22px] font-semibold tabular-nums">{parts.time}</span>
-            <span className={`block text-[11px] ${mutedCls}`}>{parts.day}</span>
+            <span className="mt-1 block font-display text-xl font-medium tabular-nums text-hub-foreground">
+              {parts.time}
+            </span>
+            <span className="block text-[10px] text-hub-muted">{parts.day}</span>
           </div>
         );
       })}
