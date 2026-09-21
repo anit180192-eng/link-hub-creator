@@ -103,12 +103,13 @@
   --sidebar-ring: oklch(0.77479 0.09224 187.48);
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --hub-background: #121313;
-  --hub-surface: #24201e;
-  --hub-accent: #c98762;
-  --hub-foreground: #f1efeb;
-  --hub-muted: #aaa6a0;
-  --hub-border: #514943;
+  --hub-background: #08151f;
+  --hub-surface: #122633;
+  --hub-elevated: #1b3543;
+  --hub-accent: #e3c581;
+  --hub-foreground: #f4f5f2;
+  --hub-muted: #b3c1ca;
+  --hub-border: #355361;
 }
 
 @theme inline {

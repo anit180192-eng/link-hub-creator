@@ -192,12 +192,12 @@ function esc(value: string) {
 
 /** Builds a standalone HTML document for download / local landing page use. */
 export function renderStartPageHtml(profile: StartPageProfile, links: StartPageLink[]) {
-  const bg = "#121313";
-  const fg = "#F1EFEB";
-  const card = "#24201E";
-  const border = "#514943";
-  const muted = "#AAA6A0";
-  const accent = "#C98762";
+  const bg = "#08151F";
+  const fg = "#F4F5F2";
+  const card = "#122633";
+  const border = "#355361";
+  const muted = "#B3C1CA";
+  const accent = "#E3C581";
   const safe = links.filter((l) => isSafeUrl(l.url));
   const name = profile.display_name || profile.slug;
   const tagline = profile.tagline.trim().toLowerCase() === "everything at once :)"
@@ -207,7 +207,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 
   const sections = groupLinks(safe)
     .map(([group, items], groupIndex) => {
-      const heading = `<div class="grouphead"><h2 class="group">${esc(group || "Personal")}</h2><span>0${groupIndex + 1}</span></div>`;
+      const heading = `<div class="grouphead"><span class="folder">▱</span><h2 class="group">${esc(group || "Personal")}</h2><span class="count">${String(items.length).padStart(2, "0")}</span></div>`;
       const body = items
         .map((link) => {
           const href = esc(normalizeUrl(link.url));
@@ -226,7 +226,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
           return `<a class="link" href="${href}" target="_blank" rel="noopener noreferrer">${img}<span class="copy"><span class="t">${title}</span><span class="s">${sub}</span></span><span class="arrow" aria-hidden="true">↗</span></a>`;
         })
         .join("");
-      return `<section>${heading}<div class="links">${body}</div></section>`;
+      return `<section class="${groupIndex === 0 ? "featured" : ""}">${heading}<div class="links">${body}</div></section>`;
     })
     .join("");
 
@@ -236,12 +236,12 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 
   const clocks = parseClocks(profile.clocks);
   const clockStrip = clocks.length
-    ? `<div class="clocks">${clocks
+    ? `<div class="clockcard"><div class="clockhead"><span>World time</span><span><i></i> Live</span></div><div class="clocks">${clocks
         .map((c) => {
           const parts = clockParts(c.tz);
           return `<div class="clock" data-tz="${esc(c.tz)}"><span class="cl">${esc(c.label)}</span><span class="ct">${esc(parts.time)}</span><span class="cd">${esc(parts.day)}</span></div>`;
         })
-        .join("")}</div>`
+        .join("")}</div></div>`
     : "";
 
   const clockScript = clocks.length
@@ -274,52 +274,61 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 <style>
   * { box-sizing: border-box; }
   body { margin:0; background:${bg}; color:${fg}; font-family:"DM Sans",sans-serif; }
-  main { max-width:1180px; margin:0 auto; padding:56px 48px; }
-  .frame { display:grid; grid-template-columns:minmax(270px,.36fr) minmax(0,.64fr); border:1px solid ${border}; }
-  header { min-height:640px; border-right:1px solid ${border}; padding:44px; display:flex; flex-direction:column; justify-content:space-between; }
-  .brand { display:inline-flex; align-items:center; gap:6px; color:${muted}; font:600 11px "Space Grotesk",sans-serif; text-transform:uppercase; text-decoration:none; }
-  .brandmark { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; border:1px solid ${accent}; color:${accent}; font-size:9px; }
-  .identity { margin-top:72px; }
-  .avatar { width:112px; height:112px; object-fit:cover; border:1px solid ${border}; margin-bottom:32px; filter:grayscale(1); }
-  .monogram { display:flex; align-items:center; justify-content:center; background:${card}; color:${accent}; font:600 30px "Space Grotesk",sans-serif; filter:none; }
-  h1 { margin:0; font:600 68px/.95 "Space Grotesk",sans-serif; }
-  p.tag { max-width:280px; margin:24px 0 0; color:${muted}; font-size:14px; line-height:1.65; }
-  .index { display:flex; align-items:center; gap:12px; color:${muted}; font-size:10px; font-weight:600; text-transform:uppercase; }
-  .index:before { content:""; width:8px; height:8px; background:${accent}; }
-  .content { min-width:0; display:flex; flex-direction:column; }
-  .clocks { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); border-bottom:1px solid ${border}; }
-  .clock { padding:16px 24px; border-right:1px solid ${border}; }
-  .clock:last-child { border-right:0; }
-  .clock .cl { display:block; color:${muted}; font-size:10px; font-weight:600; text-transform:uppercase; }
-  .clock .ct { display:block; margin-top:4px; font:500 20px "Space Grotesk",sans-serif; font-variant-numeric:tabular-nums; }
-  .clock .cd { display:block; color:${muted}; font-size:10px; }
-  .sections { flex:1; padding:48px 40px; }
-  section + section { margin-top:56px; }
-  h2.group { margin:0; color:${muted}; font-size:11px; text-transform:uppercase; }
-  .grouphead { display:flex; justify-content:space-between; align-items:end; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid ${border}; color:${muted}; font-size:10px; }
-  .links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
-  .link { height:92px; display:grid; grid-template-columns:32px minmax(0,1fr) 20px; align-items:center; gap:12px; padding:0 16px; }
-  a.link,.icononly { color:inherit; text-decoration:none; background:${card}; border:1px solid ${border}; transition:transform .2s,border-color .2s,box-shadow .2s; }
-  a.link:hover,.icononly:hover { border-color:${accent}; transform:translateY(-2px); box-shadow:0 0 18px rgba(201,135,98,.16); }
+  main { max-width:1120px; margin:0 auto; padding:32px 24px; }
+  .frame { display:grid; grid-template-columns:220px minmax(0,1fr); gap:16px; align-items:start; }
+  header,.clockcard,section { background:${card}; border:1px solid ${border}; border-radius:8px; }
+  header { padding:20px; }
+  .brand { grid-column:1/-1; display:inline-flex; width:max-content; align-items:center; gap:8px; color:${muted}; font:600 10px "Space Grotesk",sans-serif; text-transform:uppercase; text-decoration:none; margin-bottom:16px; }
+  .brandmark { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; border:1px solid ${accent}; border-radius:4px; color:${accent}; font-size:9px; }
+  .identity { margin:0; }
+  .avatar { width:56px; height:56px; object-fit:cover; border:1px solid ${border}; border-radius:6px; margin-bottom:20px; filter:grayscale(1); }
+  .monogram { display:flex; align-items:center; justify-content:center; background:${bg}; color:${accent}; font:600 18px "Space Grotesk",sans-serif; filter:none; }
+  h1 { margin:0; font:600 24px/1.2 "Space Grotesk",sans-serif; }
+  p.tag { margin:8px 0 0; color:${muted}; font-size:12px; line-height:1.6; }
+  .index { display:flex; align-items:center; gap:8px; margin-top:20px; padding-top:16px; border-top:1px solid ${border}; color:${muted}; font-size:10px; font-weight:600; text-transform:uppercase; }
+  .index:before { content:""; width:6px; height:6px; border-radius:50%; background:${accent}; }
+  .content { min-width:0; }
+  .clockcard { margin-top:16px; padding:16px; }
+  .clockhead { display:flex; justify-content:space-between; margin-bottom:10px; color:${muted}; font-size:10px; font-weight:600; text-transform:uppercase; }
+  .clockhead i { display:inline-block; width:6px; height:6px; margin-right:5px; border-radius:50%; background:${accent}; }
+  .clock { min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 0; border-top:1px solid ${border}; }
+  .clock .cl { color:${fg}; font-size:12px; font-weight:500; }
+  .clock .ct { margin-left:auto; font:600 16px "Space Grotesk",sans-serif; font-variant-numeric:tabular-nums; }
+  .clock .cd { display:none; }
+  .sections { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+  section { padding:16px; }
+  section.featured:nth-last-child(odd) { grid-column:1/-1; }
+  section.featured:nth-last-child(odd) .links { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  h2.group { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin:0; font:600 14px "Space Grotesk",sans-serif; }
+  .grouphead { display:grid; grid-template-columns:32px minmax(0,1fr) auto; align-items:center; gap:10px; margin-bottom:12px; }
+  .folder { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:6px; background:${bg}; color:${accent}; font-size:18px; }
+  .count { color:${muted}; font-size:10px; }
+  .links { display:grid; gap:8px; }
+  .link { height:64px; display:grid; grid-template-columns:28px minmax(0,1fr) 18px; align-items:center; gap:12px; padding:0 12px; }
+  a.link,.icononly { color:inherit; text-decoration:none; background:${bg}; border:1px solid ${border}; border-radius:6px; transition:transform .2s,border-color .2s,box-shadow .2s; }
+  a.link:hover,.icononly:hover { border-color:${accent}; transform:translateY(-2px); box-shadow:0 0 14px rgba(227,197,129,.14); }
   .link img { width:28px; height:28px; }
   .copy,.copy span { min-width:0; display:block; }
-  .t { font-weight:600; font-size:15px; }
-  .s { font-size:12px; color:${muted}; }
-  .arrow { color:${muted}; font-size:18px; }
-  .icononly { display:flex; align-items:center; justify-content:center; height:92px; }
+  .t { font-weight:600; font-size:14px; }
+  .s { font-size:11px; color:${muted}; }
+  .arrow { color:${muted}; font-size:16px; }
+  .icononly { display:flex; align-items:center; justify-content:center; height:64px; }
   .icononly img { width:40px; height:40px; }
   .mono { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; background:${accent}; color:${bg}; font-weight:700; }
   .mono.big { width:40px; height:40px; font-size:18px; }
-  footer { display:flex; justify-content:space-between; gap:12px; border-top:1px solid ${border}; padding:20px 24px; color:${muted}; font-size:10px; text-transform:uppercase; }
+  footer { grid-column:1/-1; display:flex; justify-content:space-between; gap:12px; border-top:1px solid ${border}; margin-top:16px; padding-top:16px; color:${muted}; font-size:10px; text-transform:uppercase; }
   footer a { color:inherit; text-decoration:none; }
-  @media (max-width:760px) { main{padding:20px 16px}.frame{display:block}header{min-height:340px;border-right:0;border-bottom:1px solid ${border};padding:28px}.identity{margin-top:56px}h1{font-size:50px}.content{}.sections{padding:32px 20px}.links{grid-template-columns:1fr}.clocks{grid-template-columns:repeat(2,1fr)}footer{flex-direction:column}.avatar{width:96px;height:96px} }
+  @media (max-width:760px) { main{padding:20px 16px}.frame{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:12px}.clockcard{margin-top:0}.sections{grid-template-columns:1fr}section.featured:nth-last-child(odd){grid-column:auto}section.featured:nth-last-child(odd) .links{grid-template-columns:1fr}footer{flex-direction:column}.brand{margin-bottom:0}.avatar{width:48px;height:48px} }
+  @media (max-width:520px) { .side{grid-template-columns:1fr}.clockcard{margin-top:0}.clocks{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.clock:nth-child(-n+2){border-top:0} }
   @media (prefers-reduced-motion:reduce) { *{transition:none!important} }
 </style>
 </head>
 <body>
 <main><div class="frame">
-  <header><div><a class="brand" href="https://aurunex.com/" aria-label="AuruNex home"><span class="brandmark">A</span>AuruNex</a><div class="identity">${avatar}<h1>${esc(name)}</h1><p class="tag">${esc(tagline)}</p></div></div><span class="index">Personal index</span></header>
-  <div class="content">${clockStrip}<div class="sections">${sections}</div><footer><span>${esc(name)} · Personal hub</span><a href="https://aurunex.com/">Built with Landing Page Builder by AuruNex</a></footer></div>
+  <a class="brand" href="https://aurunex.com/" aria-label="AuruNex home"><span class="brandmark">A</span>AuruNex</a>
+  <div class="side"><header><div class="identity">${avatar}<h1>${esc(name)}</h1><p class="tag">${esc(tagline)}</p></div><span class="index">Personal hub</span></header>${clockStrip}</div>
+  <div class="content"><div class="sections">${sections}</div></div>
+  <footer><span>${esc(name)} · Personal hub</span><a href="https://aurunex.com/">Built with Landing Page Builder by AuruNex</a></footer>
 </div>
 </main>
 ${clockScript}
