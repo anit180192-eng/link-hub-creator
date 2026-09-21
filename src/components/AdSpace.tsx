@@ -1,6 +1,6 @@
 import { Megaphone, Check, ExternalLink } from "lucide-react";
 import { AdUnit } from "@/components/PublicAdSlot";
-import { ADSENSE_CLIENT, ADSENSE_SLOT, adsConfigured } from "@/lib/ads-config";
+import { ADSENSE_CLIENT, ADSENSE_SLOT, adsConfigured, hasAdSlot } from "@/lib/ads-config";
 
 /**
  * Builder-page panel for site ads. Ads run on every published landing page
@@ -18,7 +18,7 @@ export function AdSpace() {
         {adsConfigured ? (
           <p className="flex items-center gap-1.5 text-xs text-accent">
             <Check className="h-3.5 w-3.5" aria-hidden="true" />
-            Live
+            {hasAdSlot ? "Live" : "Auto-ads on"}
           </p>
         ) : null}
       </div>
@@ -26,10 +26,30 @@ export function AdSpace() {
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         {adsConfigured ? (
           <div className="p-3">
-            <AdUnit client={ADSENSE_CLIENT} slot={ADSENSE_SLOT} />
+            {hasAdSlot ? (
+              <AdUnit client={ADSENSE_CLIENT} slot={ADSENSE_SLOT} />
+            ) : (
+              <div className="flex min-h-[90px] items-center justify-center rounded-lg border border-dashed border-border">
+                <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Auto-ads active — Google places ads automatically
+                </p>
+              </div>
+            )}
             <p className="mt-2 text-xs text-muted-foreground">
-              This ad appears at the bottom of every published landing page,
-              above the footer. Earnings go to the connected AdSense account.
+              {hasAdSlot
+                ? "A manual ad unit appears at the bottom of every published landing page, above the footer. Earnings go to your AdSense account."
+                : "AdSense auto-ads are active on every published page — Google places ads automatically. Add an ad slot ID for a fixed ad unit at the bottom of each page."}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Publisher ID: <code className="text-foreground">{ADSENSE_CLIENT}</code>
+              {hasAdSlot ? (
+                <>
+                  {" · Ad slot: "}
+                  <code className="text-foreground">{ADSENSE_SLOT}</code>
+                </>
+              ) : (
+                " · No ad slot set (auto-ads only)"
+              )}
             </p>
           </div>
         ) : (
@@ -39,7 +59,7 @@ export function AdSpace() {
               Earn from your published pages
             </p>
             <p className="max-w-[38ch] text-xs text-muted-foreground">
-              Ads will appear at the bottom of every published landing page —
+              Ads appear at the bottom of every published landing page —
               never inside the page's own design or the downloaded file. Sign up
               for Google AdSense, get your site approved, then share your
               publisher ID and ad slot to switch ads on.
