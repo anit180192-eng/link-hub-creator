@@ -440,22 +440,59 @@ function Dashboard() {
                 />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="avatar">Photo link (optional)</Label>
-                <Input
-                  id="avatar"
-                  value={form.avatar_url ?? ""}
-                  maxLength={500}
-                  placeholder="https://…"
-                  onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
-                  onBlur={() =>
-                    saveProfile.mutate({
-                      avatar_url:
-                        form.avatar_url && isSafeUrl(form.avatar_url)
-                          ? normalizeUrl(form.avatar_url)
-                          : null,
-                    })
-                  }
-                />
+                <Label htmlFor="avatar">Your photo (optional)</Label>
+                <div className="flex flex-wrap items-center gap-3">
+                  {form.avatar_url ? (
+                    <img
+                      src={form.avatar_url}
+                      alt="Your profile photo"
+                      className="size-14 rounded-full border border-border object-cover"
+                    />
+                  ) : (
+                    <div className="flex size-14 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground">
+                      <ImageIcon className="size-5" aria-hidden="true" />
+                    </div>
+                  )}
+                  <input
+                    id="avatar"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (file) uploadAvatar.mutate(file);
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={uploadAvatar.isPending}
+                    onClick={() => document.getElementById("avatar")?.click()}
+                  >
+                    {uploadAvatar.isPending
+                      ? "Uploading…"
+                      : form.avatar_url
+                        ? "Change photo"
+                        : "Upload photo"}
+                  </Button>
+                  {form.avatar_url ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={saveProfile.isPending}
+                      onClick={() => {
+                        setForm({ ...form, avatar_url: null });
+                        saveProfile.mutate({ avatar_url: null });
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  ) : null}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  JPG or PNG, up to 5 MB. Only you can replace your photo.
+                </p>
               </div>
             </div>
 
