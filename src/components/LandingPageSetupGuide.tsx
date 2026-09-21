@@ -28,7 +28,15 @@ function detectBrowser(): Browser {
   return "chrome";
 }
 
-export function LandingPageSetupGuide({ triggerLabel = "Set as my landing page", standalone = false }: { triggerLabel?: string; standalone?: boolean }) {
+export function LandingPageSetupGuide({
+  triggerLabel = "Set as my landing page",
+  standalone = false,
+  url,
+}: {
+  triggerLabel?: string;
+  standalone?: boolean;
+  url?: string;
+}) {
   const [os, setOS] = useState<OS>("windows");
   const [browser, setBrowser] = useState<Browser>("chrome");
 
