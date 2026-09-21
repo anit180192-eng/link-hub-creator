@@ -71,6 +71,27 @@ export function StartPageView({
                 {items.map((link) => {
                   const icon = faviconFor(link.url);
                   const title = linkTitle(link);
+                  if (link.icon_only) {
+                    return (
+                      <a
+                        key={link.id}
+                        href={normalizeUrl(link.url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={title}
+                        aria-label={title}
+                        className={`flex min-h-[84px] items-center justify-center rounded-[14px] border p-[18px] transition ${cardCls}`}
+                      >
+                        {icon ? (
+                          <img src={icon} alt={title} width={40} height={40} className="h-10 w-10" />
+                        ) : (
+                          <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-lg font-bold text-primary-foreground">
+                            {title.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </a>
+                    );
+                  }
                   return (
                     <a
                       key={link.id}

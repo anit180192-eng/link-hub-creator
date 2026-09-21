@@ -105,7 +105,7 @@ function Dashboard() {
     queryFn: async (): Promise<StartPageLink[]> => {
       const { data, error } = await supabase
         .from("links")
-        .select("id, platform, label, url, group_name, position")
+        .select("id, platform, label, url, group_name, position, icon_only")
         .order("position", { ascending: true });
       if (error) throw error;
       return (data ?? []) as StartPageLink[];

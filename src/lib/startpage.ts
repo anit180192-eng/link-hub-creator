@@ -294,7 +294,10 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   .row span span { display:block; }
   .t { font-weight:600; font-size:15px; }
   .s { font-size:12px; color:${muted}; }
+  .icononly { display:flex; align-items:center; justify-content:center; padding:18px; min-height:84px; }
+  .icononly img { width:40px; height:40px; }
   .mono { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; border-radius:8px; background:${accent}; color:#08151F; font-weight:700; }
+  .mono.big { width:40px; height:40px; font-size:18px; border-radius:10px; }
   footer { margin-top:56px; text-align:center; font-size:12px; color:${muted}; }
 </style>
 </head>
