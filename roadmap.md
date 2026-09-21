@@ -1,7 +1,7 @@
 # Task Roadmap
 
 ## In Progress
-- [ ] Wire AdSense publisher ID (ca-pub-7242078241100237) into ads-config; support auto-ads with publisher ID only, manual ad units when slot is also provided. Awaiting ad slot ID from user.
+- [x] Wire AdSense publisher ID (ca-pub-7242078241100237) into ads-config; auto-ads active on published pages. Ad slot ID still optional for manual placement.
 
 ## Done
 - [x] Folders/categories for links
