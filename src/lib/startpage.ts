@@ -218,6 +218,12 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
           const img = icon
             ? `<img src="${esc(icon)}" alt="" width="28" height="28" />`
             : `<span class="mono">${esc(title.charAt(0).toUpperCase())}</span>`;
+          if (link.icon_only) {
+            const bigImg = icon
+              ? `<img src="${esc(icon)}" alt="${title}" width="40" height="40" />`
+              : `<span class="mono big">${esc(title.charAt(0).toUpperCase())}</span>`;
+            return `<a class="icononly" href="${href}" target="_blank" rel="noopener noreferrer" title="${title}" aria-label="${title}">${bigImg}</a>`;
+          }
           return isGrid
             ? `<a class="tile" href="${href}" target="_blank" rel="noopener noreferrer">${img}<span class="t">${title}</span><span class="s">${sub}</span></a>`
             : `<a class="row" href="${href}" target="_blank" rel="noopener noreferrer">${img}<span><span class="t">${title}</span><span class="s">${sub}</span></span></a>`;
