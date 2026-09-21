@@ -7,10 +7,10 @@ declare global {
   }
 }
 
-const ADSENSE_CLIENT = import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT as
+const ADSENSE_CLIENT = import.meta.env["VITE_GOOGLE_ADSENSE_CLIENT"] as
   | string
   | undefined;
-const ADSENSE_SLOT = import.meta.env.VITE_GOOGLE_ADSENSE_SLOT as
+const ADSENSE_SLOT = import.meta.env["VITE_GOOGLE_ADSENSE_SLOT"] as
   | string
   | undefined;
 
