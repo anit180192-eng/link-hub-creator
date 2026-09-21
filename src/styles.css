@@ -167,7 +167,7 @@
 @layer components {
   .page-preview-stage {
     position: relative;
-    overflow: hidden;
+    overflow: auto;
     height: 34rem;
     container-type: inline-size;
     background: var(--hub-background);

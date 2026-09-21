@@ -31,7 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StartPageView } from "@/components/StartPageView";
 import { LivePagePreview } from "@/components/LivePagePreview";
 import { AdSpace } from "@/components/AdSpace";
 import {
