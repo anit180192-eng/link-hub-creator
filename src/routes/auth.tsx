@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [
-    { title: "Sign in — Homepage Builder" },
-    { name: "description", content: "Sign in to create and manage your personal browser homepage." },
-    { property: "og:title", content: "Sign in — Homepage Builder" },
-    { property: "og:description", content: "Sign in to create and manage your personal browser homepage." },
+    { title: "Sign in — Landing Page Builder" },
+    { name: "description", content: "Sign in to create and manage your personal browser landing page." },
+    { property: "og:title", content: "Sign in — Landing Page Builder" },
+    { property: "og:description", content: "Sign in to create and manage your personal browser landing page." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),

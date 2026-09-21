@@ -100,7 +100,7 @@ function esc(value: string) {
     .replace(/'/g, "&#39;");
 }
 
-/** Builds a standalone HTML document for download / local homepage use. */
+/** Builds a standalone HTML document for download / local landing page use. */
 export function renderStartPageHtml(profile: StartPageProfile, links: StartPageLink[]) {
   const dark = profile.dark_mode;
   const bg = dark ? "#08151F" : "#f6f6f2";
@@ -173,7 +173,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 <main>
   <header>${avatar}<h1>${esc(profile.display_name || profile.slug)}</h1>${profile.tagline ? `<p class="tag">${esc(profile.tagline)}</p>` : ""}</header>
   ${sections}
-  <footer>Built with Homepage Builder</footer>
+  <footer>Built with Landing Page Builder</footer>
 </main>
 </body>
 </html>`;

@@ -7,7 +7,7 @@ export function Brand({ className }: { className?: string }) {
       <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
         <PanelsTopLeft className="h-4 w-4" />
       </span>
-      <span>Homepage <span className="text-primary">Builder</span></span>
+      <span>Landing Page <span className="text-primary">Builder</span></span>
     </span>
   );
 }

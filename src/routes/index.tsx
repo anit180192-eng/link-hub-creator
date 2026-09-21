@@ -13,16 +13,16 @@ import {
 } from "lucide-react";
 import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
-import { HomepageSetupGuide } from "@/components/HomepageSetupGuide";
+import { LandingPageSetupGuide } from "@/components/LandingPageSetupGuide";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Homepage Builder — all your important links in one place" },
-      { name: "description", content: "Create one personal browser homepage for your social profiles, channels, work tools, and favorite websites." },
-      { property: "og:title", content: "Homepage Builder — all your important links in one place" },
+      { title: "Landing Page Builder — all your important links in one place" },
+      { name: "description", content: "Create one personal browser landing page for your social profiles, channels, work tools, and favorite websites." },
+      { property: "og:title", content: "Landing Page Builder — all your important links in one place" },
       { property: "og:description", content: "Build a personal start page and make it the first thing you see in your browser." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -66,7 +66,7 @@ function Landing() {
                 <span className="h-2 w-2 rounded-full bg-primary" /> Your browser, organized
               </p>
               <h1 className="mt-5 max-w-3xl font-display text-5xl leading-[1.02] sm:text-6xl lg:text-7xl">
-                Every important link.<br /><span className="text-primary">One browser homepage.</span>
+                Every important link.<br /><span className="text-primary">One browser landing page.</span>
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
                 Bring your social profiles, channels, work tools, news, and favorite websites together. Open one clean page whenever your browser starts.
@@ -80,18 +80,18 @@ function Landing() {
               </div>
               <div className="mt-8 flex flex-wrap gap-3">
                 {signedIn ? (
-                  <Button asChild size="lg"><Link to="/dashboard">Open my homepage <ArrowRight /></Link></Button>
+                  <Button asChild size="lg"><Link to="/dashboard">Open my landing page <ArrowRight /></Link></Button>
                 ) : (
-                  <a href="#sign-in"><Button size="lg">Create my homepage <ArrowRight /></Button></a>
+                  <a href="#sign-in"><Button size="lg">Create my landing page <ArrowRight /></Button></a>
                 )}
-                <HomepageSetupGuide />
+                <LandingPageSetupGuide />
               </div>
             </div>
 
             <aside id="sign-in" className="border-t border-border bg-muted/30 p-5 md:border-l md:border-t-0 md:p-6 lg:p-8">
               {signedIn ? (
                 <div className="flex h-full min-h-96 flex-col justify-between border border-border bg-card p-8">
-                  <div><p className="text-xs font-semibold uppercase text-primary">Welcome back</p><h2 className="mt-3 font-display text-3xl">Your homepage is ready when you are.</h2></div>
+                  <div><p className="text-xs font-semibold uppercase text-primary">Welcome back</p><h2 className="mt-3 font-display text-3xl">Your landing page is ready when you are.</h2></div>
                   <Button asChild size="lg"><Link to="/dashboard">Open my page <ArrowRight /></Link></Button>
                 </div>
               ) : <AuthPanel className="h-full" />}

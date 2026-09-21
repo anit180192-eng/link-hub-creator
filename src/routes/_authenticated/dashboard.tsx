@@ -42,12 +42,12 @@ import {
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your homepage — Homepage Builder" },
+      { title: "Your landing page — Landing Page Builder" },
       {
         name: "description",
         content: "Add your accounts, pick a theme, and publish your personal browser start page.",
       },
-      { property: "og:title", content: "Your homepage — Homepage Builder" },
+      { property: "og:title", content: "Your landing page — Landing Page Builder" },
       { property: "og:description", content: "Add your accounts and publish your start page." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -255,7 +255,7 @@ function Dashboard() {
     onSuccess: ({ published, slug }) => {
       setForm((current) => (current ? { ...current, slug, published } : current));
       queryClient.invalidateQueries({ queryKey: ["profile"] });
-      toast.success(published ? "Your unique homepage is live" : "Your page is now private");
+      toast.success(published ? "Your unique landing page is live" : "Your page is now private");
     },
     onError: (e: Error) =>
       toast.error(
@@ -322,7 +322,7 @@ function Dashboard() {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
           <Link to="/" className="font-display text-lg font-bold tracking-tight">
-            Homepage <span className="text-primary">Builder</span>
+            Landing Page <span className="text-primary">Builder</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm">
@@ -352,7 +352,7 @@ function Dashboard() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="slug">Homepage username</Label>
+                <Label htmlFor="slug">Landing page username</Label>
                 <div className="flex gap-2">
                   <Input
                     id="slug"
@@ -659,7 +659,7 @@ function Dashboard() {
           <section className="rounded-xl border border-border bg-card p-6">
             <h2 className="font-display text-lg">Publish</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Publishing puts your page online at a link you can set as your browser homepage.
+              Publishing puts your page online at a link you can set as your browser landing page.
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-3">

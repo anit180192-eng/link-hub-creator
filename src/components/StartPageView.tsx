@@ -97,7 +97,7 @@ export function StartPageView({
           ))
         )}
 
-        <footer className={`mt-14 text-center text-xs ${mutedCls}`}>Built with Homepage Builder</footer>
+        <footer className={`mt-14 text-center text-xs ${mutedCls}`}>Built with Landing Page Builder</footer>
       </main>
     </div>
   );
