@@ -118,6 +118,8 @@ function Landing() {
           </div>
         </section>
 
+        <LandingAdSlot />
+
         <section className="border-t border-border bg-card">
           <div className="mx-auto grid max-w-7xl gap-8 px-5 py-16 sm:grid-cols-3 lg:px-8">
             {[ ["01", "Add what matters", "Paste Instagram accounts, YouTube channels, LinkedIn, work tools, and any website."], ["02", "Sort them into folders", "Make a folder per brand, project or person, then drop each Instagram, YouTube or website link inside it."], ["03", "Open it every time", "Publish one link, then follow the guide for Chrome, Safari, Edge, or Firefox."] ].map(([number, title, body]) => (
