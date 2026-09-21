@@ -201,6 +201,7 @@ function Dashboard() {
           label: link.label.trim().slice(0, 60),
           url: normalizeUrl(link.url).slice(0, 500),
           group_name: link.group_name.trim().slice(0, 40),
+          icon_only: !!link.icon_only,
         })
         .eq("id", link.id);
       if (error) throw error;
