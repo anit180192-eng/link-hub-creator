@@ -81,7 +81,7 @@ function Dashboard() {
       if (!user) throw new Error("Please sign in again");
       const existing = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       if (existing.error) throw existing.error;
-      if (existing.data) return existing.data as ProfileRow;
+      if (existing.data) return existing.data as unknown as ProfileRow;
 
       const base = slugify(user.email?.split("@")[0] ?? "me") || "me";
       const slug = `${base}-${user.id.slice(0, 4)}`;
@@ -95,7 +95,7 @@ function Dashboard() {
         .select("*")
         .single();
       if (created.error) throw created.error;
-      return created.data as ProfileRow;
+      return created.data as unknown as ProfileRow;
     },
   });
 
