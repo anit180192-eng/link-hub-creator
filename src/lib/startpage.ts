@@ -230,6 +230,34 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
     ? `<img class="avatar" src="${esc(profile.avatar_url)}" alt="" />`
     : "";
 
+  const clocks = parseClocks(profile.clocks);
+  const clockStrip = clocks.length
+    ? `<div class="clocks">${clocks
+        .map((c) => {
+          const parts = clockParts(c.tz);
+          return `<div class="clock" data-tz="${esc(c.tz)}"><span class="cl">${esc(c.label)}</span><span class="ct">${esc(parts.time)}</span><span class="cd">${esc(parts.day)}</span></div>`;
+        })
+        .join("")}</div>`
+    : "";
+
+  const clockScript = clocks.length
+    ? `<script>
+(function(){
+  function tick(){
+    document.querySelectorAll('.clock').forEach(function(el){
+      var tz = el.getAttribute('data-tz');
+      try {
+        el.querySelector('.ct').textContent = new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
+        el.querySelector('.cd').textContent = new Intl.DateTimeFormat('en-GB',{timeZone:tz,weekday:'short',day:'numeric',month:'short'}).format(new Date());
+      } catch (e) {}
+    });
+  }
+  tick();
+  setInterval(tick, 15000);
+})();
+</script>`
+    : "";
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -245,6 +273,11 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   h1 { font-size: 30px; margin:0 0 6px; letter-spacing:-0.02em; }
   p.tag { margin:0; color:${muted}; font-size:15px; }
   h2.group { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:${muted}; margin:32px 0 12px; }
+  .clocks { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:32px; }
+  .clock { background:${card}; border:1px solid ${border}; border-radius:14px; padding:10px 16px; min-width:120px; text-align:center; }
+  .clock .cl { display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:${muted}; }
+  .clock .ct { display:block; font-size:22px; font-weight:600; font-variant-numeric:tabular-nums; margin-top:2px; }
+  .clock .cd { display:block; font-size:11px; color:${muted}; }
   .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:12px; }
   .list { display:flex; flex-direction:column; gap:10px; max-width:520px; margin:0 auto; }
   a { text-decoration:none; color:inherit; background:${card}; border:1px solid ${border}; border-radius:14px; transition:.15s; }
@@ -260,10 +293,13 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 </head>
 <body>
 <main>
+  ${clockStrip}
   <header>${avatar}<h1>${esc(profile.display_name || profile.slug)}</h1>${profile.tagline ? `<p class="tag">${esc(profile.tagline)}</p>` : ""}</header>
   ${sections}
   <footer>Built with Landing Page Builder by AuruNex</footer>
 </main>
+${clockScript}
 </body>
 </html>`;
 }
+
