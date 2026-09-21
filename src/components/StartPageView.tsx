@@ -97,7 +97,7 @@ export function StartPageView({
           ))
         )}
 
-        <footer className={`mt-14 text-center text-xs ${mutedCls}`}>Built with Landing Page Builder</footer>
+        <footer className={`mt-14 text-center text-xs ${mutedCls}`}>Built with Landing Page Builder by AuruNex</footer>
       </main>
     </div>
   );
