@@ -723,6 +723,17 @@ function Dashboard() {
                                       {folders.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
                                     </SelectContent>
                                   </Select>
+                                  <label className="flex items-center gap-2 rounded-md border border-border px-3 text-sm">
+                                    <Switch
+                                      checked={!!editingLink.icon_only}
+                                      onCheckedChange={(icon_only) =>
+                                        setEditingLink({ ...editingLink, icon_only })
+                                      }
+                                      aria-label="Show logo only"
+                                    />
+                                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                    Show logo only
+                                  </label>
                                   <Button onClick={() => updateLink.mutate(editingLink)} disabled={updateLink.isPending}>
                                     <Check className="h-4 w-4" /> Save changes
                                   </Button>
