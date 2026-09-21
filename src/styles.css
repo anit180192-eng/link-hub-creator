@@ -103,13 +103,13 @@
   --sidebar-ring: oklch(0.77479 0.09224 187.48);
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --hub-background: #08151f;
-  --hub-surface: #122633;
-  --hub-elevated: #1b3543;
-  --hub-accent: #e3c581;
-  --hub-foreground: #f4f5f2;
-  --hub-muted: #b3c1ca;
-  --hub-border: #355361;
+  --hub-background: oklch(0.18922 0.02763 242.93);
+  --hub-surface: oklch(0.25831 0.03575 238.74);
+  --hub-elevated: oklch(0.31476 0.04068 233.64);
+  --hub-accent: oklch(0.83389 0.09291 86.62);
+  --hub-foreground: oklch(0.96855 0.0041 121.56);
+  --hub-muted: oklch(0.80291 0.02002 235.8);
+  --hub-border: oklch(0.42457 0.0425 228.99);
 }
 
 @theme inline {
