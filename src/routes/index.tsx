@@ -107,8 +107,8 @@ function Landing() {
           </div>
           <div className="border border-border bg-card p-4 shadow-2xl sm:p-6">
             <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
-              <div><p className="font-display text-lg">Good morning, Alex</p><p className="text-xs text-muted-foreground">Where would you like to go?</p></div>
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">A</span>
+              <div><p className="font-display text-lg">Good morning, Shreya</p><p className="text-xs text-muted-foreground">Where would you like to go?</p></div>
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">S</span>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {services.slice(0, 5).map((service) => <div key={service.label} className="flex min-h-24 flex-col justify-between border border-border bg-background p-3"><service.icon className="h-5 w-5 text-primary" /><span className="text-sm font-medium">{service.label}</span></div>)}
