@@ -9,6 +9,11 @@ export type StartPageLink = {
   position: number;
 };
 
+export type StartPageClock = {
+  label: string;
+  tz: string;
+};
+
 export type StartPageProfile = {
   slug: string;
   display_name: string;
@@ -16,7 +21,91 @@ export type StartPageProfile = {
   avatar_url: string | null;
   theme: string;
   dark_mode: boolean;
+  clocks?: unknown;
 };
+
+export const MAX_CLOCKS = 5;
+
+/** Curated, widely useful IANA time zones for the clock picker. */
+export const TIMEZONES = [
+  { tz: "Asia/Kolkata", label: "India" },
+  { tz: "Europe/London", label: "United Kingdom" },
+  { tz: "Australia/Sydney", label: "Australia (Sydney)" },
+  { tz: "Australia/Perth", label: "Australia (Perth)" },
+  { tz: "America/New_York", label: "USA (New York)" },
+  { tz: "America/Chicago", label: "USA (Chicago)" },
+  { tz: "America/Denver", label: "USA (Denver)" },
+  { tz: "America/Los_Angeles", label: "USA (Los Angeles)" },
+  { tz: "America/Toronto", label: "Canada (Toronto)" },
+  { tz: "America/Sao_Paulo", label: "Brazil (São Paulo)" },
+  { tz: "Europe/Dublin", label: "Ireland" },
+  { tz: "Europe/Paris", label: "France" },
+  { tz: "Europe/Berlin", label: "Germany" },
+  { tz: "Europe/Madrid", label: "Spain" },
+  { tz: "Europe/Amsterdam", label: "Netherlands" },
+  { tz: "Europe/Zurich", label: "Switzerland" },
+  { tz: "Europe/Lisbon", label: "Portugal" },
+  { tz: "Europe/Moscow", label: "Russia (Moscow)" },
+  { tz: "Africa/Johannesburg", label: "South Africa" },
+  { tz: "Africa/Lagos", label: "Nigeria" },
+  { tz: "Africa/Nairobi", label: "Kenya" },
+  { tz: "Africa/Cairo", label: "Egypt" },
+  { tz: "Asia/Dubai", label: "UAE (Dubai)" },
+  { tz: "Asia/Riyadh", label: "Saudi Arabia" },
+  { tz: "Asia/Karachi", label: "Pakistan" },
+  { tz: "Asia/Dhaka", label: "Bangladesh" },
+  { tz: "Asia/Colombo", label: "Sri Lanka" },
+  { tz: "Asia/Kathmandu", label: "Nepal" },
+  { tz: "Asia/Bangkok", label: "Thailand" },
+  { tz: "Asia/Jakarta", label: "Indonesia" },
+  { tz: "Asia/Singapore", label: "Singapore" },
+  { tz: "Asia/Hong_Kong", label: "Hong Kong" },
+  { tz: "Asia/Shanghai", label: "China" },
+  { tz: "Asia/Tokyo", label: "Japan" },
+  { tz: "Asia/Seoul", label: "South Korea" },
+  { tz: "Pacific/Auckland", label: "New Zealand" },
+  { tz: "UTC", label: "UTC" },
+] as const;
+
+export function timezoneLabel(tz: string) {
+  return TIMEZONES.find((t) => t.tz === tz)?.label ?? tz.split("/").pop()?.replace(/_/g, " ") ?? tz;
+}
+
+/** Safely reads the clocks value stored on a profile row. */
+export function parseClocks(raw: unknown): StartPageClock[] {
+  if (!Array.isArray(raw)) return [];
+  const out: StartPageClock[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const tz = String((item as { tz?: unknown }).tz ?? "");
+    if (!tz) continue;
+    const label = String((item as { label?: unknown }).label ?? "").slice(0, 24);
+    out.push({ tz, label: label || timezoneLabel(tz) });
+    if (out.length >= MAX_CLOCKS) break;
+  }
+  return out;
+}
+
+export function clockParts(tz: string, at: Date = new Date()) {
+  try {
+    const time = new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(at);
+    const day = new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    }).format(at);
+    return { time, day };
+  } catch {
+    return { time: "--:--", day: "" };
+  }
+}
+
 
 export const PLATFORMS = [
   { id: "instagram", label: "Instagram", color: "#e1306c", base: "https://instagram.com/" },
