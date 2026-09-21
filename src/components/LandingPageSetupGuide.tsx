@@ -5,10 +5,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const GUIDES = {
-  chrome: { name: "Chrome", path: "Settings → On startup", steps: ["Open Chrome Settings.", "Choose On startup.", "Select Open a specific page.", "Paste your Landing Page Builder link and save."] },
-  edge: { name: "Edge", path: "Settings → Start, home, and new tabs", steps: ["Open Edge Settings.", "Choose Start, home, and new tabs.", "Select Open these pages.", "Add your Landing Page Builder link."] },
+  chrome: { name: "Chrome", path: "Settings → On startup", steps: ["Open Chrome Settings.", "Choose On startup.", "Select Open a specific page.", "Paste your landing page link and save."] },
+  edge: { name: "Edge", path: "Settings → Start, home, and new tabs", steps: ["Open Edge Settings.", "Choose Start, home, and new tabs.", "Select Open these pages.", "Add your landing page link."] },
   safari: { name: "Safari", path: "Safari → Settings → General", steps: ["Open Safari Settings.", "Choose General.", "Paste your link in Homepage.", "Set new windows and tabs to Homepage."] },
-  firefox: { name: "Firefox", path: "Settings → Home", steps: ["Open Firefox Settings.", "Choose Home.", "Select Custom URLs.", "Paste your Landing Page Builder link."] },
+  firefox: { name: "Firefox", path: "Settings → Home", steps: ["Open Firefox Settings.", "Choose Home.", "Select Custom URLs.", "Paste your landing page link."] },
 } as const;
 
 type Browser = keyof typeof GUIDES;
@@ -87,7 +87,7 @@ export function LandingPageSetupGuide({
                   <div className="h-7 w-2/3 rounded-md bg-secondary" />
                   <div className="border border-primary bg-background p-3">
                     <div className="flex items-center gap-2 text-xs"><span className="h-3 w-3 rounded-full border-4 border-primary" /> Open a specific page</div>
-                    <div className="mt-3 flex h-8 items-center justify-between border border-border bg-card px-2 text-[10px] text-muted-foreground"><span>your-landing-page-link</span><Check className="h-3 w-3 text-primary" /></div>
+                    <div className="mt-3 flex h-8 items-center justify-between border border-border bg-card px-2 text-[10px] text-muted-foreground"><span className="truncate">{url ?? "your-landing-page-link"}</span><Check className="h-3 w-3 text-primary" /></div>
                   </div>
                   <div className="h-7 w-1/2 rounded-md bg-secondary" />
                 </div>
@@ -116,7 +116,7 @@ export function LandingPageSetupGuide({
     <Dialog>
       <DialogTrigger asChild><Button size="lg" variant="outline"><Copy /> {triggerLabel}</Button></DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-        <DialogHeader><DialogTitle className="font-display text-2xl">Make Landing Page Builder open automatically</DialogTitle><DialogDescription>We found your device. Choose your browser for the exact steps.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle className="font-display text-2xl">Make your landing page open automatically</DialogTitle><DialogDescription>We found your device. Choose your browser for the exact steps.</DialogDescription></DialogHeader>
         {content}
       </DialogContent>
     </Dialog>
