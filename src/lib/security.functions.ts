@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isStrongPin } from "./pin-validation";
 
 export type TrustedBrowser = {
   id: string;
@@ -36,7 +37,8 @@ export const getSecurityStatus = createServerFn({ method: "GET" })
 export const setPin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ pin: z.string().regex(/^\d{6}$/, "Your PIN must be exactly 6 digits") }).parse(input),
+    z.object({ pin: z.string().regex(/^\d{6}$/, "Your PIN must be exactly 6 digits")
+      .refine(isStrongPin, "Pick something harder to guess than repeated or sequential digits") }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const pin = await import("./pin.server");

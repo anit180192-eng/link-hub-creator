@@ -240,7 +240,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reserve_pin_attempt: {
+        Args: { p_owner_id: string; p_ip_hash: string }
+        Returns: { allowed: boolean; attempt_id: string | null; remaining: number }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -6,7 +6,7 @@ export const MAX_ATTEMPTS_PER_BROWSER = 5;
 export const MAX_ATTEMPTS_PER_OWNER = 30;
 export const LOCKOUT_MINUTES = 15;
 export const VISIT_HOURS = 12;
-const TRUSTED_MAX_AGE = 60 * 60 * 24 * 400; // browsers cap cookies at ~400 days
+export const TRUSTED_MAX_AGE = 60 * 60 * 24 * 400; // also enforced server-side
 const PBKDF2_ITERATIONS = 100_000;
 
 const enc = new TextEncoder();
@@ -127,11 +127,17 @@ export async function findUnlockedDevice(ownerId: string) {
   const admin = await getAdmin();
   const { data } = await admin
     .from("device_tokens")
-    .select("id, kind, expires_at")
+    .select("id, kind, created_at, expires_at")
     .eq("user_id", ownerId)
     .eq("token_hash", await sha256(token))
     .maybeSingle();
   if (!data) return null;
-  if (data.expires_at && new Date(data.expires_at).getTime() < Date.now()) return null;
+  // Legacy trusted records had no expiry; cap them using their creation time too.
+  const expiresAt = data.expires_at
+    ? new Date(data.expires_at).getTime()
+    : data.kind === "trusted"
+      ? new Date(data.created_at).getTime() + TRUSTED_MAX_AGE * 1000
+      : NaN;
+  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return null;
   return { ...data, token };
 }

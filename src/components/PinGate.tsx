@@ -155,8 +155,8 @@ export function PinGate({ profile }: { profile: StartPageProfile }) {
               </span>
               <h1 className="mt-4 font-display text-xl font-semibold">Is this your own device?</h1>
               <p className="mt-2 text-sm text-hub-muted">
-                PIN accepted. If you trust this browser, we'll remember it and you won't be asked for
-                the PIN here again.
+                PIN accepted. If you trust this browser, we'll remember it for up to 400 days,
+                unless the owner removes it or you clear browser cookies.
               </p>
               <ul className="mt-4 space-y-2 text-sm text-hub-muted">
                 <li className="flex gap-2">

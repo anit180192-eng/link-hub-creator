@@ -111,54 +111,45 @@ export const unlockPage = createServerFn({ method: "POST" })
     if (!page) return { ok: false, reason: "not_found" };
     const ownerId = page.user_id;
 
-    const since = new Date(Date.now() - pin.LOCKOUT_MINUTES * 60_000).toISOString();
     const ipHash = await pin.visitorFingerprint(ownerId);
-    const [browserTries, ownerTries] = await Promise.all([
-      admin
-        .from("pin_attempts")
-        .select("id", { count: "exact", head: true })
-        .eq("owner_id", ownerId)
-        .eq("ip_hash", ipHash)
-        .gte("created_at", since),
-      admin
-        .from("pin_attempts")
-        .select("id", { count: "exact", head: true })
-        .eq("owner_id", ownerId)
-        .gte("created_at", since),
-    ]);
-    const tries = browserTries.count ?? 0;
-    if (tries >= pin.MAX_ATTEMPTS_PER_BROWSER || (ownerTries.count ?? 0) >= pin.MAX_ATTEMPTS_PER_OWNER) {
+    const { data: reservations, error: reservationError } = await admin.rpc("reserve_pin_attempt", {
+      p_owner_id: ownerId,
+      p_ip_hash: ipHash,
+    });
+    const reservation = reservations?.[0];
+    // Fail closed: a database/rate-limit error must never become unlimited guesses.
+    if (reservationError || !reservation) throw new Error("PIN check unavailable. Please try again later.");
+    if (!reservation.allowed) {
       return { ok: false, reason: "locked_out", minutes: pin.LOCKOUT_MINUTES };
     }
+    if (!reservation.attempt_id) throw new Error("PIN check unavailable. Please try again later.");
 
-    const { data: security } = await admin
+    const { data: security, error: securityError } = await admin
       .from("account_security")
       .select("pin_hash, pin_salt")
       .eq("user_id", ownerId)
       .maybeSingle();
+    if (securityError) throw new Error("PIN check unavailable. Please try again later.");
     if (!security) return { ok: false, reason: "no_pin" };
 
     const attempt = await pin.hashPin(data.pin, security.pin_salt);
     if (!pin.safeEqual(attempt, security.pin_hash)) {
-      await admin.from("pin_attempts").insert({ owner_id: ownerId, ip_hash: ipHash });
-      const remaining = Math.max(0, pin.MAX_ATTEMPTS_PER_BROWSER - tries - 1);
+      const remaining = reservation.remaining;
       if (remaining === 0) return { ok: false, reason: "locked_out", minutes: pin.LOCKOUT_MINUTES };
       return { ok: false, reason: "wrong_pin", remaining };
     }
 
     const token = pin.randomHex(32);
-    await Promise.all([
-      admin.from("pin_attempts").delete().eq("owner_id", ownerId).eq("ip_hash", ipHash),
-      // tidy up expired short visits for this owner
-      admin.from("device_tokens").delete().eq("user_id", ownerId).eq("kind", "session").lt("expires_at", new Date().toISOString()),
-      admin.from("device_tokens").insert({
+    const { error: tokenError } = await admin.from("device_tokens").insert({
         user_id: ownerId,
         token_hash: await pin.sha256(token),
         kind: "session",
         label: pin.describeBrowser(),
         expires_at: new Date(Date.now() + pin.VISIT_HOURS * 3_600_000).toISOString(),
-      }),
-    ]);
+      });
+    if (tokenError) throw new Error("Couldn't unlock this browser. Please try again later.");
+    // Remove only this successful reservation; preserve concurrent failed guesses.
+    await admin.from("pin_attempts").delete().eq("id", reservation.attempt_id).eq("owner_id", ownerId);
     pin.writeVisitCookie(ownerId, token);
     return { ok: true };
   });
@@ -181,7 +172,7 @@ export const trustThisBrowser = createServerFn({ method: "POST" })
 
     const { error } = await admin
       .from("device_tokens")
-      .update({ kind: "trusted", expires_at: null, label: pin.describeBrowser() })
+      .update({ kind: "trusted", expires_at: new Date(Date.now() + pin.TRUSTED_MAX_AGE * 1000).toISOString(), label: pin.describeBrowser() })
       .eq("id", device.id);
     if (error) return { ok: false };
     pin.writeTrustedCookie(page.user_id, device.token);

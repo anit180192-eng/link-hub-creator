@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { isStrongPin } from "@/lib/pin-validation";
 import {
   getSecurityStatus,
   removeAllBrowsers,
@@ -64,7 +65,7 @@ export function PinSecurityPanel({
   const savePinMutation = useMutation({
     mutationFn: async () => {
       if (!/^\d{6}$/.test(pin)) throw new Error("Your PIN must be exactly 6 digits.");
-      if (/^(\d)\1{5}$/.test(pin) || "0123456789".includes(pin) || "9876543210".includes(pin)) {
+      if (!isStrongPin(pin)) {
         throw new Error("Pick something harder to guess than repeated or sequential digits.");
       }
       if (pin !== confirm) throw new Error("The two PINs don't match.");
@@ -160,7 +161,7 @@ export function PinSecurityPanel({
           )}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          One PIN covers all your pages. We store it scrambled, so nobody — not even us — can read it.
+          One PIN covers all your pages. We store a salted hash, not the PIN itself.
         </p>
 
         {status.isLoading ? null : showForm ? (
@@ -241,7 +242,7 @@ export function PinSecurityPanel({
           ) : null}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          These browsers won't ask for your PIN. Remove any you don't recognise, or ones you no longer use.
+          Trusted access lasts up to 400 days, or until you remove it or clear browser cookies. Remove any browsers you don't recognise or no longer use.
         </p>
         {devices.length === 0 ? (
           <p className="mt-3 rounded-lg border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground">
