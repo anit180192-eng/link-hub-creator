@@ -143,7 +143,21 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
+    // After returning from Google sign-in, always land on the page builder —
+    // even if the sign-in service sent us back to the homepage.
+    const goToBuilder = () => {
+      if (!consumePostLoginRedirect()) return;
+      if (router.state.location.pathname !== "/dashboard") {
+        router.navigate({ to: "/dashboard" });
+      }
+    };
+    if (hasPendingPostLoginRedirect()) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) goToBuilder();
+      });
+    }
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) goToBuilder();
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
