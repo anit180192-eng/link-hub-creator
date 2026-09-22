@@ -788,15 +788,16 @@ function Dashboard() {
           </CollapsibleSection>
 
           {/* World clocks */}
-          <section className="rounded-xl border border-border bg-card p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="font-display text-lg">World clocks</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Show the time in up to {MAX_CLOCKS} countries at the top of your page. Add none if
-                  you'd rather keep it clean.
-                </p>
-              </div>
+          <CollapsibleSection
+            title="World clocks"
+            subtitle={`Show the time in up to ${MAX_CLOCKS} countries at the top of your page. Add none if you'd rather keep it clean.`}
+            collapsedBadge={
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                {clocks.length} {clocks.length === 1 ? "clock" : "clocks"}
+              </span>
+            }
+            defaultOpen={false}
+            actions={
               <Button
                 variant="outline"
                 disabled={clocks.length >= MAX_CLOCKS}
@@ -808,14 +809,14 @@ function Dashboard() {
               >
                 <Clock3 className="mr-1 h-4 w-4" /> Add clock
               </Button>
-            </div>
-
+            }
+          >
             {clocks.length === 0 ? (
-              <p className="mt-4 text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 No clocks yet — your page shows just your links.
               </p>
             ) : (
-              <ul className="mt-4 space-y-3">
+              <ul className="space-y-3">
                 {clocks.map((clock, index) => (
                   <li key={index} className="flex flex-wrap items-center gap-2">
                     <span className="text-xs text-muted-foreground">Clock {index + 1}</span>
@@ -873,7 +874,7 @@ function Dashboard() {
                 ))}
               </ul>
             )}
-          </section>
+          </CollapsibleSection>
 
 
           {/* Folders + links */}
