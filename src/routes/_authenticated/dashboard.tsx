@@ -15,6 +15,7 @@ import {
   Folder,
   FolderPlus,
   Image as ImageIcon,
+  Lock,
   LogOut,
   Pencil,
   Plus,
@@ -38,6 +39,7 @@ import {
 import { LivePagePreview } from "@/components/LivePagePreview";
 import { Brand } from "@/components/Brand";
 import { AdSpace } from "@/components/AdSpace";
+import { PinSecurityPanel } from "@/components/PinSecurityPanel";
 import {
   MAX_CLOCKS,
   PLATFORMS,
@@ -80,6 +82,7 @@ type ProfileRow = StartPageProfile & {
   user_id: string;
   name: string;
   published: boolean;
+  pin_protected?: boolean;
 };
 
 const NO_FOLDER = "__none__";
@@ -535,6 +538,11 @@ function Dashboard() {
                   <span className={`mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium ${page.published ? "text-accent" : "text-muted-foreground"}`}>
                     {page.published ? <Check className="h-3 w-3" aria-hidden="true" /> : <CircleDashed className="h-3 w-3" aria-hidden="true" />}
                     {page.published ? "Live" : "Draft"}
+                    {page.pin_protected ? (
+                      <span className="ml-1.5 inline-flex items-center gap-1 text-muted-foreground">
+                        <Lock className="h-3 w-3" aria-hidden="true" /> PIN
+                      </span>
+                    ) : null}
                   </span>
                 </button>
               );
@@ -1136,6 +1144,22 @@ function Dashboard() {
               </div>
             </div>
           </section>
+
+          <PinSecurityPanel
+            pageName={form.name}
+            pageProtected={!!form.pin_protected}
+            toggling={saveProfile.isPending}
+            onToggle={(pin_protected) => {
+              setForm({ ...form, pin_protected });
+              saveProfile.mutate(
+                { pin_protected },
+                {
+                  onSuccess: () =>
+                    toast.success(pin_protected ? "This page now asks for your PIN" : "PIN turned off for this page"),
+                },
+              );
+            }}
+          />
         </div>
 
         <aside className="lg:sticky lg:top-10 lg:h-fit">
