@@ -55,21 +55,62 @@ export function AuthPanel({ className }: { className?: string }) {
     }
   }
 
+  function showGoogleError(error: { message: string }) {
+    setBusy(false);
+    toast.error(
+      error.message.toLowerCase().includes("provider is not enabled")
+        ? "Google sign-in isn't switched on yet. Use email for now."
+        : "Google sign-in didn't work. Try again.",
+    );
+  }
+
+  // Google refuses to load its sign-in page inside a frame (e.g. an embedded preview),
+  // so when framed we open it in a small window and receive the session back.
+  async function handleGooglePopup() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth?popup=1`, skipBrowserRedirect: true },
+    });
+    if (error || !data?.url) return showGoogleError(error ?? { message: "" });
+
+    const popup = window.open(data.url, "lpb-google-signin", "width=500,height=650");
+    if (!popup) {
+      setBusy(false);
+      toast.error("Your browser blocked the Google window. Allow pop-ups and try again.");
+      return;
+    }
+
+    const onMessage = async (event: MessageEvent) => {
+      if (event.origin !== window.location.origin || event.source !== popup) return;
+      const payload = event.data as { type?: string; access_token?: string; refresh_token?: string };
+      if (payload?.type !== "lpb-google-session" || !payload.access_token || !payload.refresh_token) return;
+      cleanup();
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: payload.access_token,
+        refresh_token: payload.refresh_token,
+      });
+      if (sessionError) return showGoogleError(sessionError);
+      navigate({ to: "/dashboard" });
+    };
+    const timer = window.setInterval(() => {
+      if (popup.closed) { cleanup(); setBusy(false); }
+    }, 800);
+    function cleanup() {
+      window.removeEventListener("message", onMessage);
+      window.clearInterval(timer);
+    }
+    window.addEventListener("message", onMessage);
+  }
+
   async function handleGoogle() {
     setBusy(true);
+    if (window.self !== window.top) return handleGooglePopup();
     // Returns to the public /auth page, which forwards signed-in users to /dashboard.
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth` },
     });
-    if (error) {
-      setBusy(false);
-      toast.error(
-        error.message.toLowerCase().includes("provider is not enabled")
-          ? "Google sign-in isn't switched on yet. Use email for now."
-          : "Google sign-in didn't work. Try again.",
-      );
-    }
+    if (error) showGoogleError(error);
   }
 
   return (
