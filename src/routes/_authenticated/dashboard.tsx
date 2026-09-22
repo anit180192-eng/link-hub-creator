@@ -39,6 +39,7 @@ import {
 import { LivePagePreview } from "@/components/LivePagePreview";
 import { Brand } from "@/components/Brand";
 import { AdSpace } from "@/components/AdSpace";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { PinSecurityPanel } from "@/components/PinSecurityPanel";
 import {
   MAX_CLOCKS,
