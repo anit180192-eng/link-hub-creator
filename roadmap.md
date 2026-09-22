@@ -35,3 +35,8 @@
 - [x] Landing Page Builder logo in browser tab + on every app page
 - [ ] Guest builder: build without account, download HTML only (next)
 - [ ] PIN protection + trusted devices for personal links (next)
+
+## Builder improvements (Sep 22)
+- [x] Land on the page builder right after sign-in (Google + email confirmation)
+- [x] Landing Page Builder logo on builder, published pages and downloads
+- [x] Multiple pages per account, each with its own link (Personal, Office, …)
