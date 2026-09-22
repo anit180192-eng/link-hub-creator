@@ -878,17 +878,16 @@ function Dashboard() {
 
 
           {/* Folders + links */}
-          <section className="rounded-xl border border-border bg-card p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="font-display text-lg">Your folders &amp; links</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Group related accounts together — e.g. a folder per brand, project or person.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-2">
+          <CollapsibleSection
+            title="Your folders & links"
+            subtitle="Group related accounts together — e.g. a folder per brand, project or person."
+            collapsedBadge={
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                {links.length} {links.length === 1 ? "link" : "links"}
+              </span>
+            }
+          >
+            <div className="flex flex-wrap gap-2">
               <Input
                 className="w-64"
                 placeholder="New folder name — e.g. Bhakti Raga Media"
