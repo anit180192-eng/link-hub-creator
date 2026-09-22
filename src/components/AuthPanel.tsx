@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
 
 const schema = z.object({
@@ -58,15 +57,19 @@ export function AuthPanel({ className }: { className?: string }) {
 
   async function handleGoogle() {
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    // Returns to the public /auth page, which forwards signed-in users to /dashboard.
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth` },
     });
-    if (result.error) {
+    if (error) {
       setBusy(false);
-      toast.error("Google sign-in didn't work. Try again.");
-      return;
+      toast.error(
+        error.message.toLowerCase().includes("provider is not enabled")
+          ? "Google sign-in isn't switched on yet. Use email for now."
+          : "Google sign-in didn't work. Try again.",
+      );
     }
-    if (!result.redirected) navigate({ to: "/dashboard" });
   }
 
   return (
