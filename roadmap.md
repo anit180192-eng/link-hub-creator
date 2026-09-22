@@ -34,7 +34,7 @@
 - [x] Privacy section: 6-digit PIN + trusted devices (marked Coming soon)
 - [x] Landing Page Builder logo in browser tab + on every app page
 - [ ] Guest builder: build without account, download HTML only (next)
-- [ ] PIN protection + trusted devices for personal links (next)
+- [x] PIN protection + trusted devices for personal links
 
 ## Builder improvements (Sep 22)
 - [x] Land on the page builder right after sign-in (Google + email confirmation)

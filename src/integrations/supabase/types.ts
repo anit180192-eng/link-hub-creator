@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_security: {
+        Row: {
+          created_at: string
+          pin_hash: string
+          pin_salt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          pin_hash: string
+          pin_salt: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          pin_hash?: string
+          pin_salt?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      device_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          kind: string
+          label: string
+          last_used_at: string
+          token_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          kind?: string
+          label?: string
+          last_used_at?: string
+          token_hash: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          kind?: string
+          label?: string
+          last_used_at?: string
+          token_hash?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       links: {
         Row: {
           created_at: string
@@ -73,6 +130,7 @@ export type Database = {
           display_name: string
           id: string
           name: string
+          pin_protected: boolean
           published: boolean
           slug: string
           tagline: string
@@ -88,6 +146,7 @@ export type Database = {
           display_name?: string
           id?: string
           name?: string
+          pin_protected?: boolean
           published?: boolean
           slug: string
           tagline?: string
@@ -103,12 +162,34 @@ export type Database = {
           display_name?: string
           id?: string
           name?: string
+          pin_protected?: boolean
           published?: boolean
           slug?: string
           tagline?: string
           theme?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      pin_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string
+          owner_id?: string
         }
         Relationships: []
       }

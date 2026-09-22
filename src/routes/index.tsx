@@ -251,7 +251,7 @@ function Landing() {
                 "Set it as your start page in every browser, on any laptop or phone",
                 "Edit once — every device shows the change instantly",
                 "Still download the HTML file whenever you like",
-                "Protect it with a 6-digit PIN and trusted devices (coming soon)",
+                "Protect it with a 6-digit PIN and trusted devices",
               ]}
               cta={signedIn
                 ? <Button asChild><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
@@ -266,11 +266,10 @@ function Landing() {
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-primary">Privacy for your personal link</p>
-                <StatusBadge>Coming soon</StatusBadge>
               </div>
               <h2 className="mt-3 font-display text-3xl sm:text-4xl">Your link is a real web address. So we'll lock it for you.</h2>
               <p className="mt-4 max-w-xl text-muted-foreground">
-                Anyone who gets hold of a web address could open it. That's why personal links will come with a PIN and
+                Anyone who gets hold of a web address could open it. That's why personal links come with a PIN and
                 trusted devices — secure for you, without typing a code every time you open a new tab.
               </p>
               <ol className="mt-8 space-y-5">
