@@ -515,16 +515,17 @@ function Dashboard() {
       </section>
 
       {/* Page switcher */}
-      <section className="mx-auto max-w-7xl px-5 pt-6" aria-labelledby="pages-heading">
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h1 id="pages-heading" className="font-display text-xl">Your landing pages</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Make one page for personal use, another for the office, and so on. Every page has
-                its own link.
-              </p>
-            </div>
+      <section className="mx-auto max-w-7xl px-5 pt-6">
+        <CollapsibleSection
+          title="Your landing pages"
+          headingId="pages-heading"
+          subtitle="Make one page for personal use, another for the office, and so on. Every page has its own link."
+          collapsedBadge={
+            <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+              {pages.length} {pages.length === 1 ? "page" : "pages"}
+            </span>
+          }
+          actions={
             <Button
               variant="outline"
               disabled={pages.length >= MAX_PAGES}
@@ -534,9 +535,9 @@ function Dashboard() {
               {creatingPage ? <X className="mr-1 h-4 w-4" /> : <FilePlus2 className="mr-1 h-4 w-4" />}
               {creatingPage ? "Cancel" : "New page"}
             </Button>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Your pages">
+          }
+        >
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Your pages">
             {pages.map((page) => {
               const active = page.id === profile.id;
               return (
@@ -606,7 +607,7 @@ function Dashboard() {
               </p>
             </form>
           ) : null}
-        </div>
+        </CollapsibleSection>
       </section>
 
       <main className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[minmax(0,1fr)_480px]">
