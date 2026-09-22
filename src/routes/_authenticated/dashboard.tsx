@@ -39,6 +39,7 @@ import {
 import { LivePagePreview } from "@/components/LivePagePreview";
 import { Brand } from "@/components/Brand";
 import { AdSpace } from "@/components/AdSpace";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { PinSecurityPanel } from "@/components/PinSecurityPanel";
 import {
   MAX_CLOCKS,
@@ -514,16 +515,17 @@ function Dashboard() {
       </section>
 
       {/* Page switcher */}
-      <section className="mx-auto max-w-7xl px-5 pt-6" aria-labelledby="pages-heading">
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h1 id="pages-heading" className="font-display text-xl">Your landing pages</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Make one page for personal use, another for the office, and so on. Every page has
-                its own link.
-              </p>
-            </div>
+      <section className="mx-auto max-w-7xl px-5 pt-6">
+        <CollapsibleSection
+          title="Your landing pages"
+          headingId="pages-heading"
+          subtitle="Make one page for personal use, another for the office, and so on. Every page has its own link."
+          collapsedBadge={
+            <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+              {pages.length} {pages.length === 1 ? "page" : "pages"}
+            </span>
+          }
+          actions={
             <Button
               variant="outline"
               disabled={pages.length >= MAX_PAGES}
@@ -533,9 +535,9 @@ function Dashboard() {
               {creatingPage ? <X className="mr-1 h-4 w-4" /> : <FilePlus2 className="mr-1 h-4 w-4" />}
               {creatingPage ? "Cancel" : "New page"}
             </Button>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Your pages">
+          }
+        >
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Your pages">
             {pages.map((page) => {
               const active = page.id === profile.id;
               return (
@@ -605,17 +607,20 @@ function Dashboard() {
               </p>
             </form>
           ) : null}
-        </div>
+        </CollapsibleSection>
       </section>
 
       <main className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[minmax(0,1fr)_480px]">
         <div className="space-y-8">
           {/* Profile */}
-          <section className="rounded-xl border border-border bg-card p-6">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-display text-lg">
-                Editing: <span className="text-primary">{form.name || "Untitled page"}</span>
-              </h2>
+          <CollapsibleSection
+            title={<>Editing: <span className="text-primary">{form.name || "Untitled page"}</span></>}
+            collapsedBadge={
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                {form.published ? "Live" : "Draft"}
+              </span>
+            }
+            actions={
               <Button
                 type="button"
                 variant="ghost"
@@ -625,7 +630,7 @@ function Dashboard() {
                 onClick={() => {
                   if (
                     window.confirm(
-                      `Delete the page “${form.name || form.slug}” and all its links? Its link will stop working.`,
+                      `Delete the page "${form.name || form.slug}" and all its links? Its link will stop working.`,
                     )
                   ) {
                     deletePage.mutate(profile.id);
@@ -634,8 +639,9 @@ function Dashboard() {
               >
                 <Trash2 className="mr-1 h-4 w-4" /> Delete page
               </Button>
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            }
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="page-name">Page name (only you see this)</Label>
                 <Input
@@ -779,18 +785,19 @@ function Dashboard() {
                 <Label htmlFor="dark">Dark page</Label>
               </div>
             </div>
-          </section>
+          </CollapsibleSection>
 
           {/* World clocks */}
-          <section className="rounded-xl border border-border bg-card p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="font-display text-lg">World clocks</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Show the time in up to {MAX_CLOCKS} countries at the top of your page. Add none if
-                  you'd rather keep it clean.
-                </p>
-              </div>
+          <CollapsibleSection
+            title="World clocks"
+            subtitle={`Show the time in up to ${MAX_CLOCKS} countries at the top of your page. Add none if you'd rather keep it clean.`}
+            collapsedBadge={
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                {clocks.length} {clocks.length === 1 ? "clock" : "clocks"}
+              </span>
+            }
+            defaultOpen={false}
+            actions={
               <Button
                 variant="outline"
                 disabled={clocks.length >= MAX_CLOCKS}
@@ -802,14 +809,14 @@ function Dashboard() {
               >
                 <Clock3 className="mr-1 h-4 w-4" /> Add clock
               </Button>
-            </div>
-
+            }
+          >
             {clocks.length === 0 ? (
-              <p className="mt-4 text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 No clocks yet — your page shows just your links.
               </p>
             ) : (
-              <ul className="mt-4 space-y-3">
+              <ul className="space-y-3">
                 {clocks.map((clock, index) => (
                   <li key={index} className="flex flex-wrap items-center gap-2">
                     <span className="text-xs text-muted-foreground">Clock {index + 1}</span>
@@ -867,21 +874,20 @@ function Dashboard() {
                 ))}
               </ul>
             )}
-          </section>
+          </CollapsibleSection>
 
 
           {/* Folders + links */}
-          <section className="rounded-xl border border-border bg-card p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="font-display text-lg">Your folders &amp; links</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Group related accounts together — e.g. a folder per brand, project or person.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-2">
+          <CollapsibleSection
+            title="Your folders & links"
+            subtitle="Group related accounts together — e.g. a folder per brand, project or person."
+            collapsedBadge={
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                {links.length} {links.length === 1 ? "link" : "links"}
+              </span>
+            }
+          >
+            <div className="flex flex-wrap gap-2">
               <Input
                 className="w-64"
                 placeholder="New folder name — e.g. Bhakti Raga Media"
@@ -1108,14 +1114,18 @@ function Dashboard() {
                 </div>
               ))}
             </div>
-          </section>
+          </CollapsibleSection>
 
           {/* Publish */}
-          <section className="rounded-xl border border-border bg-card p-6">
-            <h2 className="font-display text-lg">Publish</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Publishing puts your page online at a link you can set as your browser landing page.
-            </p>
+          <CollapsibleSection
+            title="Publish"
+            subtitle="Publishing puts your page online at a link you can set as your browser landing page."
+            collapsedBadge={
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                {form.published ? "Live" : "Draft"}
+              </span>
+            }
+          >
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Button
@@ -1161,7 +1171,7 @@ function Dashboard() {
                 <LandingPageSetupGuide url={form.published ? publicUrl : undefined} />
               </div>
             </div>
-          </section>
+          </CollapsibleSection>
         </div>
 
         <aside className="lg:sticky lg:top-10 lg:h-fit">
