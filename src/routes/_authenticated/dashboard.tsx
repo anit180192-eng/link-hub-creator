@@ -514,7 +514,7 @@ function Dashboard() {
       </section>
 
       {/* Page switcher */}
-      <section className="mx-auto max-w-7xl px-5 pt-8" aria-labelledby="pages-heading">
+      <section className="mx-auto max-w-7xl px-5 pt-6" aria-labelledby="pages-heading">
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
