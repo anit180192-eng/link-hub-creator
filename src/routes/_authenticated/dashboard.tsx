@@ -1144,22 +1144,6 @@ function Dashboard() {
               </div>
             </div>
           </section>
-
-          <PinSecurityPanel
-            pageName={form.name}
-            pageProtected={!!form.pin_protected}
-            toggling={saveProfile.isPending}
-            onToggle={(pin_protected) => {
-              setForm({ ...form, pin_protected });
-              saveProfile.mutate(
-                { pin_protected },
-                {
-                  onSuccess: () =>
-                    toast.success(pin_protected ? "This page now asks for your PIN" : "PIN turned off for this page"),
-                },
-              );
-            }}
-          />
         </div>
 
         <aside className="lg:sticky lg:top-10 lg:h-fit">
