@@ -46,7 +46,7 @@ export function LandingAdSlot() {
         Advertisement
       </p>
       <div className="grid">
-        <div className="ad-placeholder col-start-1 row-start-1 flex min-h-[90px] items-center justify-center rounded-lg border border-dashed border-border bg-muted/20 px-4 text-center text-xs text-muted-foreground pointer-events-none">
+        <div className="placement-note col-start-1 row-start-1 flex min-h-[90px] items-center justify-center rounded-lg border border-dashed border-border bg-muted/20 px-4 text-center text-xs text-muted-foreground pointer-events-none">
           Ads will appear here when available.
         </div>
         <ins
