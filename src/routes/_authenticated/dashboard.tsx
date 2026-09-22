@@ -495,21 +495,23 @@ function Dashboard() {
     <div className="min-h-screen">
       <DashboardHeader onSignOut={handleSignOut} />
 
-      <PinSecurityPanel
-        pageName={form.name}
-        pageProtected={!!form.pin_protected}
-        toggling={saveProfile.isPending}
-        onToggle={(pin_protected) => {
-          setForm({ ...form, pin_protected });
-          saveProfile.mutate(
-            { pin_protected },
-            {
-              onSuccess: () =>
-                toast.success(pin_protected ? "This page now asks for your PIN" : "PIN turned off for this page"),
-            },
-          );
-        }}
-      />
+      <section className="mx-auto max-w-7xl px-5 pt-8">
+        <PinSecurityPanel
+          pageName={form.name}
+          pageProtected={!!form.pin_protected}
+          toggling={saveProfile.isPending}
+          onToggle={(pin_protected) => {
+            setForm({ ...form, pin_protected });
+            saveProfile.mutate(
+              { pin_protected },
+              {
+                onSuccess: () =>
+                  toast.success(pin_protected ? "This page now asks for your PIN" : "PIN turned off for this page"),
+              },
+            );
+          }}
+        />
+      </section>
 
       {/* Page switcher */}
       <section className="mx-auto max-w-7xl px-5 pt-8" aria-labelledby="pages-heading">
