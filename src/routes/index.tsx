@@ -223,6 +223,8 @@ function Landing() {
           </div>
         </section>
 
+        <LandingAdSlot />
+
         {/* Free vs account */}
         <section id="plans" className="mx-auto max-w-7xl scroll-mt-6 px-5 py-16 lg:px-8 lg:py-24">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">Two ways to use it</p>
@@ -333,7 +335,6 @@ function Landing() {
           </div>
         </section>
 
-        <LandingAdSlot />
       </main>
 
       <footer className="mx-auto mt-10 flex max-w-7xl flex-col gap-4 border-t border-border px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between lg:px-8">

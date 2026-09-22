@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { LandingAdSlot } from "@/components/LandingAdSlot";
 import { Brand } from "@/components/Brand";
 import { LandingPageSetupGuide } from "@/components/LandingPageSetupGuide";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ function SetupPage() {
         <div className="mt-14 max-w-2xl"><p className="text-xs font-semibold uppercase text-primary">About 20 seconds</p><h1 className="mt-3 font-display text-4xl sm:text-5xl">See your links whenever your browser opens.</h1><p className="mt-4 text-muted-foreground">Choose your computer and browser below. Browser security requires you to confirm the change yourself, but these visual steps take you directly through it.</p></div>
         <div className="mt-10 border border-border bg-card p-5 sm:p-8"><LandingPageSetupGuide standalone /></div>
         <div className="mt-6 border border-border p-5 text-sm text-muted-foreground"><strong className="text-foreground">Using the downloaded file?</strong> Save it somewhere permanent, open it, copy its <code className="text-primary">file://</code> address, and use that address in the same steps.</div>
+        <LandingAdSlot />
       </div>
     </div>
   );

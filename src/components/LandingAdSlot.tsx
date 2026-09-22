@@ -1,63 +1,57 @@
-import { useEffect } from "react";
-import { ADSENSE_CLIENT, ADSENSE_SLOT, adsConfigured, hasAdSlot } from "@/lib/ads-config";
+import { useEffect, useRef, useState } from "react";
+import { useLocation } from "@tanstack/react-router";
+import { ADSENSE_CLIENT, ADSENSE_SLOT, ADSENSE_SCRIPT_SRC, hasAdSlot } from "@/lib/ads-config";
 
 declare global {
-  interface Window {
-    adsbygoogle?: unknown[];
-  }
+  interface Window { adsbygoogle?: unknown[]; }
 }
 
-/** Loads the AdSense loader script once (idempotent — skips if already in head). */
-function loadAdSenseScript(client: string) {
-  const src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
-  if (document.querySelector(`script[src="${src}"]`)) return;
-  const script = document.createElement("script");
-  script.async = true;
-  script.crossOrigin = "anonymous";
-  script.src = src;
-  document.head.appendChild(script);
+let scriptReady: Promise<void> | undefined;
+function loadAdSense() {
+  return scriptReady ??= new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.src = ADSENSE_SCRIPT_SRC;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("AdSense unavailable"));
+    document.head.appendChild(script);
+  });
 }
 
-/**
- * Small, subtle AdSense holder for the app's main landing page.
- * Slim single-row strip — never taller than ~120px — so it stays
- * unobtrusive. Shows a live ad unit when a slot is configured,
- * otherwise a clean labelled placeholder while auto-ads load.
- */
+/** One explicitly placed banner on marketing content; never on shared pages. */
 export function LandingAdSlot() {
-  useEffect(() => {
-    if (!adsConfigured) return;
-    loadAdSenseScript(ADSENSE_CLIENT);
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch {
-      // AdSense blocked or not yet approved — placeholder stays.
-    }
-  }, []);
+  const pathname = useLocation({ select: (location) => location.pathname });
+  const allowed = pathname === "/" || pathname === "/setup";
+  const pushed = useRef(false);
+  const [failed, setFailed] = useState(false);
 
-  if (!adsConfigured) return null;
+  useEffect(() => {
+    if (!allowed || !hasAdSlot || window.location.hostname !== "landingpagebuilder.aurunex.com") return;
+    let active = true;
+    loadAdSense().then(() => {
+      if (!active || pushed.current) return;
+      pushed.current = true;
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    }).catch(() => { if (active) setFailed(true); });
+    return () => { active = false; };
+  }, [allowed]);
+
+  if (!allowed || !hasAdSlot || failed) return null;
 
   return (
-    <div className="mx-auto max-w-7xl px-5 lg:px-8">
-      <div
-        className="mx-auto flex max-w-[728px] min-h-[90px] items-center justify-center rounded-lg border border-dashed border-border/60 bg-card/30 px-4"
-        style={{ maxHeight: 120 }}
-      >
-        {hasAdSlot ? (
-          <ins
-            className="adsbygoogle block w-full"
-            style={{ display: "block", minHeight: 90 }}
-            data-ad-client={ADSENSE_CLIENT}
-            data-ad-slot={ADSENSE_SLOT}
-            data-ad-format="auto"
-            data-full-width-responsive="true"
-          />
-        ) : (
-          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Advertisement
-          </p>
-        )}
-      </div>
-    </div>
+    <aside aria-label="Advertisement" className="content-ad mx-auto w-full max-w-5xl px-5 py-8 sm:py-10">
+      <p className="mb-3 text-center text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        Advertisement
+      </p>
+      <ins
+        className="adsbygoogle block w-full"
+        style={{ display: "block", minHeight: 90 }}
+        data-ad-client={ADSENSE_CLIENT}
+        data-ad-slot={ADSENSE_SLOT}
+        data-ad-format="horizontal"
+        data-full-width-responsive="false"
+      />
+    </aside>
   );
 }

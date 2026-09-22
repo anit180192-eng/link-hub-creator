@@ -195,3 +195,8 @@
     background: var(--muted);
   }
 }
+
+/* Collapse only confirmed empty units; never clip or hide a filled ad. */
+.content-ad:has(ins[data-ad-status="unfilled"]) {
+  display: none;
+}
