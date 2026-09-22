@@ -196,7 +196,7 @@
   }
 }
 
-/* Collapse only confirmed empty units; never clip or hide a filled ad. */
-.content-ad:has(ins[data-ad-status="unfilled"]) {
+/* Replace the placeholder only when Google confirms a real ad is present. */
+.content-ad:has(ins[data-ad-status="filled"]) .ad-placeholder {
   display: none;
 }
