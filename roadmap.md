@@ -27,3 +27,11 @@
 - [x] Remove Lovable Cloud from this project (permanent), then connect own Supabase
 - [x] Switch Google sign-in to own Google keys; set site URL + redirect URLs
 - [x] Verify sign-up, dashboard, publish, public page, photo upload
+
+## Homepage rework (Sep 22)
+- [x] Homepage preview uses the real page layout (sample "Shreya Anit" page)
+- [x] Explain the product clearly; free (download) vs account (personal link) comparison
+- [x] Privacy section: 6-digit PIN + trusted devices (marked Coming soon)
+- [x] Landing Page Builder logo in browser tab + on every app page
+- [ ] Guest builder: build without account, download HTML only (next)
+- [ ] PIN protection + trusted devices for personal links (next)

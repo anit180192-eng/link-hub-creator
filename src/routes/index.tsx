@@ -67,7 +67,7 @@ const sampleLinks: StartPageLink[] = [
   { id: "3", platform: "website", label: "Google Calendar", url: "https://calendar.google.com", group_name: "Personal", position: 3 },
   { id: "4", platform: "website", label: "Google Drive", url: "https://drive.google.com", group_name: "Personal", position: 4 },
   { id: "5", platform: "instagram", label: "Instagram", url: "https://www.instagram.com", group_name: "Personal", position: 5, icon_only: true },
-  { id: "6", platform: "website", label: "WhatsApp", url: "https://web.whatsapp.com", group_name: "Personal", position: 6, icon_only: true },
+  { id: "6", platform: "website", label: "Facebook", url: "https://www.facebook.com", group_name: "Personal", position: 6, icon_only: true },
   { id: "7", platform: "youtube", label: "YouTube channel", url: "https://www.youtube.com", group_name: "Bhakti Raga Media", position: 7 },
   { id: "8", platform: "website", label: "Spotify for Artists", url: "https://artists.spotify.com", group_name: "Bhakti Raga Media", position: 8 },
   { id: "9", platform: "instagram", label: "Instagram", url: "https://www.instagram.com", group_name: "Bhakti Raga Media", position: 9, icon_only: true },
@@ -186,7 +186,7 @@ function Landing() {
             </p>
           </div>
 
-          <div className="mt-10 overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
+          <div className="mx-auto mt-10 max-w-[1120px] overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
             <div className="flex items-center gap-3 border-b border-border px-4 py-3">
               <div className="flex gap-1.5" aria-hidden="true">
                 <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
@@ -198,7 +198,7 @@ function Landing() {
                 <span className="truncate">landingpagebuilder.aurunex.com/p/<span className="text-foreground">shreya</span></span>
               </div>
             </div>
-            <div className="page-preview-stage !h-[26rem] sm:!h-[34rem] lg:!h-[40rem]">
+            <div className="page-preview-stage !h-[26rem] sm:!h-[34rem] lg:!h-[45rem]">
               <div className="page-preview-canvas page-preview-canvas--desktop">
                 <StartPageView profile={sampleProfile} links={sampleLinks} />
               </div>
