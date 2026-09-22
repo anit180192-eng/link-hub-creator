@@ -106,23 +106,28 @@ export function PinSecurityPanel({
         </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-border bg-background p-4 text-sm">
-        <p className="font-semibold text-foreground">How the PIN works across your pages</p>
-        <ul className="mt-2 space-y-1.5 text-muted-foreground">
-          <li className="flex gap-2">
-            <span className="text-primary" aria-hidden="true">•</span>
-            <span><span className="font-medium text-foreground">One PIN for every page.</span> You set it once and it protects all your pages — personal, office, any page you create.</span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-primary" aria-hidden="true">•</span>
-            <span><span className="font-medium text-foreground">Lock each page separately.</span> The switch below turns the PIN on or off for the page you're editing. You can lock some pages and leave others open.</span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-primary" aria-hidden="true">•</span>
-            <span><span className="font-medium text-foreground">Trusted browsers skip the PIN everywhere.</span> Once a browser is trusted, it opens any of your locked pages without asking — across every page you own.</span>
-          </li>
-        </ul>
-      </div>
+      <Collapsible open={infoOpen} onOpenChange={setInfoOpen} className="mt-4 rounded-lg border border-border bg-background">
+        <CollapsibleTrigger className="group flex w-full items-center gap-2 p-4 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
+          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" aria-hidden="true" />
+          <span className="font-semibold text-foreground">How the PIN works across your pages</span>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <ul className="space-y-1.5 px-4 pb-4 text-muted-foreground">
+            <li className="flex gap-2">
+              <span className="text-primary" aria-hidden="true">•</span>
+              <span><span className="font-medium text-foreground">One PIN for every page.</span> You set it once and it protects all your pages — personal, office, any page you create.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary" aria-hidden="true">•</span>
+              <span><span className="font-medium text-foreground">Lock each page separately.</span> The switch below turns the PIN on or off for the page you're editing. You can lock some pages and leave others open.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary" aria-hidden="true">•</span>
+              <span><span className="font-medium text-foreground">Trusted browsers skip the PIN everywhere.</span> Once a browser is trusted, it opens any of your locked pages without asking — across every page you own.</span>
+            </li>
+          </ul>
+        </CollapsibleContent>
+      </Collapsible>
 
       <ol className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-3">
         <li className="rounded-lg border border-border bg-background p-3">
