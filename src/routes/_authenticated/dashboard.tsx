@@ -592,6 +592,21 @@ function Dashboard() {
 
       <main className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[minmax(0,1fr)_480px]">
         <div className="space-y-8">
+          <PinSecurityPanel
+            pageName={form.name}
+            pageProtected={!!form.pin_protected}
+            toggling={saveProfile.isPending}
+            onToggle={(pin_protected) => {
+              setForm({ ...form, pin_protected });
+              saveProfile.mutate(
+                { pin_protected },
+                {
+                  onSuccess: () =>
+                    toast.success(pin_protected ? "This page now asks for your PIN" : "PIN turned off for this page"),
+                },
+              );
+            }}
+          />
           {/* Profile */}
           <section className="rounded-xl border border-border bg-card p-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1144,22 +1159,6 @@ function Dashboard() {
               </div>
             </div>
           </section>
-
-          <PinSecurityPanel
-            pageName={form.name}
-            pageProtected={!!form.pin_protected}
-            toggling={saveProfile.isPending}
-            onToggle={(pin_protected) => {
-              setForm({ ...form, pin_protected });
-              saveProfile.mutate(
-                { pin_protected },
-                {
-                  onSuccess: () =>
-                    toast.success(pin_protected ? "This page now asks for your PIN" : "PIN turned off for this page"),
-                },
-              );
-            }}
-          />
         </div>
 
         <aside className="lg:sticky lg:top-10 lg:h-fit">
