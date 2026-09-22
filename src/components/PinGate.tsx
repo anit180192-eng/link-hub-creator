@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { AlertCircle, Lock, MonitorSmartphone, ShieldCheck } from "lucide-react";
@@ -17,6 +17,12 @@ export function PinGate({ profile }: { profile: StartPageProfile }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const name = profile.display_name || profile.slug;
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Put the cursor back in the PIN box after a wrong attempt.
+  useEffect(() => {
+    if (!busy && step === "pin") inputRef.current?.focus();
+  }, [busy, step]);
 
   async function submit(value = pin) {
     if (value.length !== 6 || busy) return;
@@ -105,6 +111,7 @@ export function PinGate({ profile }: { profile: StartPageProfile }) {
                 <label htmlFor="page-pin" className="sr-only">6-digit PIN</label>
                 <InputOTP
                   id="page-pin"
+                  ref={inputRef}
                   maxLength={6}
                   inputMode="numeric"
                   pattern="^[0-9]*$"
