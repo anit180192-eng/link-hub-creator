@@ -5,10 +5,16 @@ import type { Database } from "@/integrations/supabase/types";
 import { parseClocks, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 
 export type PublicPage = {
+  profile: null;
+  links: [];
+  locked: true;
+  protected: true;
+  trusted: false;
+} | {
   profile: StartPageProfile;
   links: StartPageLink[];
   /** True when the page needs a PIN and this browser hasn't unlocked it. */
-  locked: boolean;
+  locked: false;
   /** True when the page is PIN protected. */
   protected: boolean;
   /** True when this browser is saved as trusted for this page's owner. */
@@ -37,16 +43,25 @@ const LINK_COLUMNS = "id, platform, label, url, group_name, position, icon_only"
 export const getPublicPage = createServerFn({ method: "GET" })
   .inputValidator((slug: string) => String(slug).slice(0, 60))
   .handler(async ({ data: slug }): Promise<PublicPage> => {
-    const supabase = publicClient();
+    // Protected page rows are not exposed by the anonymous Data API. This
+    // server-only lookup must never serialize metadata before device validation.
+    const { findUnlockedDevice, getAdmin } = await import("./pin.server");
+    const admin = await getAdmin();
 
-    const { data: page } = await supabase
+    const { data: page, error } = await admin
       .from("pages")
       .select("id, user_id, slug, display_name, tagline, avatar_url, theme, dark_mode, clocks, pin_protected")
       .eq("slug", slug)
       .eq("published", true)
       .maybeSingle();
 
+    if (error) throw new Error("This page couldn't be loaded right now.");
     if (!page) return null;
+
+    const device = page.pin_protected ? await findUnlockedDevice(page.user_id) : null;
+    if (page.pin_protected && !device) {
+      return { profile: null, links: [], locked: true, protected: true, trusted: false };
+    }
 
     const profile: StartPageProfile = {
       slug: page.slug,
@@ -59,6 +74,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
     };
 
     if (!page.pin_protected) {
+      const supabase = publicClient();
       const { data: links } = await supabase
         .from("links")
         .select(LINK_COLUMNS)
@@ -67,13 +83,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
       return { profile, links: (links ?? []) as StartPageLink[], locked: false, protected: false, trusted: false };
     }
 
-    const { findUnlockedDevice, getAdmin } = await import("./pin.server");
-    const device = await findUnlockedDevice(page.user_id);
-    if (!device) {
-      return { profile, links: [], locked: true, protected: true, trusted: false };
-    }
-
-    const admin = await getAdmin();
+    if (!device) throw new Error("This page couldn't be loaded right now.");
     const [{ data: links }] = await Promise.all([
       admin.from("links").select(LINK_COLUMNS).eq("page_id", page.id).order("position", { ascending: true }),
       admin.from("device_tokens").update({ last_used_at: new Date().toISOString() }).eq("id", device.id),

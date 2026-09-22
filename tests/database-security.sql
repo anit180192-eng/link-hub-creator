@@ -24,6 +24,8 @@ BEGIN
     (owner_b,other_page,'https://example.com/other');
 
   EXECUTE 'SET LOCAL ROLE anon';
+  SELECT count(*) INTO total FROM public.pages WHERE id IN (open_page,private_page,draft_page);
+  ASSERT total = 1, 'Anonymous visitors can read protected or draft page metadata';
   SELECT count(*) INTO total FROM public.links WHERE page_id IN (open_page,private_page,draft_page);
   ASSERT total = 1, 'Anonymous visitors can read private or draft links';
   ASSERT NOT has_table_privilege('anon','public.account_security','SELECT'), 'PIN hashes exposed';

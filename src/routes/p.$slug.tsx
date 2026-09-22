@@ -19,20 +19,20 @@ export const Route = createFileRoute("/p/$slug")({
         ],
       };
     }
-    const name = loaderData.profile.display_name || params.slug;
     if (loaderData.protected) {
       return {
         meta: [
-          { title: `${name} — Private page` },
-          { name: "description", content: `${name}'s private start page. A PIN is needed to view it.` },
+          { title: "Private page — Landing Page Builder" },
+          { name: "description", content: "Enter the PIN to view this private page." },
           { name: "robots", content: "noindex" },
-          { property: "og:title", content: `${name} — Private page` },
+          { property: "og:title", content: "Private page — Landing Page Builder" },
           { property: "og:description", content: "A private start page protected with a PIN." },
           { property: "og:type", content: "website" },
           { name: "twitter:card", content: "summary" },
         ],
       };
     }
+    const name = loaderData.profile.display_name || params.slug;
     const description =
       loaderData.profile.tagline || `All of ${name}'s links and accounts in one start page.`;
     return {
@@ -66,7 +66,8 @@ export const Route = createFileRoute("/p/$slug")({
 });
 
 function PublicStartPage() {
-  const { profile, links, locked } = Route.useLoaderData();
-  if (locked) return <PinGate profile={profile} />;
-  return <StartPageView profile={profile} links={links} />;
+  const page = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  if (page.locked) return <PinGate slug={slug} />;
+  return <StartPageView profile={page.profile} links={page.links} />;
 }

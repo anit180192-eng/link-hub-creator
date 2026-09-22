@@ -4,11 +4,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { AlertCircle, Lock, MonitorSmartphone, ShieldCheck } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { trustThisBrowser, unlockPage } from "@/lib/public-page.functions";
-import type { StartPageProfile } from "@/lib/startpage";
 
 type Step = "pin" | "trust";
 
-export function PinGate({ profile }: { profile: StartPageProfile }) {
+export function PinGate({ slug }: { slug: string }) {
   const router = useRouter();
   const unlock = useServerFn(unlockPage);
   const trust = useServerFn(trustThisBrowser);
@@ -16,7 +15,6 @@ export function PinGate({ profile }: { profile: StartPageProfile }) {
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const name = profile.display_name || profile.slug;
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Put the cursor back in the PIN box after a wrong attempt.
@@ -29,7 +27,7 @@ export function PinGate({ profile }: { profile: StartPageProfile }) {
     setBusy(true);
     setError(null);
     try {
-      const result = await unlock({ data: { slug: profile.slug, pin: value } });
+      const result = await unlock({ data: { slug, pin: value } });
       if (result.ok) {
         setStep("trust");
         return;
@@ -56,7 +54,7 @@ export function PinGate({ profile }: { profile: StartPageProfile }) {
   async function finish(trusted: boolean) {
     setBusy(true);
     try {
-      if (trusted) await trust({ data: { slug: profile.slug } });
+      if (trusted) await trust({ data: { slug } });
     } catch {
       /* the visit still works even if trusting fails */
     } finally {
@@ -83,21 +81,16 @@ export function PinGate({ profile }: { profile: StartPageProfile }) {
           {step === "pin" ? (
             <>
               <div className="flex items-center gap-3">
-                {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt="" className="h-12 w-12 rounded-md border border-hub-border object-cover" />
-                ) : (
-                  <span className="flex h-12 w-12 items-center justify-center rounded-md border border-hub-border bg-hub-background text-hub-accent">
-                    <Lock className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                )}
+                <span className="flex h-12 w-12 items-center justify-center rounded-md border border-hub-border bg-hub-background text-hub-accent">
+                  <Lock className="h-5 w-5" aria-hidden="true" />
+                </span>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-hub-muted">Private page</p>
-                  <h1 className="font-display text-xl font-semibold">{name}</h1>
+                  <h1 className="font-display text-xl font-semibold">Private page</h1>
                 </div>
               </div>
 
               <p className="mt-5 text-sm text-hub-muted">
-                Enter the 6-digit PIN to see these links. You only need to do this once on a browser
+                Enter the 6-digit PIN to view this page. You only need to do this once on a browser
                 you trust.
               </p>
 
