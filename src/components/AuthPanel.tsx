@@ -35,7 +35,7 @@ export function AuthPanel({ className }: { className?: string }) {
         const { data, error } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: `${window.location.origin}/auth` },
         });
         if (error) throw error;
         if (!data.session) {
@@ -105,7 +105,9 @@ export function AuthPanel({ className }: { className?: string }) {
   async function handleGoogle() {
     setBusy(true);
     if (window.self !== window.top) return handleGooglePopup();
-    // Returns to the public /auth page, which forwards signed-in users to /dashboard.
+    // Remember that a sign-in is in progress so we land on the builder even if
+    // the sign-in service sends us back to the homepage instead of /auth.
+    markPostLoginRedirect();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth` },
