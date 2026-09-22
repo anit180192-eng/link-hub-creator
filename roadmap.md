@@ -21,9 +21,9 @@
 - [x] Rework generated pages into a compact executive dashboard
 - [x] Improve the live preview and compact logo-only links
 
-## Move to your own Supabase ("Landing Page Builder") — switching this project, fresh start (no data import; user OK losing test data)
+## Move to your own Supabase ("Landing Page Builder") — switching this project, fresh start (no data import; user OK losing test data) — COMPLETE
 - [x] Setup script for the new project (tables, access rules, photo storage)
-- [ ] User creates Supabase project + runs setup script — waiting on user
-- [ ] Remove Lovable Cloud from this project (permanent), then connect own Supabase — waiting on user (workspace admin)
-- [ ] Switch Google sign-in to own Google keys; set site URL + redirect URLs
-- [ ] Verify sign-up, dashboard, publish, public page, photo upload
+- [x] User creates Supabase project + runs setup script
+- [x] Remove Lovable Cloud from this project (permanent), then connect own Supabase
+- [x] Switch Google sign-in to own Google keys; set site URL + redirect URLs
+- [x] Verify sign-up, dashboard, publish, public page, photo upload
