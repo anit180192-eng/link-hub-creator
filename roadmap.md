@@ -20,3 +20,12 @@
 - [x] Redesign generated landing pages as a warm Swiss-editorial personal hub
 - [x] Rework generated pages into a compact executive dashboard
 - [x] Improve the live preview and compact logo-only links
+
+## Move to your own Supabase ("Landing Page Builder") — switching this project
+- [x] Backup export: 3 accounts, 2 pages, 16 links, 2 photos
+- [x] Setup script for the new project (tables, access rules, photo storage)
+- [ ] User creates Supabase project + runs setup script — waiting on user
+- [ ] Remove Lovable Cloud from this project (permanent), then connect own Supabase — waiting on user (workspace admin)
+- [ ] Recreate accounts with same IDs, import pages/links, re-upload photos with new links
+- [ ] Set up Google sign-in with own Google keys; set site URL + redirect URLs
+- [ ] Verify sign-in, dashboard, publish, /p/anit18, photo upload
