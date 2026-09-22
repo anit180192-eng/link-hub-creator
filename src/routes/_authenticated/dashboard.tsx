@@ -1115,14 +1115,18 @@ function Dashboard() {
                 </div>
               ))}
             </div>
-          </section>
+          </CollapsibleSection>
 
           {/* Publish */}
-          <section className="rounded-xl border border-border bg-card p-6">
-            <h2 className="font-display text-lg">Publish</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Publishing puts your page online at a link you can set as your browser landing page.
-            </p>
+          <CollapsibleSection
+            title="Publish"
+            subtitle="Publishing puts your page online at a link you can set as your browser landing page."
+            collapsedBadge={
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                {form.published ? "Live" : "Draft"}
+              </span>
+            }
+          >
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Button
@@ -1168,7 +1172,7 @@ function Dashboard() {
                 <LandingPageSetupGuide url={form.published ? publicUrl : undefined} />
               </div>
             </div>
-          </section>
+          </CollapsibleSection>
         </div>
 
         <aside className="lg:sticky lg:top-10 lg:h-fit">
