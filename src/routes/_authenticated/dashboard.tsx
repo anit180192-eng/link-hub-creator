@@ -586,8 +586,41 @@ function Dashboard() {
         <div className="space-y-8">
           {/* Profile */}
           <section className="rounded-xl border border-border bg-card p-6">
-            <h2 className="font-display text-lg">Your page</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-display text-lg">
+                Editing: <span className="text-primary">{form.name || "Untitled page"}</span>
+              </h2>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={pages.length <= 1 || deletePage.isPending}
+                title={pages.length <= 1 ? "You need at least one page" : undefined}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Delete the page “${form.name || form.slug}” and all its links? Its link will stop working.`,
+                    )
+                  ) {
+                    deletePage.mutate(profile.id);
+                  }
+                }}
+              >
+                <Trash2 className="mr-1 h-4 w-4" /> Delete page
+              </Button>
+            </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="page-name">Page name (only you see this)</Label>
+                <Input
+                  id="page-name"
+                  value={form.name}
+                  maxLength={40}
+                  placeholder="e.g. Personal, Office"
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onBlur={() => saveProfile.mutate({ name: form.name.trim() || "My page" })}
+                />
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="name">Display name</Label>
                 <Input
@@ -598,8 +631,8 @@ function Dashboard() {
                   onBlur={() => saveProfile.mutate({ display_name: form.display_name })}
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="slug">Landing page username</Label>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="slug">This page's link address</Label>
                 <div className="flex gap-2">
                   <Input
                     id="slug"
