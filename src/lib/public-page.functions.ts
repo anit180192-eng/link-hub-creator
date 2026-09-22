@@ -27,19 +27,18 @@ export const getPublicPage = createServerFn({ method: "GET" })
     });
 
     const { data: profile } = await supabase
-      .from("profiles")
+      .from("pages")
       .select("id, slug, display_name, tagline, avatar_url, theme, dark_mode, clocks")
       .eq("slug", slug)
       .eq("published", true)
       .maybeSingle();
-
 
     if (!profile) return null;
 
     const { data: links } = await supabase
       .from("links")
       .select("id, platform, label, url, group_name, position, icon_only")
-      .eq("user_id", profile.id)
+      .eq("page_id", profile.id)
       .order("position", { ascending: true });
 
     return {
