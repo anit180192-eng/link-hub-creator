@@ -613,11 +613,14 @@ function Dashboard() {
       <main className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[minmax(0,1fr)_480px]">
         <div className="space-y-8">
           {/* Profile */}
-          <section className="rounded-xl border border-border bg-card p-6">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-display text-lg">
-                Editing: <span className="text-primary">{form.name || "Untitled page"}</span>
-              </h2>
+          <CollapsibleSection
+            title={<>Editing: <span className="text-primary">{form.name || "Untitled page"}</span></>}
+            collapsedBadge={
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                {form.published ? "Live" : "Draft"}
+              </span>
+            }
+            actions={
               <Button
                 type="button"
                 variant="ghost"
@@ -627,7 +630,7 @@ function Dashboard() {
                 onClick={() => {
                   if (
                     window.confirm(
-                      `Delete the page “${form.name || form.slug}” and all its links? Its link will stop working.`,
+                      `Delete the page "${form.name || form.slug}" and all its links? Its link will stop working.`,
                     )
                   ) {
                     deletePage.mutate(profile.id);
@@ -636,8 +639,9 @@ function Dashboard() {
               >
                 <Trash2 className="mr-1 h-4 w-4" /> Delete page
               </Button>
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            }
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="page-name">Page name (only you see this)</Label>
                 <Input
