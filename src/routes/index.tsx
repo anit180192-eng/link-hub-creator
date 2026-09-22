@@ -49,7 +49,7 @@ export const Route = createFileRoute("/")({
    exact same component as real published pages, so it always matches. */
 const sampleProfile: StartPageProfile = {
   slug: "shreya",
-  display_name: "Shreya Anit",
+  display_name: "Shreya",
   tagline: "Creator, property and family — everything I open daily.",
   avatar_url: null,
   theme: "grid",
@@ -68,9 +68,9 @@ const sampleLinks: StartPageLink[] = [
   { id: "4", platform: "website", label: "Google Drive", url: "https://drive.google.com", group_name: "Personal", position: 4 },
   { id: "5", platform: "instagram", label: "Instagram", url: "https://www.instagram.com", group_name: "Personal", position: 5, icon_only: true },
   { id: "6", platform: "website", label: "Facebook", url: "https://www.facebook.com", group_name: "Personal", position: 6, icon_only: true },
-  { id: "7", platform: "youtube", label: "YouTube channel", url: "https://www.youtube.com", group_name: "Bhakti Raga Media", position: 7 },
-  { id: "8", platform: "website", label: "SoundCloud", url: "https://soundcloud.com", group_name: "Bhakti Raga Media", position: 8 },
-  { id: "9", platform: "instagram", label: "Instagram", url: "https://www.instagram.com", group_name: "Bhakti Raga Media", position: 9, icon_only: true },
+  { id: "7", platform: "youtube", label: "YouTube channel", url: "https://www.youtube.com", group_name: "Music", position: 7 },
+  { id: "8", platform: "website", label: "SoundCloud", url: "https://soundcloud.com", group_name: "Music", position: 8 },
+  { id: "9", platform: "instagram", label: "Instagram", url: "https://www.instagram.com", group_name: "Music", position: 9, icon_only: true },
   { id: "10", platform: "website", label: "Rightmove", url: "https://www.rightmove.co.uk", group_name: "Property", position: 10 },
   { id: "11", platform: "website", label: "Zoopla", url: "https://www.zoopla.co.uk", group_name: "Property", position: 11 },
 ];
