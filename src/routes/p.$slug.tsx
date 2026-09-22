@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { StartPageView } from "@/components/StartPageView";
+import { PinGate } from "@/components/PinGate";
 import { getPublicPage } from "@/lib/public-page.functions";
 
 export const Route = createFileRoute("/p/$slug")({
@@ -19,6 +20,19 @@ export const Route = createFileRoute("/p/$slug")({
       };
     }
     const name = loaderData.profile.display_name || params.slug;
+    if (loaderData.protected) {
+      return {
+        meta: [
+          { title: `${name} — Private page` },
+          { name: "description", content: `${name}'s private start page. A PIN is needed to view it.` },
+          { name: "robots", content: "noindex" },
+          { property: "og:title", content: `${name} — Private page` },
+          { property: "og:description", content: "A private start page protected with a PIN." },
+          { property: "og:type", content: "website" },
+          { name: "twitter:card", content: "summary" },
+        ],
+      };
+    }
     const description =
       loaderData.profile.tagline || `All of ${name}'s links and accounts in one start page.`;
     return {
@@ -52,6 +66,7 @@ export const Route = createFileRoute("/p/$slug")({
 });
 
 function PublicStartPage() {
-  const { profile, links } = Route.useLoaderData();
+  const { profile, links, locked } = Route.useLoaderData();
+  if (locked) return <PinGate profile={profile} />;
   return <StartPageView profile={profile} links={links} />;
 }
