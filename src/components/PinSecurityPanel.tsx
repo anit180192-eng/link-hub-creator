@@ -56,6 +56,7 @@ export function PinSecurityPanel({
   const [pin, setPinValue] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [infoOpen, setInfoOpen] = useState(true);
 
   const hasPin = !!status.data?.hasPin;
   const devices = status.data?.devices ?? [];
