@@ -38,9 +38,9 @@ export function StartPageView({
   return (
     <div className="min-h-screen bg-hub-background text-hub-foreground">
       <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
-        <a href="https://aurunex.com/" target="_blank" rel="noopener noreferrer" aria-label="AuruNex home" className="mb-4 inline-flex items-center gap-2 text-[10px] font-semibold uppercase text-hub-muted transition-colors hover:text-hub-accent">
-          <span className="flex h-5 w-5 items-center justify-center rounded border border-hub-accent text-[9px] text-hub-accent">A</span>
-          AuruNex
+        <a href="https://landingpagebuilder.aurunex.com/" target="_blank" rel="noopener noreferrer" aria-label="Landing Page Builder home" className="mb-4 inline-flex items-center gap-2 text-[11px] font-semibold text-hub-muted transition-colors hover:text-hub-accent">
+          <img src="/favicon.svg" alt="" width={20} height={20} className="h-5 w-5 rounded" />
+          Landing Page Builder
         </a>
         <div className="grid items-start gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
           <aside className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">

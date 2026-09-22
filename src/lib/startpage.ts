@@ -287,8 +287,8 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   .frame { display:grid; grid-template-columns:220px minmax(0,1fr); gap:16px; align-items:start; }
   header,.clockcard,section { background:${card}; border:1px solid ${border}; border-radius:8px; }
   header { padding:20px; }
-  .brand { grid-column:1/-1; display:inline-flex; width:max-content; align-items:center; gap:8px; color:${muted}; font:600 10px "Space Grotesk",sans-serif; text-transform:uppercase; text-decoration:none; margin-bottom:16px; }
-  .brandmark { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; border:1px solid ${accent}; border-radius:4px; color:${accent}; font-size:9px; }
+  .brand { grid-column:1/-1; display:inline-flex; width:max-content; align-items:center; gap:8px; color:${muted}; font:600 11px "Space Grotesk",sans-serif; text-decoration:none; margin-bottom:16px; }
+  .brandmark { width:20px; height:20px; display:inline-flex; }
   .identity { margin:0; }
   .avatar { width:56px; height:56px; object-fit:cover; border:1px solid ${border}; border-radius:6px; margin-bottom:20px; filter:grayscale(1); }
   .monogram { display:flex; align-items:center; justify-content:center; background:${bg}; color:${accent}; font:600 18px "Space Grotesk",sans-serif; filter:none; }
@@ -341,7 +341,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 </head>
 <body>
 <main><div class="frame">
-  <a class="brand" href="https://aurunex.com/" aria-label="AuruNex home"><span class="brandmark">A</span>AuruNex</a>
+  <a class="brand" href="https://landingpagebuilder.aurunex.com/" aria-label="Landing Page Builder home"><svg class="brandmark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#E3C581"/><g fill="none" stroke="#08151F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="18" height="18" rx="2.5"/><path d="M7 13h18M13 25V13"/></g></svg>Landing Page Builder</a>
   <div class="side"><header><div class="identity">${avatar}<h1>${esc(name)}</h1><p class="tag">${esc(tagline)}</p></div><span class="index">Personal hub</span></header>${clockStrip}</div>
   <div class="content"><div class="sections">${sections}</div></div>
   <footer><span>${esc(name)} · Personal hub</span><a href="https://aurunex.com/">Built with Landing Page Builder by AuruNex</a></footer>

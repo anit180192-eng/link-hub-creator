@@ -21,6 +21,7 @@ export type Database = {
           icon_only: boolean
           id: string
           label: string
+          page_id: string
           platform: string
           position: number
           updated_at: string
@@ -33,6 +34,7 @@ export type Database = {
           icon_only?: boolean
           id?: string
           label?: string
+          page_id: string
           platform?: string
           position?: number
           updated_at?: string
@@ -45,10 +47,67 @@ export type Database = {
           icon_only?: boolean
           id?: string
           label?: string
+          page_id?: string
           platform?: string
           position?: number
           updated_at?: string
           url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "links_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pages: {
+        Row: {
+          avatar_url: string | null
+          clocks: Json
+          created_at: string
+          dark_mode: boolean
+          display_name: string
+          id: string
+          name: string
+          published: boolean
+          slug: string
+          tagline: string
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          clocks?: Json
+          created_at?: string
+          dark_mode?: boolean
+          display_name?: string
+          id?: string
+          name?: string
+          published?: boolean
+          slug: string
+          tagline?: string
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          clocks?: Json
+          created_at?: string
+          dark_mode?: boolean
+          display_name?: string
+          id?: string
+          name?: string
+          published?: boolean
+          slug?: string
+          tagline?: string
+          theme?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

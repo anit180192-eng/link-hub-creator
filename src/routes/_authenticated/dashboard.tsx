@@ -1,14 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 import {
   ArrowDown,
   ArrowUp,
   Check,
+  CircleDashed,
   Clock3,
   Copy,
   Download,
   ExternalLink,
+  FilePlus2,
   Folder,
   FolderPlus,
   Image as ImageIcon,
@@ -16,6 +19,7 @@ import {
   Pencil,
   Plus,
   Trash2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,18 +54,20 @@ import {
   type StartPageProfile,
 } from "@/lib/startpage";
 
+const searchSchema = z.object({ page: z.string().max(64).optional() });
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   staticData: { sitemap: false },
+  validateSearch: (search) => searchSchema.parse(search),
   head: () => ({
     meta: [
-      { title: "Your landing page — Landing Page Builder" },
+      { title: "Your landing pages — Landing Page Builder" },
       {
         name: "description",
-        content: "Add your accounts, pick a theme, and publish your personal browser start page.",
+        content: "Create landing pages for personal, office and more, each with its own link.",
       },
-      { property: "og:title", content: "Your landing page — Landing Page Builder" },
-      { property: "og:description", content: "Add your accounts and publish your start page." },
+      { property: "og:title", content: "Your landing pages — Landing Page Builder" },
+      { property: "og:description", content: "Create several landing pages, each with its own link." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -69,53 +75,94 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 
-type ProfileRow = StartPageProfile & { id: string; published: boolean };
+type ProfileRow = StartPageProfile & {
+  id: string;
+  user_id: string;
+  name: string;
+  published: boolean;
+};
 
 const NO_FOLDER = "__none__";
+const MAX_PAGES = 10;
+
+function randomSuffix() {
+  return Math.random().toString(36).slice(2, 6);
+}
+
+function DashboardHeader({ onSignOut }: { onSignOut?: () => void }) {
+  return (
+    <header className="border-b border-border">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+        <Link to="/" aria-label="Landing Page Builder home">
+          <Brand className="text-lg" />
+        </Link>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/setup">Setup guide</Link>
+          </Button>
+          {onSignOut ? (
+            <Button variant="outline" size="sm" onClick={onSignOut}>
+              <LogOut className="mr-1 h-4 w-4" /> Sign out
+            </Button>
+          ) : null}
+        </div>
+      </div>
+    </header>
+  );
+}
 
 function Dashboard() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const search = Route.useSearch();
 
-  const profileQuery = useQuery({
-    queryKey: ["profile"],
-    queryFn: async (): Promise<ProfileRow> => {
+  const pagesQuery = useQuery({
+    queryKey: ["pages"],
+    queryFn: async (): Promise<ProfileRow[]> => {
       const { data: userData } = await supabase.auth.getUser();
       const user = userData.user;
       if (!user) throw new Error("Please sign in again");
-      const existing = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      const existing = await supabase
+        .from("pages")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
       if (existing.error) throw existing.error;
-      if (existing.data) return existing.data as unknown as ProfileRow;
+      if (existing.data.length) return existing.data as unknown as ProfileRow[];
 
       const base = slugify(user.email?.split("@")[0] ?? "me") || "me";
-      const slug = `${base}-${user.id.slice(0, 4)}`;
       const created = await supabase
-        .from("profiles")
+        .from("pages")
         .insert({
-          id: user.id,
-          slug,
+          user_id: user.id,
+          name: "Personal",
+          slug: `${base}-${user.id.slice(0, 4)}`,
           display_name: user.user_metadata?.["full_name"] ?? base,
         })
         .select("*")
         .single();
       if (created.error) throw created.error;
-      return created.data as unknown as ProfileRow;
+      return [created.data as unknown as ProfileRow];
     },
   });
 
+  const pages = pagesQuery.data ?? [];
+  const profile = pages.find((p) => p.id === search.page) ?? pages[0];
+
   const linksQuery = useQuery({
-    queryKey: ["links"],
+    queryKey: ["links", profile?.id],
+    enabled: !!profile?.id,
     queryFn: async (): Promise<StartPageLink[]> => {
       const { data, error } = await supabase
         .from("links")
         .select("id, platform, label, url, group_name, position, icon_only")
+        .eq("page_id", profile!.id)
         .order("position", { ascending: true });
       if (error) throw error;
       return (data ?? []) as StartPageLink[];
     },
   });
 
-  const profile = profileQuery.data;
   const links = linksQuery.data ?? [];
 
   const [form, setForm] = useState<ProfileRow | null>(null);
@@ -132,9 +179,10 @@ function Dashboard() {
   const [newFolder, setNewFolder] = useState("");
   const [extraFolders, setExtraFolders] = useState<string[]>([]);
   const [editingLink, setEditingLink] = useState<StartPageLink | null>(null);
+  const [creatingPage, setCreatingPage] = useState(false);
+  const [newPage, setNewPage] = useState({ name: "", slug: "" });
 
   const clocks = parseClocks(form?.clocks);
-
 
   const folders = Array.from(
     new Set([...links.map((l) => l.group_name.trim()).filter(Boolean), ...extraFolders]),
@@ -151,13 +199,74 @@ function Dashboard() {
   const ungrouped = links.filter((l) => !l.group_name.trim());
   if (ungrouped.length) sections.push(["", ungrouped]);
 
+  function selectPage(id: string) {
+    setEditingLink(null);
+    setExtraFolders([]);
+    setNewLink((prev) => ({ ...prev, label: "", url: "", group_name: "" }));
+    navigate({ to: "/dashboard", search: { page: id }, replace: true });
+  }
+
+  const createPage = useMutation({
+    mutationFn: async () => {
+      if (!profile) return null;
+      if (pages.length >= MAX_PAGES) throw new Error(`You can have up to ${MAX_PAGES} pages`);
+      const name = newPage.name.trim().slice(0, 40);
+      if (!name) throw new Error("Give your new page a name, e.g. Office");
+      const slug =
+        slugify(newPage.slug) ||
+        `${slugify(`${form?.slug.split("-")[0] ?? "me"}-${name}`)}-${randomSuffix()}`;
+      const { data, error } = await supabase
+        .from("pages")
+        .insert({
+          user_id: profile.user_id,
+          name,
+          slug: slug.slice(0, 40),
+          display_name: profile.display_name,
+          avatar_url: profile.avatar_url,
+          theme: profile.theme,
+          dark_mode: profile.dark_mode,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data.id;
+    },
+    onSuccess: async (id) => {
+      setCreatingPage(false);
+      setNewPage({ name: "", slug: "" });
+      await queryClient.invalidateQueries({ queryKey: ["pages"] });
+      if (id) selectPage(id);
+      toast.success("New page created");
+    },
+    onError: (e: Error) =>
+      toast.error(
+        e.message.includes("duplicate")
+          ? "That link address is already taken. Choose another."
+          : e.message,
+      ),
+  });
+
+  const deletePage = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("pages").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      const next = pages.find((p) => p.id !== profile?.id);
+      await queryClient.invalidateQueries({ queryKey: ["pages"] });
+      if (next) selectPage(next.id);
+      toast.success("Page deleted");
+    },
+    onError: () => toast.error("Couldn't delete that page"),
+  });
+
   const saveProfile = useMutation({
     mutationFn: async (patch: Partial<ProfileRow>) => {
       if (!profile) return;
-      const { error } = await supabase.from("profiles").update(patch).eq("id", profile.id);
+      const { error } = await supabase.from("pages").update(patch).eq("id", profile.id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pages"] }),
     onError: (e: Error) =>
       toast.error(
         e.message.includes("duplicate") ? "That page address is taken" : "Couldn't save changes",
@@ -170,7 +279,7 @@ function Dashboard() {
       if (!file.type.startsWith("image/")) throw new Error("Please choose an image file");
       if (file.size > 5 * 1024 * 1024) throw new Error("Please choose an image under 5 MB");
       const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase().slice(0, 5);
-      const path = `${profile.id}/avatar-${Date.now()}.${ext}`;
+      const path = `${profile.user_id}/page-${profile.id}-${Date.now()}.${ext}`;
       const up = await supabase.storage
         .from("avatars")
         .upload(path, file, { upsert: true, contentType: file.type });
@@ -180,14 +289,14 @@ function Dashboard() {
         .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
       if (signed.error) throw signed.error;
       const { error } = await supabase
-        .from("profiles")
+        .from("pages")
         .update({ avatar_url: signed.data.signedUrl })
         .eq("id", profile.id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Photo updated");
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["pages"] });
     },
     onError: (e: Error) => toast.error(e.message || "Couldn't upload that photo"),
   });
@@ -197,7 +306,8 @@ function Dashboard() {
       if (!profile) return;
       if (!isSafeUrl(newLink.url)) throw new Error("Enter a valid web address");
       const { error } = await supabase.from("links").insert({
-        user_id: profile.id,
+        user_id: profile.user_id,
+        page_id: profile.id,
         platform: newLink.platform,
         label: newLink.label.trim().slice(0, 60),
         url: normalizeUrl(newLink.url).slice(0, 500),
@@ -251,11 +361,10 @@ function Dashboard() {
       const a = links[index];
       const b = links[target];
       if (!a || !b) return;
-      const updates = [
+      await Promise.all([
         supabase.from("links").update({ position: target }).eq("id", a.id),
         supabase.from("links").update({ position: index }).eq("id", b.id),
-      ];
-      await Promise.all(updates);
+      ]);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["links"] }),
   });
@@ -271,10 +380,12 @@ function Dashboard() {
 
   const renameFolder = useMutation({
     mutationFn: async ({ from, to }: { from: string; to: string }) => {
+      if (!profile) return;
       const clean = to.trim().slice(0, 40);
       const { error } = await supabase
         .from("links")
         .update({ group_name: clean })
+        .eq("page_id", profile.id)
         .eq("group_name", from);
       if (error) throw error;
       setExtraFolders((prev) => {
@@ -289,9 +400,9 @@ function Dashboard() {
   const publishPage = useMutation({
     mutationFn: async (published: boolean) => {
       const slug = slugify(form?.slug ?? "");
-      if (!profile || !slug) throw new Error("Choose a username before publishing");
+      if (!profile || !slug) throw new Error("Choose a link address before publishing");
       const { error } = await supabase
-        .from("profiles")
+        .from("pages")
         .update({ slug, published })
         .eq("id", profile.id);
       if (error) throw error;
@@ -299,13 +410,13 @@ function Dashboard() {
     },
     onSuccess: ({ published, slug }) => {
       setForm((current) => (current ? { ...current, slug, published } : current));
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      toast.success(published ? "Your unique landing page is live" : "Your page is now private");
+      queryClient.invalidateQueries({ queryKey: ["pages"] });
+      toast.success(published ? "This page is live at its own link" : "This page is now private");
     },
     onError: (e: Error) =>
       toast.error(
         e.message.includes("duplicate")
-          ? "That username is already taken. Choose another."
+          ? "That link address is already taken. Choose another."
           : e.message,
       ),
   });
@@ -320,7 +431,6 @@ function Dashboard() {
   }
 
   function createFolder() {
-
     const name = newFolder.trim().slice(0, 40);
     if (!name) return;
     if (folders.includes(name)) {
@@ -353,49 +463,164 @@ function Dashboard() {
     toast.success("Downloaded your start page");
   }
 
-  const publicUrl =
-    typeof window !== "undefined" && form ? `${window.location.origin}/p/${form.slug}` : "";
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const publicUrl = form ? `${origin}/p/${form.slug}` : "";
 
-  if (profileQuery.isLoading || !form) {
+  if (pagesQuery.isError) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
-        Loading your start page…
+      <div className="min-h-screen">
+        <DashboardHeader onSignOut={handleSignOut} />
+        <p className="px-5 py-20 text-center text-sm text-muted-foreground">
+          We couldn't load your pages. Refresh to try again.
+        </p>
       </div>
     );
   }
 
-  if (profileQuery.isError) {
+  if (pagesQuery.isLoading || !form || !profile) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
-        We couldn't load your start page. Refresh to try again.
+      <div className="min-h-screen">
+        <DashboardHeader />
+        <p className="px-5 py-20 text-center text-sm text-muted-foreground">
+          Loading your pages…
+        </p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <Link to="/" aria-label="Landing Page Builder home">
-            <Brand className="text-lg" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/setup">Setup guide</Link>
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="mr-1 h-4 w-4" /> Sign out
+      <DashboardHeader onSignOut={handleSignOut} />
+
+      {/* Page switcher */}
+      <section className="mx-auto max-w-7xl px-5 pt-8" aria-labelledby="pages-heading">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 id="pages-heading" className="font-display text-xl">Your landing pages</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Make one page for personal use, another for the office, and so on. Every page has
+                its own link.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              disabled={pages.length >= MAX_PAGES}
+              onClick={() => setCreatingPage((v) => !v)}
+              aria-expanded={creatingPage}
+            >
+              {creatingPage ? <X className="mr-1 h-4 w-4" /> : <FilePlus2 className="mr-1 h-4 w-4" />}
+              {creatingPage ? "Cancel" : "New page"}
             </Button>
           </div>
+
+          <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Your pages">
+            {pages.map((page) => {
+              const active = page.id === profile.id;
+              return (
+                <button
+                  key={page.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => selectPage(page.id)}
+                  className={`flex min-w-[160px] flex-col items-start rounded-lg border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    active
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-background hover:border-primary/60 hover:bg-secondary"
+                  }`}
+                >
+                  <span className="text-sm font-semibold text-foreground">{page.name || "Untitled page"}</span>
+                  <span className="mt-0.5 max-w-[220px] truncate text-xs text-muted-foreground">/p/{page.slug}</span>
+                  <span className={`mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium ${page.published ? "text-accent" : "text-muted-foreground"}`}>
+                    {page.published ? <Check className="h-3 w-3" aria-hidden="true" /> : <CircleDashed className="h-3 w-3" aria-hidden="true" />}
+                    {page.published ? "Live" : "Draft"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {creatingPage ? (
+            <form
+              className="mt-4 grid gap-3 rounded-lg border border-border bg-background p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+              onSubmit={(e) => {
+                e.preventDefault();
+                createPage.mutate();
+              }}
+            >
+              <div className="space-y-1.5">
+                <Label htmlFor="new-page-name">Page name</Label>
+                <Input
+                  id="new-page-name"
+                  autoFocus
+                  placeholder="e.g. Office"
+                  maxLength={40}
+                  value={newPage.name}
+                  onChange={(e) => setNewPage({ ...newPage, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="new-page-slug">Link address (optional)</Label>
+                <Input
+                  id="new-page-slug"
+                  placeholder="e.g. shreya-office"
+                  maxLength={40}
+                  value={newPage.slug}
+                  onChange={(e) => setNewPage({ ...newPage, slug: slugify(e.target.value) })}
+                />
+              </div>
+              <Button type="submit" disabled={createPage.isPending}>
+                <Plus className="mr-1 h-4 w-4" /> {createPage.isPending ? "Creating…" : "Create page"}
+              </Button>
+              <p className="text-xs text-muted-foreground sm:col-span-3">
+                Your new page starts empty and private. Its link will be /p/
+                {newPage.slug || "chosen-for-you"}. You can change it any time before publishing.
+              </p>
+            </form>
+          ) : null}
         </div>
-      </header>
+      </section>
 
       <main className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[minmax(0,1fr)_480px]">
         <div className="space-y-8">
           {/* Profile */}
           <section className="rounded-xl border border-border bg-card p-6">
-            <h2 className="font-display text-lg">Your page</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-display text-lg">
+                Editing: <span className="text-primary">{form.name || "Untitled page"}</span>
+              </h2>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={pages.length <= 1 || deletePage.isPending}
+                title={pages.length <= 1 ? "You need at least one page" : undefined}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Delete the page “${form.name || form.slug}” and all its links? Its link will stop working.`,
+                    )
+                  ) {
+                    deletePage.mutate(profile.id);
+                  }
+                }}
+              >
+                <Trash2 className="mr-1 h-4 w-4" /> Delete page
+              </Button>
+            </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="page-name">Page name (only you see this)</Label>
+                <Input
+                  id="page-name"
+                  value={form.name}
+                  maxLength={40}
+                  placeholder="e.g. Personal, Office"
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onBlur={() => saveProfile.mutate({ name: form.name.trim() || "My page" })}
+                />
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="name">Display name</Label>
                 <Input
@@ -406,8 +631,8 @@ function Dashboard() {
                   onBlur={() => saveProfile.mutate({ display_name: form.display_name })}
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="slug">Landing page username</Label>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="slug">This page's link address</Label>
                 <div className="flex gap-2">
                   <Input
                     id="slug"
