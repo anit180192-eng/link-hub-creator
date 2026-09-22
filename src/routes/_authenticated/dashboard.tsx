@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LivePagePreview } from "@/components/LivePagePreview";
+import { Brand } from "@/components/Brand";
 import { AdSpace } from "@/components/AdSpace";
 import {
   MAX_CLOCKS,
@@ -375,8 +376,8 @@ function Dashboard() {
     <div className="min-h-screen">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <Link to="/" className="font-display text-lg font-bold tracking-tight">
-            Landing Page <span className="text-primary">Builder</span>
+          <Link to="/" aria-label="Landing Page Builder home">
+            <Brand className="text-lg" />
           </Link>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm">
