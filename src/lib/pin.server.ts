@@ -1,0 +1,137 @@
+// Server-only helpers for PIN protection and trusted browsers.
+import { getCookie, getRequestHeader, getRequestIP, setCookie } from "@tanstack/react-start/server";
+
+export const PIN_REGEX = /^\d{6}$/;
+export const MAX_ATTEMPTS_PER_BROWSER = 5;
+export const MAX_ATTEMPTS_PER_OWNER = 30;
+export const LOCKOUT_MINUTES = 15;
+export const VISIT_HOURS = 12;
+const TRUSTED_MAX_AGE = 60 * 60 * 24 * 400; // browsers cap cookies at ~400 days
+const PBKDF2_ITERATIONS = 100_000;
+
+const enc = new TextEncoder();
+
+function toHex(buf: ArrayBuffer | Uint8Array) {
+  return Array.from(buf instanceof Uint8Array ? buf : new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function fromHex(hex: string) {
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  return out;
+}
+
+export function randomHex(bytes: number) {
+  const b = new Uint8Array(bytes);
+  crypto.getRandomValues(b);
+  return toHex(b);
+}
+
+export async function sha256(value: string) {
+  return toHex(await crypto.subtle.digest("SHA-256", enc.encode(value)));
+}
+
+export async function hashPin(pin: string, saltHex: string) {
+  const key = await crypto.subtle.importKey("raw", enc.encode(pin), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", hash: "SHA-256", salt: fromHex(saltHex), iterations: PBKDF2_ITERATIONS },
+    key,
+    256,
+  );
+  return toHex(bits);
+}
+
+export function safeEqual(a: string, b: string) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+export function cookieName(ownerId: string) {
+  return `lpb_u_${ownerId.replace(/-/g, "")}`;
+}
+
+const baseCookie = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none" as const,
+  partitioned: true,
+  path: "/",
+};
+
+export function readDeviceCookie(ownerId: string) {
+  const value = getCookie(cookieName(ownerId));
+  return value && /^[a-f0-9]{64}$/.test(value) ? value : null;
+}
+
+export function writeVisitCookie(ownerId: string, token: string) {
+  setCookie(cookieName(ownerId), token, baseCookie); // ends when the browser closes
+}
+
+export function writeTrustedCookie(ownerId: string, token: string) {
+  setCookie(cookieName(ownerId), token, { ...baseCookie, maxAge: TRUSTED_MAX_AGE });
+}
+
+export async function visitorFingerprint(ownerId: string) {
+  let ip = "";
+  try {
+    ip = getRequestIP({ xForwardedFor: true }) ?? "";
+  } catch {
+    /* not available */
+  }
+  ip = ip || getRequestHeader("cf-connecting-ip") || "unknown";
+  return sha256(`${ownerId}:${ip}`);
+}
+
+export function describeBrowser() {
+  const ua = getRequestHeader("user-agent") ?? "";
+  const browser = /Edg\//.test(ua)
+    ? "Edge"
+    : /OPR\/|Opera/.test(ua)
+      ? "Opera"
+      : /Firefox\//.test(ua)
+        ? "Firefox"
+        : /Chrome\//.test(ua)
+          ? "Chrome"
+          : /Safari\//.test(ua)
+            ? "Safari"
+            : "Browser";
+  const os = /iPhone/.test(ua)
+    ? "iPhone"
+    : /iPad/.test(ua)
+      ? "iPad"
+      : /Android/.test(ua)
+        ? "Android"
+        : /Windows/.test(ua)
+          ? "Windows"
+          : /Mac OS X|Macintosh/.test(ua)
+            ? "Mac"
+            : /Linux/.test(ua)
+              ? "Linux"
+              : "";
+  return os ? `${browser} on ${os}` : browser;
+}
+
+export async function getAdmin() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return supabaseAdmin;
+}
+
+/** Returns the stored browser record if this request carries a valid unlock for the owner. */
+export async function findUnlockedDevice(ownerId: string) {
+  const token = readDeviceCookie(ownerId);
+  if (!token) return null;
+  const admin = await getAdmin();
+  const { data } = await admin
+    .from("device_tokens")
+    .select("id, kind, expires_at")
+    .eq("user_id", ownerId)
+    .eq("token_hash", await sha256(token))
+    .maybeSingle();
+  if (!data) return null;
+  if (data.expires_at && new Date(data.expires_at).getTime() < Date.now()) return null;
+  return { ...data, token };
+}
