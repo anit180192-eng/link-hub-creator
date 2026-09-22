@@ -495,8 +495,26 @@ function Dashboard() {
     <div className="min-h-screen">
       <DashboardHeader onSignOut={handleSignOut} />
 
+      <section className="mx-auto max-w-7xl px-5 pt-8">
+        <PinSecurityPanel
+          pageName={form.name}
+          pageProtected={!!form.pin_protected}
+          toggling={saveProfile.isPending}
+          onToggle={(pin_protected) => {
+            setForm({ ...form, pin_protected });
+            saveProfile.mutate(
+              { pin_protected },
+              {
+                onSuccess: () =>
+                  toast.success(pin_protected ? "This page now asks for your PIN" : "PIN turned off for this page"),
+              },
+            );
+          }}
+        />
+      </section>
+
       {/* Page switcher */}
-      <section className="mx-auto max-w-7xl px-5 pt-8" aria-labelledby="pages-heading">
+      <section className="mx-auto max-w-7xl px-5 pt-6" aria-labelledby="pages-heading">
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -592,21 +610,6 @@ function Dashboard() {
 
       <main className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[minmax(0,1fr)_480px]">
         <div className="space-y-8">
-          <PinSecurityPanel
-            pageName={form.name}
-            pageProtected={!!form.pin_protected}
-            toggling={saveProfile.isPending}
-            onToggle={(pin_protected) => {
-              setForm({ ...form, pin_protected });
-              saveProfile.mutate(
-                { pin_protected },
-                {
-                  onSuccess: () =>
-                    toast.success(pin_protected ? "This page now asks for your PIN" : "PIN turned off for this page"),
-                },
-              );
-            }}
-          />
           {/* Profile */}
           <section className="rounded-xl border border-border bg-card p-6">
             <div className="flex flex-wrap items-center justify-between gap-2">

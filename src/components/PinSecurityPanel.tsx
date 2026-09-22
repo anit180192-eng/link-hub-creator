@@ -97,11 +97,29 @@ export function PinSecurityPanel({
           <KeyRound className="h-5 w-5" aria-hidden="true" />
         </span>
         <div>
-          <h2 id="pin-heading" className="font-display text-lg">PIN &amp; trusted browsers</h2>
+          <h2 id="pin-heading" className="font-display text-lg">PIN & trusted browsers</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Your page link is public, so anyone with it could see your links. Add a 6-digit PIN to keep them private.
           </p>
         </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-border bg-background p-4 text-sm">
+        <p className="font-semibold text-foreground">How the PIN works across your pages</p>
+        <ul className="mt-2 space-y-1.5 text-muted-foreground">
+          <li className="flex gap-2">
+            <span className="text-primary" aria-hidden="true">•</span>
+            <span><span className="font-medium text-foreground">One PIN for every page.</span> You set it once and it protects all your pages — personal, office, any page you create.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-primary" aria-hidden="true">•</span>
+            <span><span className="font-medium text-foreground">Lock each page separately.</span> The switch below turns the PIN on or off for the page you're editing. You can lock some pages and leave others open.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-primary" aria-hidden="true">•</span>
+            <span><span className="font-medium text-foreground">Trusted browsers skip the PIN everywhere.</span> Once a browser is trusted, it opens any of your locked pages without asking — across every page you own.</span>
+          </li>
+        </ul>
       </div>
 
       <ol className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-3">
