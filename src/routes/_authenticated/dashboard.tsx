@@ -785,7 +785,7 @@ function Dashboard() {
                 <Label htmlFor="dark">Dark page</Label>
               </div>
             </div>
-          </section>
+          </CollapsibleSection>
 
           {/* World clocks */}
           <section className="rounded-xl border border-border bg-card p-6">
