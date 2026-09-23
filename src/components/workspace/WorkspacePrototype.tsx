@@ -23,9 +23,11 @@ import {
 } from "lucide-react";
 import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { WorldClocks } from "@/components/WorldClocks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,6 +50,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { faviconFor, hostOf, normalizeUrl } from "@/lib/startpage";
+import sampleProfilePhoto from "@/assets/sample-shreya-profile.jpg";
 
 type DemoLink = {
   id: string;
@@ -59,11 +62,12 @@ type DemoLink = {
 
 type DemoFolder = { id: string; name: string; links: DemoLink[] };
 type DemoTab = { id: string; name: string; folders: DemoFolder[] };
-type DemoProfile = { id: string; name: string; initials: string; tabs: DemoTab[] };
+type DemoProfile = { id: string; name: string; initials: string; slug: string; protected: boolean; published: boolean; tabs: DemoTab[] };
 type Selection =
   | { type: "link"; tabId: string; folderId: string; item: DemoLink }
   | { type: "folder"; tabId: string; item: DemoFolder }
   | { type: "settings" }
+  | { type: "security" }
   | null;
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -73,14 +77,20 @@ const EMPTY_PROFILE: DemoProfile = {
   id: "empty-profile",
   name: "My Space",
   initials: "MS",
+  slug: "my-space",
+  protected: false,
+  published: false,
   tabs: [EMPTY_TAB],
 };
 
 const SAMPLE_PROFILES: DemoProfile[] = [
   {
     id: "my-space",
-    name: "My Space",
-    initials: "MS",
+    name: "Personal",
+    initials: "SP",
+    slug: "shreya-personal",
+    protected: true,
+    published: true,
     tabs: [
       { id: "home", name: "Home", folders: [] },
       {
@@ -142,8 +152,11 @@ const SAMPLE_PROFILES: DemoProfile[] = [
   },
   {
     id: "work-space",
-    name: "Work Space",
-    initials: "WS",
+    name: "Office",
+    initials: "SO",
+    slug: "shreya-office",
+    protected: false,
+    published: true,
     tabs: [
       { id: "work-home", name: "Home", folders: [] },
       {
@@ -264,7 +277,7 @@ export function WorkspacePrototype() {
   const [profiles, setProfiles] = useState(SAMPLE_PROFILES);
   const [profileId, setProfileId] = useState("my-space");
   const profile = profiles.find((item) => item.id === profileId) ?? profiles[0] ?? EMPTY_PROFILE;
-  const [tabId, setTabId] = useState("creativity");
+  const [tabId, setTabId] = useState("home");
   const tab = profile.tabs.find((item) => item.id === tabId) ?? profile.tabs[0] ?? EMPTY_TAB;
   const [query, setQuery] = useState("");
   const [preview, setPreview] = useState(false);
@@ -274,6 +287,7 @@ export function WorkspacePrototype() {
   const [dirty, setDirty] = useState(false);
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const [addingLink, setAddingLink] = useState<{ tabId: string; folderId: string } | null>(null);
+  const [pin, setPin] = useState("");
 
   useEffect(() => {
     if (!dirty) return;
@@ -373,13 +387,48 @@ export function WorkspacePrototype() {
     setTabId(next.id);
   }
 
+  function addProfile() {
+    const id = uid();
+    const next: DemoProfile = {
+      id,
+      name: "New page",
+      initials: "NP",
+      slug: `new-page-${profiles.length + 1}`,
+      protected: false,
+      published: false,
+      tabs: [{ id: uid(), name: "Home", folders: [] }],
+    };
+    setProfiles((items) => [...items, next]);
+    setProfileId(id);
+    setTabId(next.tabs[0]?.id ?? "");
+    setQuery("");
+  }
+
+  function publishProfile() {
+    updateProfile((current) => ({ ...current, published: true }));
+    setSaveState("saving");
+    window.setTimeout(() => setSaveState("saved"), 600);
+  }
+
+  function openSecurity() {
+    setSelection({ type: "security" });
+    setDirty(false);
+    setDrawerOpen(true);
+  }
+
+  function toggleProtection(checked: boolean) {
+    updateProfile((current) => ({ ...current, protected: checked }));
+    setSaveState("saving");
+    window.setTimeout(() => setSaveState("saved"), 450);
+  }
+
   return (
     <div className="dark min-h-screen bg-hub-background text-hub-foreground">
       <div className="flex min-h-screen flex-col">
         <header className="border-b border-hub-border bg-hub-surface">
           <div className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 sm:px-5">
             <div className="flex min-w-0 items-center gap-3">
-              <Brand className="hidden shrink-0 text-sm xl:inline-flex" />
+              <Brand className="hidden shrink-0 text-sm md:inline-flex" />
               <div className="hidden h-5 w-px bg-hub-border xl:block" />
               <Select value={profile.id} onValueChange={selectProfile}>
                 <SelectTrigger className="h-9 w-[168px] border-hub-border bg-hub-background text-hub-foreground sm:w-[210px]" aria-label="Select profile">
@@ -389,6 +438,7 @@ export function WorkspacePrototype() {
                   {profiles.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <Button variant="ghost" size="icon" className="size-8 shrink-0 text-hub-muted hover:text-hub-accent" onClick={addProfile} aria-label="Create another landing page"><Plus /></Button>
               <span className="hidden items-center gap-1.5 text-xs text-hub-muted md:inline-flex" role="status">
                 {saveState === "saving" ? <Clock3 className="size-3.5" /> : saveState === "error" ? <span className="size-2 rounded-full bg-destructive" /> : <Check className="size-3.5 text-hub-accent" />}
                 {saveState === "saving" ? "Saving…" : saveState === "error" ? "Needs attention" : "Saved"}
@@ -396,11 +446,14 @@ export function WorkspacePrototype() {
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
               <ThemeToggle />
+              <Button variant="outline" size="sm" className="border-hub-border bg-hub-background px-2 text-hub-foreground hover:text-hub-foreground sm:px-3" onClick={openSecurity} aria-label="PIN and trusted browsers">
+                <ShieldCheck /> <span className="hidden lg:inline">Security</span>{profile.protected ? <span className="size-1.5 rounded-full bg-hub-accent" aria-label="PIN protection is on" /> : null}
+              </Button>
               <Button variant="outline" size="sm" className="hidden border-hub-border bg-hub-background text-hub-foreground hover:text-hub-foreground sm:inline-flex" onClick={() => setPreview((value) => !value)}>
                 {preview ? <Pencil /> : <Eye />} {preview ? "Edit" : "Preview"}
               </Button>
-              <Button size="sm" onClick={() => { setSaveState("saving"); window.setTimeout(() => setSaveState("saved"), 600); }}>
-                Publish
+              <Button size="sm" onClick={publishProfile}>
+                {profile.published ? "Update" : "Publish"}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -408,7 +461,7 @@ export function WorkspacePrototype() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onSelect={() => { setSelection({ type: "settings" }); setDrawerOpen(true); }}><Settings /> Profile settings</DropdownMenuItem>
-                  <DropdownMenuItem><ShieldCheck /> Security</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={openSecurity}><ShieldCheck /> PIN & trusted browsers</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -440,7 +493,7 @@ export function WorkspacePrototype() {
                 <p className="px-2 pb-2 text-[10px] font-semibold uppercase text-hub-muted">This profile</p>
                 <Button variant="secondary" className="h-9 w-full justify-start text-xs"><Monitor /> Page canvas</Button>
                 <Button variant="ghost" className="mt-1 h-9 w-full justify-start text-xs text-hub-muted" onClick={() => { setSelection({ type: "settings" }); setDrawerOpen(true); }}><Settings /> Settings</Button>
-                <Button variant="ghost" className="mt-1 h-9 w-full justify-start text-xs text-hub-muted"><ShieldCheck /> PIN & access</Button>
+                <Button variant="ghost" className="mt-1 h-9 w-full justify-start text-xs text-hub-muted" onClick={openSecurity}><ShieldCheck /> PIN & access {profile.protected ? <span className="ml-auto size-1.5 rounded-full bg-hub-accent" /> : null}</Button>
                 <div className="my-4 border-t border-hub-border" />
                 <p className="px-2 pb-2 text-[10px] font-semibold uppercase text-hub-muted">Selected tab</p>
                 {tab.folders.map((folder) => (
@@ -455,10 +508,10 @@ export function WorkspacePrototype() {
             <div className="mx-auto w-full max-w-[1480px] px-3 py-5 sm:px-5 lg:px-7">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b border-hub-border pb-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-md border border-hub-border bg-hub-surface font-display text-xs font-semibold text-hub-accent">{profile.initials}</span>
+                  <img src={sampleProfilePhoto} alt="Sample profile for Shreya" width={816} height={816} className="size-10 shrink-0 rounded-md border border-hub-border object-cover" />
                   <div className="min-w-0">
                     <h1 className="truncate font-display text-xl font-semibold text-hub-foreground">{profile.name}</h1>
-                    <p className="truncate text-xs text-hub-muted">{tab.name} · {currentLinks.length} links</p>
+                    <p className="truncate text-xs text-hub-muted">{tab.name} · {currentLinks.length} links · <span className="text-hub-accent">{profile.published ? `/p/${profile.slug}` : "Not published yet"}</span></p>
                   </div>
                 </div>
                 <div className="relative w-44 sm:w-64">
@@ -468,17 +521,24 @@ export function WorkspacePrototype() {
               </div>
 
               {tab.name === "Home" ? (
-                <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(260px,.6fr)]">
-                  <section className="rounded-md border border-hub-border bg-hub-surface p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div><p className="text-xs text-hub-muted">Wednesday, 23 September</p><p className="mt-1 font-display text-4xl font-semibold tabular-nums">15:08</p></div>
-                      <Clock3 className="size-5 text-hub-accent" />
-                    </div>
-                    <div className="mt-5 border-t border-hub-border pt-3">
+                <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,.85fr)]">
+                  <div className="space-y-4">
+                    <section className="overflow-hidden rounded-md border border-hub-border bg-hub-surface">
+                      <div className="grid gap-5 p-5 sm:grid-cols-[112px_minmax(0,1fr)] sm:items-center">
+                        <img src={sampleProfilePhoto} alt="Sample profile for Shreya" width={816} height={816} className="size-28 rounded-md border border-hub-border object-cover" />
+                        <div>
+                          <p className="text-xs font-medium text-hub-accent">Good afternoon, Shreya</p>
+                          <h2 className="mt-1 font-display text-2xl font-semibold">Welcome to your day.</h2>
+                          <p className="mt-2 max-w-md text-sm leading-6 text-hub-muted">Your favourite places, current time and everyday links are ready in one calm view.</p>
+                        </div>
+                      </div>
+                    </section>
+                    <WorldClocks clocks={[{ tz: "Europe/London", label: "London" }, { tz: "Asia/Kolkata", label: "New Delhi" }]} dark compact />
+                    <section className="rounded-md border border-hub-border bg-hub-surface p-4">
                       <div className="flex items-center justify-between"><h2 className="font-display text-sm font-semibold">Favourite links</h2><span className="text-[10px] text-hub-muted">{favourites.length}</span></div>
-                      {favourites.length ? <div className="mt-2 grid gap-1 sm:grid-cols-2">{favourites.map((link) => <LinkRow key={link.id} link={link} editing={false} onSelect={() => undefined} />)}</div> : <p className="mt-3 text-xs text-hub-muted">Mark links as favourites to see them here.</p>}
-                    </div>
-                  </section>
+                      {favourites.length ? <div className="mt-2 grid gap-1 sm:grid-cols-2">{favourites.map((link) => <LinkRow key={link.id} link={link} editing={false} onSelect={() => undefined} />)}</div> : <p className="mt-3 text-xs text-hub-muted">Favourite links from every tab will appear here.</p>}
+                    </section>
+                  </div>
                   <div className="space-y-4">
                     <section className="rounded-md border border-hub-border bg-hub-surface p-4">
                       <div className="flex items-center justify-between"><h2 className="font-display text-sm font-semibold">Weather</h2><Sparkles className="size-4 text-hub-accent" /></div>
@@ -530,14 +590,37 @@ export function WorkspacePrototype() {
       <Sheet open={drawerOpen} onOpenChange={(open) => { if (!open && dirty && !window.confirm("Discard your unsaved changes?")) return; setDrawerOpen(open); if (!open) { setDirty(false); setSelection(null); setAddingLink(null); } }}>
         <SheetContent className="dark w-full border-hub-border bg-hub-surface text-hub-foreground sm:max-w-md">
           <SheetHeader>
-            <SheetTitle className="font-display text-hub-foreground">{selection?.type === "folder" ? "Folder settings" : selection?.type === "settings" ? "Profile settings" : selection?.type === "link" ? "Edit link" : "Add link"}</SheetTitle>
-            <SheetDescription className="text-hub-muted">{selection?.type === "settings" ? "Appearance, access, export and profile details live here." : "Only the essentials are shown first."}</SheetDescription>
+            <SheetTitle className="font-display text-hub-foreground">{selection?.type === "folder" ? "Folder settings" : selection?.type === "security" ? "PIN & trusted browsers" : selection?.type === "settings" ? "Profile settings" : selection?.type === "link" ? "Edit link" : "Add link"}</SheetTitle>
+            <SheetDescription className="text-hub-muted">{selection?.type === "security" ? `Control access to the published ${profile.name} page.` : selection?.type === "settings" ? "Appearance, export and profile details live here." : "Only the essentials are shown first."}</SheetDescription>
           </SheetHeader>
-          {selection?.type === "settings" ? (
+          {selection?.type === "security" ? (
+            <div className="mt-6 space-y-4">
+              <div className="rounded-md border border-hub-border bg-hub-background p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div><Label htmlFor="protect-page" className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="size-4 text-hub-accent" /> Ask for PIN on {profile.name}</Label><p className="mt-1 text-xs leading-5 text-hub-muted">Each page can be locked separately. Your account uses one PIN across all locked pages.</p></div>
+                  <Switch id="protect-page" checked={profile.protected} onCheckedChange={toggleProtection} />
+                </div>
+              </div>
+              <div className="rounded-md border border-hub-border bg-hub-background p-4">
+                <div className="flex items-center justify-between"><p className="text-sm font-semibold">Your 6-digit PIN</p><span className="flex items-center gap-1 text-xs text-hub-accent"><Check className="size-3.5" /> PIN is set</span></div>
+                <p className="mt-1 text-xs text-hub-muted">Change it here. The PIN itself is never shown on your published page.</p>
+                <Input value={pin} onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" maxLength={6} placeholder="New 6-digit PIN" aria-label="New six digit PIN" className="mt-3 max-w-48 border-hub-border bg-hub-surface font-mono text-base" />
+                <Button size="sm" className="mt-3" disabled={pin.length !== 6}>Save PIN</Button>
+              </div>
+              <div className="rounded-md border border-hub-border bg-hub-background p-4">
+                <p className="text-sm font-semibold">Trusted browsers</p>
+                <p className="mt-1 text-xs leading-5 text-hub-muted">A trusted browser can open all your locked pages without asking again. Remove access whenever you need to.</p>
+                <div className="mt-3 flex items-center gap-3 border-t border-hub-border pt-3"><Monitor className="size-4 text-hub-muted" /><div className="min-w-0 flex-1"><p className="text-sm">Chrome on Mac</p><p className="text-[10px] text-hub-muted">Trusted 20 Sep · last used today</p></div><Button variant="ghost" size="sm" className="text-hub-muted">Remove</Button></div>
+              </div>
+              <div className="rounded-md border border-hub-border bg-hub-elevated/35 p-4 text-xs leading-5 text-hub-muted"><strong className="text-hub-foreground">How it works:</strong> a new browser enters the PIN once, then can be trusted. Other browsers continue to ask for it.</div>
+            </div>
+          ) : selection?.type === "settings" ? (
             <div className="mt-6 space-y-2">
-              {["Profile details", "Appearance", "PIN & trusted browsers", "Export HTML", "Browser setup"].map((label) => (
+              <div className="mb-4 rounded-md border border-hub-border bg-hub-background p-3"><p className="text-xs text-hub-muted">Published address</p><p className="mt-1 truncate font-mono text-xs text-hub-foreground">landingpagebuilder.aurunex.com/p/{profile.slug}</p></div>
+              {["Profile details", "Appearance", "Export HTML", "Browser setup"].map((label) => (
                 <Button key={label} variant="outline" className="h-11 w-full justify-start border-hub-border bg-hub-background text-hub-foreground"><Settings /> {label}</Button>
               ))}
+              <Button variant="outline" className="h-11 w-full justify-start border-hub-border bg-hub-background text-hub-foreground" onClick={openSecurity}><ShieldCheck /> PIN & trusted browsers</Button>
             </div>
           ) : (
             <form className="mt-6 space-y-4" onSubmit={(event) => { event.preventDefault(); saveDrawer(); }}>
