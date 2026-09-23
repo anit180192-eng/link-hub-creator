@@ -7,6 +7,7 @@ import {
   Download,
   ExternalLink,
   FolderOpen,
+  Mail,
   Globe2,
   Image as ImageIcon,
   KeyRound,
