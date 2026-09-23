@@ -29,7 +29,7 @@ import type { StartPageLink, StartPageProfile } from "@/lib/startpage";
 
 const TITLE = "Landing Page Builder — your personal start page for every browser";
 const DESCRIPTION =
-  "Put your accounts, channels, tools and favourite websites into one organised page with folders and world clocks. Get a personal link that opens on every browser and device.";
+  "Put your accounts, channels, tools and favourite websites into one organised page with folders and world clocks. Build your landing page for every browser and device.";
 
 export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
@@ -49,7 +49,7 @@ export const Route = createFileRoute("/")({
 /* Sample page shown in the "A faster first tab" preview — rendered with the
    exact same component as real published pages, so it always matches. */
 const sampleProfile: StartPageProfile = {
-  slug: "shreya",
+  slug: "shreya07",
   display_name: "Shreya",
   tagline: "Creator, property and family — everything I open daily.",
   avatar_url: null,
@@ -94,7 +94,7 @@ function Landing() {
   const primaryCta = signedIn ? (
     <Button asChild size="lg"><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
   ) : (
-    <Button asChild size="lg"><a href="#sign-in">Get my personal link <ArrowRight /></a></Button>
+    <Button asChild size="lg"><a href="#sign-in">Build your landing page <ArrowRight /></a></Button>
   );
 
   return (
@@ -137,7 +137,7 @@ function Landing() {
                   "Organise links into folders by brand, project or person",
                   "Show busy accounts as compact logo tiles",
                   "Keep up to five world clocks on the page",
-                  "Get a personal link that works on every device",
+                  "Build your landing page for every device",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent"><Check className="h-3.5 w-3.5" aria-hidden="true" /></span>
@@ -166,7 +166,7 @@ function Landing() {
                 <div className="flex h-full flex-col gap-4">
                   <div className="rounded-lg border border-primary/40 bg-primary/10 p-4">
                     <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <Link2 className="h-4 w-4 text-primary" aria-hidden="true" /> Sign in to get your personal link
+                      <Link2 className="h-4 w-4 text-primary" aria-hidden="true" /> Sign in to build your landing page
                     </p>
                     <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
                       Your page gets its own address, like <span className="font-medium text-foreground">landingpagebuilder.aurunex.com/p/yourname</span>, so it opens the same way on every browser, laptop and phone. Free.
@@ -186,13 +186,18 @@ function Landing() {
               <p className="text-xs font-semibold uppercase tracking-wider text-primary">What you create</p>
               <h2 className="mt-3 font-display text-3xl sm:text-4xl">A faster first tab.</h2>
             </div>
-            <p className="max-w-xl text-muted-foreground">
-              This is a real page made with Landing Page Builder — the same layout you'll get. Your name or initials, your
-              folders, your clocks, and every link ready to open. Try clicking around.
-            </p>
+            <div className="max-w-xl">
+              <p className="text-muted-foreground">
+                This is a real page made with Landing Page Builder — the same layout you'll get. Your name or initials, your
+                folders, your clocks, and every link ready to open. Try clicking around.
+              </p>
+              <a href="#shreya07" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-foreground">
+                View Shreya07's page <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </a>
+            </div>
           </div>
 
-          <div className="mx-auto mt-10 max-w-[1120px] overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
+          <div id="shreya07" className="mx-auto mt-10 max-w-[1120px] scroll-mt-6 overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
             <div className="flex items-center gap-3 border-b border-border px-4 py-3">
               <div className="flex gap-1.5" aria-hidden="true">
                 <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
@@ -201,7 +206,7 @@ function Landing() {
               </div>
               <div className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground">
                 <Lock className="h-3 w-3 shrink-0" aria-hidden="true" />
-                <span className="truncate">landingpagebuilder.aurunex.com/p/<span className="text-foreground">shreya</span></span>
+                <span className="truncate">landingpagebuilder.aurunex.com/p/<span className="text-foreground">shreya07</span></span>
               </div>
             </div>
             <div className="page-preview-stage !h-[26rem] sm:!h-[34rem] lg:!h-[45rem]">
