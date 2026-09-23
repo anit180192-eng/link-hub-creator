@@ -419,6 +419,9 @@ export function WorkspacePrototype() {
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
               <ThemeToggle />
+              <Button variant="outline" size="sm" className="border-hub-border bg-hub-background px-2 text-hub-foreground hover:text-hub-foreground sm:px-3" onClick={openSecurity} aria-label="PIN and trusted browsers">
+                <ShieldCheck /> <span className="hidden lg:inline">Security</span>{profile.protected ? <span className="size-1.5 rounded-full bg-hub-accent" aria-label="PIN protection is on" /> : null}
+              </Button>
               <Button variant="outline" size="sm" className="hidden border-hub-border bg-hub-background text-hub-foreground hover:text-hub-foreground sm:inline-flex" onClick={() => setPreview((value) => !value)}>
                 {preview ? <Pencil /> : <Eye />} {preview ? "Edit" : "Preview"}
               </Button>
@@ -481,7 +484,7 @@ export function WorkspacePrototype() {
                   <img src={sampleProfilePhoto} alt="Sample profile for Shreya" width={816} height={816} className="size-10 shrink-0 rounded-md border border-hub-border object-cover" />
                   <div className="min-w-0">
                     <h1 className="truncate font-display text-xl font-semibold text-hub-foreground">{profile.name}</h1>
-                    <p className="truncate text-xs text-hub-muted">{tab.name} · {currentLinks.length} links</p>
+                    <p className="truncate text-xs text-hub-muted">{tab.name} · {currentLinks.length} links · <span className="text-hub-accent">/p/{profile.slug}</span></p>
                   </div>
                 </div>
                 <div className="relative w-44 sm:w-64">
