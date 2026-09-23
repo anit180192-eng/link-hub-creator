@@ -64,7 +64,7 @@ export function PinGate({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-hub-background px-4 py-10 text-hub-foreground">
+    <div className="dark flex min-h-screen items-center justify-center bg-hub-background px-4 py-10 text-hub-foreground">
       <div className="w-full max-w-md">
         <a
           href="https://landingpagebuilder.aurunex.com/"

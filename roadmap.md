@@ -40,3 +40,4 @@
 - [x] Land on the page builder right after sign-in (Google + email confirmation)
 - [x] Landing Page Builder logo on builder, published pages and downloads
 - [x] Multiple pages per account, each with its own link (Personal, Office, …)
+- [x] Light / dark / match-device theme switcher on every app page (published pages keep their navy look)

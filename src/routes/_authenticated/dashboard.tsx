@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/select";
 import { LivePagePreview } from "@/components/LivePagePreview";
 import { Brand } from "@/components/Brand";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { PinSecurityPanel } from "@/components/PinSecurityPanel";
 import {
@@ -100,6 +101,7 @@ function DashboardHeader({ onSignOut }: { onSignOut?: () => void }) {
           <Brand className="text-lg" />
         </Link>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Button asChild variant="ghost" size="sm">
             <Link to="/setup">Setup guide</Link>
           </Button>
