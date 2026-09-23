@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Check, Clock3, Copy, Download, Ellipsis, Eye, Folder, Image as ImageIcon, LogOut, Menu, Monitor, Pencil, Plus, Search, Settings, ShieldCheck, Sparkles, Star, Trash2 } from "lucide-react";
+import { Check, Clock3, Coffee, Copy, Download, Ellipsis, Eye, Folder, Image as ImageIcon, LogOut, Menu, Monitor, Pencil, Plus, Search, Settings, ShieldCheck, Sparkles, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
