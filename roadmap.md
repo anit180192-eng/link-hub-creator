@@ -64,3 +64,8 @@
 - [x] Move profile switching to the top-right and keep Preview as the only primary top action
 - [x] Group Appearance, PIN & access, Publish, and tab management in the left panel
 - [x] Show bookmark import only while adding a tab and keep tab rename contextual
+
+## One-time guided tour (Sep 23)
+- [x] Add responsive spotlight steps for profiles, tabs, canvas, tab creation, PIN access, preview, and publishing
+- [x] Add Back, Next, Skip, and Finish controls
+- [x] Save completion to the signed-in account so the tour does not return on other browsers
