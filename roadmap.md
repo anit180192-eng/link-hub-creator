@@ -54,8 +54,8 @@
 - [ ] Review the staged preview before any production publish
 
 ## First-time usability (Sep 23)
-- [ ] Simplify homepage and add first-screen interactive example
-- [ ] Open registration directly from the primary CTA
-- [ ] Add default tab/folder and guided one-link first run
-- [ ] Add post-publish open/setup actions
-- [ ] Verify desktop, mobile, and available account-flow behaviour
+- [x] Simplify homepage and add first-screen interactive example
+- [x] Open registration directly from the primary CTA
+- [x] Add default tab/folder and guided one-link first run
+- [x] Add post-publish open/setup actions
+- [x] Verify desktop, mobile, and available account-flow behaviour (authenticated fresh-account flow unavailable with external auth)
