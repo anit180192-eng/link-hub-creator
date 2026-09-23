@@ -776,20 +776,20 @@ function Dashboard() {
 
             <div className="mt-6 flex flex-wrap items-center gap-6">
               <div className="flex items-center gap-2">
-                <Label className="text-sm">Theme</Label>
+                <Label htmlFor="page-layout" className="text-sm">Layout</Label>
                 <Select
-                  value={form.theme}
+                  value={form.theme === "list" ? "list" : "grid"}
                   onValueChange={(theme) => {
                     setForm({ ...form, theme });
                     saveProfile.mutate({ theme });
                   }}
                 >
-                  <SelectTrigger className="w-44">
+                  <SelectTrigger id="page-layout" className="w-48">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="grid">Icon grid dashboard</SelectItem>
-                    <SelectItem value="list">Link-in-bio list</SelectItem>
+                    <SelectItem value="grid">Dashboard (folders side by side)</SelectItem>
+                    <SelectItem value="list">Single column (link-in-bio)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -805,6 +805,9 @@ function Dashboard() {
                 <Label htmlFor="dark">Dark page</Label>
               </div>
             </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              These change how your published page looks. The preview updates straight away.
+            </p>
           </CollapsibleSection>
 
           {/* World clocks */}
