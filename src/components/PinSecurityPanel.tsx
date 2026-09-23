@@ -13,6 +13,7 @@ import {
   getSecurityStatus,
   removeAllBrowsers,
   removeTrustedBrowser,
+  removePin,
   setPin,
 } from "@/lib/security.functions";
 
@@ -36,11 +37,13 @@ function PinInput({ id, value, onChange, label }: { id: string; value: string; o
 }
 
 export function PinSecurityPanel({
+  pageId,
   pageName,
   pageProtected,
   onToggle,
   toggling,
 }: {
+  pageId: string;
   pageName: string;
   pageProtected: boolean;
   onToggle: (value: boolean) => void;
@@ -51,8 +54,9 @@ export function PinSecurityPanel({
   const savePin = useServerFn(setPin);
   const removeOne = useServerFn(removeTrustedBrowser);
   const removeAll = useServerFn(removeAllBrowsers);
+  const dropPin = useServerFn(removePin);
 
-  const status = useQuery({ queryKey: ["security"], queryFn: () => fetchStatus() });
+  const status = useQuery({ queryKey: ["security", pageId], queryFn: () => fetchStatus({ data: { pageId } }) });
   const [editing, setEditing] = useState(false);
   const [pin, setPinValue] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -69,7 +73,7 @@ export function PinSecurityPanel({
         throw new Error("Pick something harder to guess than repeated or sequential digits.");
       }
       if (pin !== confirm) throw new Error("The two PINs don't match.");
-      await savePin({ data: { pin } });
+      await savePin({ data: { pageId, pin } });
     },
     onSuccess: () => {
       toast.success(hasPin ? "PIN changed" : "PIN saved");
@@ -77,7 +81,7 @@ export function PinSecurityPanel({
       setConfirm("");
       setError(null);
       setEditing(false);
-      queryClient.invalidateQueries({ queryKey: ["security"] });
+      queryClient.invalidateQueries({ queryKey: ["security", pageId] });
     },
     onError: (e: Error) => setError(e.message),
   });
@@ -86,7 +90,7 @@ export function PinSecurityPanel({
     mutationFn: (id: string | null) => (id ? removeOne({ data: { id } }) : removeAll()),
     onSuccess: (_d, id) => {
       toast.success(id ? "Browser removed" : "All browsers removed");
-      queryClient.invalidateQueries({ queryKey: ["security"] });
+      queryClient.invalidateQueries({ queryKey: ["security", pageId] });
     },
     onError: () => toast.error("Couldn't remove that browser"),
   });
@@ -102,7 +106,7 @@ export function PinSecurityPanel({
         <div>
           <h2 id="pin-heading" className="font-display text-lg">PIN & trusted browsers</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your page link is public, so anyone with it could see your links. Add a 6-digit PIN to keep them private.
+            Each profile has its own PIN — or none at all. For example: one PIN for Personal, a different one to share with colleagues for Work, and no PIN for an open "About me" profile.
           </p>
         </div>
       </div>
@@ -110,21 +114,21 @@ export function PinSecurityPanel({
       <Collapsible open={infoOpen} onOpenChange={setInfoOpen} className="mt-4 rounded-lg border border-border bg-background">
         <CollapsibleTrigger className="group flex w-full items-center gap-2 p-4 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" aria-hidden="true" />
-          <span className="font-semibold text-foreground">How the PIN works across your pages</span>
+          <span className="font-semibold text-foreground">How PINs work per profile</span>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <ul className="space-y-1.5 px-4 pb-4 text-muted-foreground">
             <li className="flex gap-2">
               <span className="text-primary" aria-hidden="true">•</span>
-              <span><span className="font-medium text-foreground">One PIN for every page.</span> You set it once and it protects all your pages — personal, office, any page you create.</span>
+              <span><span className="font-medium text-foreground">A separate PIN for each profile.</span> The PIN you set here only unlocks “{pageName}”. Sharing it never opens your other profiles.</span>
             </li>
             <li className="flex gap-2">
               <span className="text-primary" aria-hidden="true">•</span>
-              <span><span className="font-medium text-foreground">Lock each page separately.</span> The switch below turns the PIN on or off for the page you're editing. You can lock some pages and leave others open.</span>
+              <span><span className="font-medium text-foreground">PIN is optional.</span> Leave the switch off (or remove the PIN) to keep this profile open to anyone with the link.</span>
             </li>
             <li className="flex gap-2">
               <span className="text-primary" aria-hidden="true">•</span>
-              <span><span className="font-medium text-foreground">Trusted browsers skip the PIN everywhere.</span> Once a browser is trusted, it opens any of your locked pages without asking — across every page you own.</span>
+              <span><span className="font-medium text-foreground">Trusted browsers are per profile too.</span> A browser trusted for Work still needs the Personal PIN.</span>
             </li>
           </ul>
         </CollapsibleContent>
@@ -148,7 +152,7 @@ export function PinSecurityPanel({
       {/* Account PIN */}
       <div className="mt-5 border-t border-border pt-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-semibold">Your PIN</p>
+          <p className="text-sm font-semibold">PIN for “{pageName}”</p>
           {status.isLoading ? null : hasPin ? (
             <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
               <Check className="h-3.5 w-3.5" aria-hidden="true" /> PIN is set
@@ -161,7 +165,7 @@ export function PinSecurityPanel({
           )}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          One PIN covers all your pages. We store a salted hash, not the PIN itself.
+          Only this profile uses this PIN. We store a salted hash, not the PIN itself.
         </p>
 
         {status.isLoading ? null : showForm ? (
@@ -197,6 +201,13 @@ export function PinSecurityPanel({
             Change PIN
           </Button>
         )}
+        {hasPin && !showForm ? (
+          <Button className="ml-2 mt-3" variant="ghost" size="sm" onClick={async () => {
+            if (!window.confirm(`Remove the PIN from “${pageName}”? Anyone with the link will be able to open it.`)) return;
+            try { await dropPin({ data: { pageId } }); onToggle(false); toast.success("PIN removed — this profile is now open"); queryClient.invalidateQueries({ queryKey: ["security", pageId] }); }
+            catch { toast.error("Couldn't remove the PIN"); }
+          }}>No PIN for this profile</Button>
+        ) : null}
       </div>
 
       {/* Per page toggle */}
