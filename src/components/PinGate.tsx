@@ -105,6 +105,7 @@ export function PinGate({ slug }: { slug: string }) {
                 <InputOTP
                   id="page-pin"
                   ref={inputRef}
+                  type="password"
                   maxLength={6}
                   inputMode="numeric"
                   pattern="^[0-9]*$"
@@ -120,7 +121,12 @@ export function PinGate({ slug }: { slug: string }) {
                 >
                   <InputOTPGroup>
                     {[0, 1, 2, 3, 4, 5].map((i) => (
-                      <InputOTPSlot key={i} index={i} className="h-12 w-11 border-hub-border text-lg" />
+                      <InputOTPSlot
+                        key={i}
+                        index={i}
+                        masked
+                        className="h-12 w-11 border-hub-border text-lg"
+                      />
                     ))}
                   </InputOTPGroup>
                 </InputOTP>
