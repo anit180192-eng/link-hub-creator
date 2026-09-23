@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Check, Clock3, Copy, Download, Ellipsis, Eye, Folder, Image as ImageIcon, LogOut, Menu, Monitor, Pencil, Plus, Search, Settings, ShieldCheck, Sparkles, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { Brand } from "@/components/Brand";
 import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { PinSecurityPanel } from "@/components/PinSecurityPanel";
@@ -16,7 +17,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MAX_CLOCKS, TIMEZONES, faviconFor, hostOf, isSafeUrl, normalizeUrl, parseClocks, renderStartPageHtml, slugify, timezoneLabel, type StartPageClock, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 
-type PageRow = Omit<StartPageProfile,"clocks"> & { id:string; user_id:string; name:string; published:boolean; pin_protected:boolean; weather_city:string; clocks:unknown };
+type PageRow = Omit<StartPageProfile,"clocks"> & { id:string; user_id:string; name:string; published:boolean; pin_protected:boolean; weather_city:string; clocks:Json };
 type TabRow = { id:string; page_id:string; user_id:string; name:string; position:number };
 type LinkRow = StartPageLink & { favourite:boolean; tab_id:string|null };
 type Drawer = "identity"|"appearance"|"security"|"clocks"|"weather"|"link"|"folder"|"tab"|"publish"|null;
