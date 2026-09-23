@@ -59,3 +59,8 @@
 - [x] Add default tab/folder and guided one-link first run
 - [x] Add post-publish open/setup actions
 - [x] Verify desktop, mobile, and available account-flow behaviour (authenticated fresh-account flow unavailable with external auth)
+
+## Dashboard control organisation (Sep 23)
+- [x] Move profile switching to the top-right and keep Preview as the only primary top action
+- [x] Group Appearance, PIN & access, Publish, and tab management in the left panel
+- [x] Show bookmark import only while adding a tab and keep tab rename contextual
