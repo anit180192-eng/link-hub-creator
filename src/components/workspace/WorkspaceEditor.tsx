@@ -82,5 +82,11 @@ export function WorkspaceEditor(){
     {drawer==="tab"?<div className="mt-6 space-y-4"><Label htmlFor="tab-name">Tab name in {page.name}</Label><Input id="tab-name" value={tabDraft.name} onChange={e=>setTabDraft({...tabDraft,name:e.target.value})} placeholder="Creative" className="bg-hub-background"/><Button onClick={()=>tabDraft.id?updateTab.mutate():createTab.mutate()}>{tabDraft.id?"Rename tab":"Add tab"}</Button>{tabDraft.id?<Button variant="ghost" className="ml-2 text-destructive" disabled={tabs.length<=1} onClick={()=>deleteTab.mutate()}>Delete tab</Button>:null}</div>:null}
    {drawer==="publish"?<div className="mt-6 space-y-4"><div className="rounded-md border border-hub-accent/40 bg-hub-background p-4"><p className="flex items-center gap-2 font-semibold text-hub-accent"><Check className="size-4"/>Your page is live</p><p className="mt-2 break-all font-mono text-xs text-hub-muted">{publicUrl}</p></div><div className="flex flex-wrap gap-2"><Button onClick={()=>{navigator.clipboard.writeText(publicUrl);toast.success("Link copied")}}><Copy/>Copy link</Button><Button variant="outline" asChild><a href={publicUrl} target="_blank" rel="noopener noreferrer"><Eye/>Open page</a></Button><Button variant="outline" onClick={download}><Download/>Download HTML</Button><Button variant="ghost" onClick={()=>savePage.mutate({published:false})}>Unpublish</Button></div></div>:null}
   </SheetContent></Sheet>
- </div>
+  <AlertDialog open={!!notice} onOpenChange={o=>{if(!o)setNotice(null)}}>
+    <AlertDialogContent className="border-hub-border bg-hub-surface text-hub-foreground">
+      <AlertDialogHeader><AlertDialogTitle className="font-display">{notice?.title}</AlertDialogTitle><AlertDialogDescription className="text-hub-muted">{notice?.body}</AlertDialogDescription></AlertDialogHeader>
+      <AlertDialogAction className="bg-hub-accent text-hub-background">Got it</AlertDialogAction>
+    </AlertDialogContent>
+  </AlertDialog>
+  </div>
 }
