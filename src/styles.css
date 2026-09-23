@@ -119,6 +119,17 @@
   --font-sans: var(--font-body);
 }
 
+/* Published pages with "Dark page" switched off — warm paper, navy text, deep gold (WCAG AA). */
+.hub-light {
+  --hub-background: oklch(0.97 0.008 90);
+  --hub-surface: oklch(1 0 0);
+  --hub-elevated: oklch(0.93 0.014 88);
+  --hub-accent: oklch(0.5 0.1 78);
+  --hub-foreground: oklch(0.18922 0.02763 242.93);
+  --hub-muted: oklch(0.46 0.03 240);
+  --hub-border: oklch(0.87 0.015 88);
+}
+
 /* Dark theme — Midnight Teal & Champagne. */
 .dark {
   --background: oklch(0.18922 0.02763 242.93);

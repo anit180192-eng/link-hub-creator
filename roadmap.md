@@ -41,3 +41,4 @@
 - [x] Landing Page Builder logo on builder, published pages and downloads
 - [x] Multiple pages per account, each with its own link (Personal, Office, …)
 - [x] Light / dark / match-device theme switcher on every app page (published pages keep their navy look)
+- [x] Page layout choice (dashboard / single column) and Dark page switch actually change the published page, preview and download

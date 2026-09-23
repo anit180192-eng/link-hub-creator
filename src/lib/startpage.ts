@@ -192,12 +192,15 @@ function esc(value: string) {
 
 /** Builds a standalone HTML document for download / local landing page use. */
 export function renderStartPageHtml(profile: StartPageProfile, links: StartPageLink[]) {
-  const bg = "#08151F";
-  const fg = "#F4F5F2";
-  const card = "#122633";
-  const border = "#355361";
-  const muted = "#B3C1CA";
-  const accent = "#E3C581";
+  const dark = profile.dark_mode !== false;
+  const isList = profile.theme === "list";
+  const bg = dark ? "#08151F" : "#F7F5EF";
+  const fg = dark ? "#F4F5F2" : "#08151F";
+  const card = dark ? "#122633" : "#FFFFFF";
+  const border = dark ? "#355361" : "#DCD6C8";
+  const muted = dark ? "#B3C1CA" : "#495B67";
+  const accent = dark ? "#E3C581" : "#825B0C";
+  const glow = dark ? "rgba(227,197,129,.18)" : "rgba(130,91,12,.18)";
   const safe = links.filter((l) => isSafeUrl(l.url));
   const name = profile.display_name || profile.slug;
   const tagline = profile.tagline.trim().toLowerCase() === "everything at once :)"
@@ -315,7 +318,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   .links { display:grid; gap:8px; }
   .link { height:64px; display:grid; grid-template-columns:28px minmax(0,1fr) 18px; align-items:center; gap:12px; padding:0 12px; }
   a.link,.quicklink { color:inherit; text-decoration:none; background:${bg}; border:1px solid ${border}; border-radius:6px; transition:transform .2s,border-color .2s,box-shadow .2s; }
-  a.link:hover,.quicklink:hover { border-color:${accent}; transform:translateY(-3px); box-shadow:0 0 16px rgba(227,197,129,.18); }
+  a.link:hover,.quicklink:hover { border-color:${accent}; transform:translateY(-3px); box-shadow:0 0 16px ${glow}; }
   a.link:focus-visible,.quicklink:focus-visible { outline:2px solid ${accent}; outline-offset:2px; }
   a.link:active { transform:translateY(0); }
   .link img { width:28px; height:28px; }
@@ -337,10 +340,34 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
   @media (max-width:760px) { main{padding:20px 16px}.frame{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:12px}.clockcard{margin-top:0}.sections{grid-template-columns:1fr}section.featured:nth-last-child(odd){grid-column:auto}section.featured:nth-last-child(odd) .links{grid-template-columns:1fr}footer{flex-direction:column}.brand{margin-bottom:0}.avatar{width:48px;height:48px} }
   @media (max-width:520px) { .side{grid-template-columns:1fr}.clockcard{margin-top:0}.clocks{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.clock:nth-child(-n+2){border-top:0} }
   @media (prefers-reduced-motion:reduce) { *{transition:none!important} }
+  /* Single-column (link-in-bio) layout */
+  main.is-list { max-width:560px; padding:40px 16px; }
+  .is-list .frame { grid-template-columns:1fr; gap:0; }
+  .is-list .brand { margin-bottom:24px; }
+  .is-list .side { display:block; }
+  .is-list header { background:none; border:0; padding:0; text-align:center; }
+  .is-list .avatar { width:80px; height:80px; border-radius:50%; margin:0 auto 16px; }
+  .is-list .monogram { font-size:24px; }
+  .is-list p.tag { font-size:14px; }
+  .is-list .index { display:none; }
+  .is-list .clockcard { margin-top:24px; }
+  .is-list .clocks { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
+  .is-list .clock:nth-child(-n+2) { border-top:0; }
+  .is-list .content { margin-top:24px; }
+  .is-list .sections { grid-template-columns:1fr; gap:24px; }
+  .is-list section { background:none; border:0; padding:0; }
+  .is-list section.featured:nth-last-child(odd) { grid-column:auto; }
+  .is-list section.featured:nth-last-child(odd) .links { grid-template-columns:1fr; }
+  .is-list .grouphead { grid-template-columns:auto minmax(0,1fr) auto; gap:6px; margin-bottom:8px; padding:0 4px; }
+  .is-list .folder { width:auto; height:auto; background:none; font-size:14px; }
+  .is-list h2.group { font-size:12px; text-transform:uppercase; color:${muted}; }
+  .is-list .link { height:56px; }
+  .is-list .quicklinks { justify-content:center; }
+  .is-list footer { margin-top:32px; }
 </style>
 </head>
 <body>
-<main><div class="frame">
+<main${isList ? ' class="is-list"' : ""}><div class="frame">
   <a class="brand" href="https://landingpagebuilder.aurunex.com/" aria-label="Landing Page Builder home"><svg class="brandmark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#E3C581"/><g fill="none" stroke="#08151F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="18" height="18" rx="2.5"/><path d="M7 13h18M13 25V13"/></g></svg>Landing Page Builder</a>
   <div class="side"><header><div class="identity">${avatar}<h1>${esc(name)}</h1><p class="tag">${esc(tagline)}</p></div><span class="index">Personal hub</span></header>${clockStrip}</div>
   <div class="content"><div class="sections">${sections}</div></div>
