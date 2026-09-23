@@ -46,6 +46,7 @@ export type Database = {
           kind: string
           label: string
           last_used_at: string
+          page_id: string | null
           token_hash: string
           user_id: string
         }
@@ -56,6 +57,7 @@ export type Database = {
           kind?: string
           label?: string
           last_used_at?: string
+          page_id?: string | null
           token_hash: string
           user_id: string
         }
@@ -66,10 +68,19 @@ export type Database = {
           kind?: string
           label?: string
           last_used_at?: string
+          page_id?: string | null
           token_hash?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "device_tokens_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       links: {
         Row: {
@@ -178,6 +189,41 @@ export type Database = {
             columns: ["tab_id"]
             isOneToOne: false
             referencedRelation: "page_tabs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_security: {
+        Row: {
+          created_at: string
+          page_id: string
+          pin_hash: string
+          pin_salt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          page_id: string
+          pin_hash: string
+          pin_salt: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          page_id?: string
+          pin_hash?: string
+          pin_salt?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_security_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: true
+            referencedRelation: "pages"
             referencedColumns: ["id"]
           },
         ]

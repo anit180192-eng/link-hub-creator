@@ -120,24 +120,38 @@ export async function getAdmin() {
   return supabaseAdmin;
 }
 
-/** Returns the stored browser record if this request carries a valid unlock for the owner. */
-export async function findUnlockedDevice(ownerId: string) {
-  const token = readDeviceCookie(ownerId);
-  if (!token) return null;
+/** Returns the stored browser record if this request carries a valid unlock for this profile page. */
+export async function findUnlockedDevice(ownerId: string, pageId: string) {
   const admin = await getAdmin();
-  const { data } = await admin
-    .from("device_tokens")
-    .select("id, kind, created_at, expires_at")
-    .eq("user_id", ownerId)
-    .eq("token_hash", await sha256(token))
-    .maybeSingle();
-  if (!data) return null;
-  // Legacy trusted records had no expiry; cap them using their creation time too.
-  const expiresAt = data.expires_at
-    ? new Date(data.expires_at).getTime()
-    : data.kind === "trusted"
-      ? new Date(data.created_at).getTime() + TRUSTED_MAX_AGE * 1000
-      : NaN;
-  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return null;
-  return { ...data, token };
+  const check = async (token: string | null, scoped: boolean) => {
+    if (!token) return null;
+    let q = admin
+      .from("device_tokens")
+      .select("id, kind, created_at, expires_at")
+      .eq("user_id", ownerId)
+      .eq("token_hash", await sha256(token));
+    q = scoped ? q.eq("page_id", pageId) : q.is("page_id", null);
+    const { data } = await q.maybeSingle();
+    if (!data) return null;
+    const expiresAt = data.expires_at
+      ? new Date(data.expires_at).getTime()
+      : data.kind === "trusted"
+        ? new Date(data.created_at).getTime() + TRUSTED_MAX_AGE * 1000
+        : NaN;
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return null;
+    return { ...data, token };
+  };
+  // Per-profile unlock first; legacy account-wide unlocks still honoured.
+  return (await check(readDeviceCookie(pageId), true)) ?? (await check(readDeviceCookie(ownerId), false));
+}
+
+/** Profile PIN if set, otherwise the legacy account PIN. */
+export async function getPinRecord(ownerId: string, pageId: string) {
+  const admin = await getAdmin();
+  const { data: own, error } = await admin.from("page_security").select("pin_hash, pin_salt, updated_at").eq("page_id", pageId).maybeSingle();
+  if (error) throw error;
+  if (own) return own;
+  const { data: legacy, error: e2 } = await admin.from("account_security").select("pin_hash, pin_salt, updated_at").eq("user_id", ownerId).maybeSingle();
+  if (e2) throw e2;
+  return legacy;
 }
