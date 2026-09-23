@@ -68,6 +68,14 @@ type Selection =
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
+const EMPTY_TAB: DemoTab = { id: "empty", name: "Home", folders: [] };
+const EMPTY_PROFILE: DemoProfile = {
+  id: "empty-profile",
+  name: "My Space",
+  initials: "MS",
+  tabs: [EMPTY_TAB],
+};
+
 const SAMPLE_PROFILES: DemoProfile[] = [
   {
     id: "my-space",
@@ -255,9 +263,9 @@ function FolderPanel({
 export function WorkspacePrototype() {
   const [profiles, setProfiles] = useState(SAMPLE_PROFILES);
   const [profileId, setProfileId] = useState("my-space");
-  const profile = profiles.find((item) => item.id === profileId) ?? profiles[0];
+  const profile = profiles.find((item) => item.id === profileId) ?? profiles[0] ?? EMPTY_PROFILE;
   const [tabId, setTabId] = useState("creativity");
-  const tab = profile.tabs.find((item) => item.id === tabId) ?? profile.tabs[0];
+  const tab = profile.tabs.find((item) => item.id === tabId) ?? profile.tabs[0] ?? EMPTY_TAB;
   const [query, setQuery] = useState("");
   const [preview, setPreview] = useState(false);
   const [selection, setSelection] = useState<Selection>(null);
