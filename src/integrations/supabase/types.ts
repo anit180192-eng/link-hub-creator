@@ -74,6 +74,7 @@ export type Database = {
       links: {
         Row: {
           created_at: string
+          favourite: boolean
           group_name: string
           icon_only: boolean
           id: string
@@ -81,12 +82,14 @@ export type Database = {
           page_id: string
           platform: string
           position: number
+          tab_id: string | null
           updated_at: string
           url: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          favourite?: boolean
           group_name?: string
           icon_only?: boolean
           id?: string
@@ -94,12 +97,14 @@ export type Database = {
           page_id: string
           platform?: string
           position?: number
+          tab_id?: string | null
           updated_at?: string
           url: string
           user_id: string
         }
         Update: {
           created_at?: string
+          favourite?: boolean
           group_name?: string
           icon_only?: boolean
           id?: string
@@ -107,6 +112,7 @@ export type Database = {
           page_id?: string
           platform?: string
           position?: number
+          tab_id?: string | null
           updated_at?: string
           url?: string
           user_id?: string
@@ -114,6 +120,51 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "links_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "links_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "page_tabs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_tabs: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          page_id: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+          page_id: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          page_id?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_tabs_page_id_fkey"
             columns: ["page_id"]
             isOneToOne: false
             referencedRelation: "pages"
@@ -137,6 +188,7 @@ export type Database = {
           theme: string
           updated_at: string
           user_id: string
+          weather_city: string
         }
         Insert: {
           avatar_url?: string | null
@@ -153,6 +205,7 @@ export type Database = {
           theme?: string
           updated_at?: string
           user_id: string
+          weather_city?: string
         }
         Update: {
           avatar_url?: string | null
@@ -169,6 +222,7 @@ export type Database = {
           theme?: string
           updated_at?: string
           user_id?: string
+          weather_city?: string
         }
         Relationships: []
       }

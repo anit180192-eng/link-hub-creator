@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { WorkspacePrototype } from "@/components/workspace/WorkspacePrototype";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/workspace-preview")({
   staticData: { sitemap: false },
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard" });
+  },
   head: () => ({
     meta: [
       { title: "Workspace preview — Landing Page Builder" },
@@ -14,5 +16,4 @@ export const Route = createFileRoute("/workspace-preview")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: WorkspacePrototype,
 });

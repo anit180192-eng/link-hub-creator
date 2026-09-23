@@ -29,7 +29,7 @@
 - [x] Verify sign-up, dashboard, publish, public page, photo upload
 
 ## Homepage rework (Sep 22)
-- [x] Homepage preview uses the real page layout (sample "Shreya Anit" page)
+- [x] Homepage preview uses the real page layout (sample "Shreya" page)
 - [x] Explain the product clearly; free (download) vs account (personal link) comparison
 - [x] Privacy section: 6-digit PIN + trusted devices (marked Coming soon)
 - [x] Landing Page Builder logo in browser tab + on every app page
@@ -46,6 +46,6 @@
 ## Compact profile workspace redesign (Sep 23)
 - [x] Stage A: sample-only Modular Midnight Canvas editor and interactive start-page preview
 - [x] Stage A refinement: Neo-Classical Home with editable identity, picture/initials, clocks/weather, profile-wide favourites, local recents and prominent publishing
-- [ ] Stage B: additive tabs/folders migration, existing-data backfill, editing, publishing, PIN and export integration
-- [ ] Stage C: browser-local recents, favourites, optional Home widgets and matching homepage preview
+- [x] Stage B: additive tabs/folders migration, existing-data backfill, editing, publishing, PIN and export integration
+- [x] Stage C: browser-local recents, favourites and optional Home widgets
 - [ ] Review the staged preview before any production publish
