@@ -45,6 +45,7 @@
 
 ## Compact profile workspace redesign (Sep 23)
 - [x] Stage A: sample-only Modular Midnight Canvas editor and interactive start-page preview
+- [x] Stage A refinement: Neo-Classical Home with editable clocks/weather, profile-wide favourites, local recents and prominent publishing
 - [ ] Stage B: additive tabs/folders migration, existing-data backfill, editing, publishing, PIN and export integration
 - [ ] Stage C: browser-local recents, favourites, optional Home widgets and matching homepage preview
 - [ ] Review the staged preview before any production publish
