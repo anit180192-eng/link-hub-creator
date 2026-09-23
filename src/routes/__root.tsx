@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { consumePostLoginRedirect, hasPendingPostLoginRedirect } from "@/lib/post-login";
+import { THEME_INIT_SCRIPT, watchSystemTheme } from "@/lib/theme";
 
 
 function NotFoundComponent() {
@@ -123,8 +124,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // The theme script adds the "dark" class before paint, so the server markup differs on purpose.
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
@@ -138,6 +141,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+
+  useEffect(() => watchSystemTheme(), []);
 
   useEffect(() => {
     // After returning from Google sign-in, always land on the page builder —
