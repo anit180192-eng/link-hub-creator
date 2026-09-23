@@ -216,7 +216,7 @@ function Landing() {
                     slug={sampleProfile.slug}
                     published
                     links={sampleLinks.map((link) => ({ id: link.id, name: link.label, url: link.url, favourite: ["1", "3", "7", "10"].includes(link.id) }))}
-                    clocks={sampleProfile.clocks}
+                    clocks={sampleProfile.clocks ?? []}
                     weatherCity="London"
                     editing={false}
                     onEditIdentity={() => undefined}
