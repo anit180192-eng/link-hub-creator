@@ -68,7 +68,7 @@ function Landing() {
       <header className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 lg:px-8">
         <Link to="/" aria-label="Landing Page Builder home"><Brand className="text-base sm:text-lg" /></Link>
         <nav className="hidden items-center gap-1 text-sm md:flex" aria-label="Main">
-          <a href="#preview" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">What you build</a>
+          <a href="#example" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">What you build</a>
           <a href="#plans" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Free vs account</a>
           <a href="#privacy" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Privacy</a>
           <Link to="/setup" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Setup guide</Link>
@@ -103,6 +103,23 @@ function Landing() {
               </div>
             </div>
             <div className="border-t border-border p-4 md:border-l md:border-t-0 lg:p-7"><CompactExample /></div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-5 py-12 lg:px-8 lg:py-16">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Three simple steps</p>
+          <div className="mt-6 grid gap-6 sm:grid-cols-3">
+            {[
+              ["01", "Add your first link", "Paste a website address. A name is optional."],
+              ["02", "Organise it", "Use the ready-made folder, or add your own later."],
+              ["03", "Publish your page", "Open your personal address from any browser."],
+            ].map(([number, title, body]) => (
+              <div key={number} className="border-l border-border pl-4">
+                <span className="text-xs font-bold text-primary">{number}</span>
+                <h2 className="mt-2 font-display text-lg">{title}</h2>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">{body}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -210,23 +227,8 @@ function Landing() {
           </div>
         </section>
 
-        {/* How it works */}
-        <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-20">
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary">How it works</p>
-          <h2 className="mt-3 font-display text-3xl sm:text-4xl">Ready in about five minutes.</h2>
-          <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {[
-              ["01", "Sign up free", "Create an account with email or Google and pick your username — it becomes your link."],
-              ["02", "Add links and folders", "Paste your Instagram, YouTube, LinkedIn or any website, sort them into folders, and add clocks."],
-              ["03", "Publish and set as start page", "Publish, copy your link, and follow our guide for Chrome, Safari, Edge or Firefox."],
-            ].map(([number, title, body]) => (
-              <div key={number} className="border-l border-border pl-5">
-                <span className="text-xs font-bold text-primary">{number}</span>
-                <h3 className="mt-4 font-display text-xl">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
-              </div>
-            ))}
-          </div>
+        <section className="mx-auto max-w-7xl px-5 py-12 lg:px-8 lg:py-16">
+          <h2 className="font-display text-2xl">Ready to make yours?</h2>
           <div className="mt-10 flex flex-wrap gap-3">
             {primaryCta}
             <Button asChild size="lg" variant="outline"><Link to="/setup"><RefreshCw /> Browser setup guide</Link></Button>
@@ -246,52 +248,24 @@ function Landing() {
   );
 }
 
-const previewTabLinks: Record<string, Array<{ name: string; url: string; folder: string }>> = {
-  Creative: [
-    { name: "Canva", url: "https://www.canva.com", folder: "Design" },
-    { name: "Pinterest", url: "https://www.pinterest.com", folder: "Inspiration" },
-    { name: "Behance", url: "https://www.behance.net", folder: "Inspiration" },
-  ],
-  Music: [
-    { name: "YouTube", url: "https://www.youtube.com", folder: "Listen" },
-    { name: "Spotify", url: "https://open.spotify.com", folder: "Listen" },
-    { name: "SoundCloud", url: "https://soundcloud.com", folder: "Create" },
-  ],
-  "Part-time work": [
-    { name: "Gmail", url: "https://mail.google.com", folder: "Daily tools" },
-    { name: "Google Drive", url: "https://drive.google.com", folder: "Daily tools" },
-    { name: "LinkedIn", url: "https://www.linkedin.com", folder: "Career" },
-  ],
-};
+const exampleFolders = [
+  { name: "Every day", links: ["Gmail", "Calendar", "Drive"] },
+  { name: "Creative", links: ["Canva", "Pinterest"] },
+];
 
-function SampleTab({ name }: { name: string }) {
-  const links = previewTabLinks[name] ?? [];
-  const folders = Array.from(new Set(links.map((link) => link.folder)));
+function CompactExample() {
+  const [tab, setTab] = useState<"Home" | "Links">("Home");
   return (
-    <div className="mt-5 min-h-screen space-y-4">
-      <div>
-        <p className="text-[10px] font-semibold uppercase text-hub-accent">Personal profile</p>
-        <h2 className="mt-1 font-display text-2xl font-semibold text-hub-foreground">{name}</h2>
-        <p className="mt-1 text-xs text-hub-muted">Folders and links for {name.toLowerCase()}.</p>
+    <div id="example" className="dark overflow-hidden rounded-lg border border-hub-border bg-hub-background text-hub-foreground shadow-2xl">
+      <div className="flex items-center justify-between border-b border-hub-border bg-hub-surface px-4 py-3">
+        <div className="flex items-center gap-2"><span className="grid size-8 place-items-center rounded-md bg-hub-accent font-semibold text-hub-background">S</span><div><p className="text-xs font-semibold">Shreya</p><p className="text-[10px] text-hub-muted">Example page</p></div></div>
+        <span className="text-[10px] text-hub-muted">Personal profile</span>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {folders.map((folder) => (
-          <section key={folder} className="rounded-lg border border-hub-border bg-hub-surface p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-display text-sm font-semibold text-hub-foreground">{folder}</h3>
-              <span className="text-[10px] text-hub-muted">{links.filter((link) => link.folder === folder).length}</span>
-            </div>
-            <div className="space-y-1">
-              {links.filter((link) => link.folder === folder).map((link) => (
-                <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" className="group flex min-h-11 items-center gap-3 rounded-md px-2.5 transition-colors hover:bg-hub-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent">
-                  <span className="grid size-7 place-items-center rounded-sm bg-hub-elevated text-xs font-semibold text-hub-accent">{link.name.charAt(0)}</span>
-                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-hub-foreground">{link.name}</span>
-                  <ArrowRight className="size-3.5 text-hub-muted transition-transform group-hover:translate-x-0.5 group-hover:text-hub-accent" />
-                </a>
-              ))}
-            </div>
-          </section>
-        ))}
+      <div className="flex gap-1 border-b border-hub-border px-3 py-1" aria-label="Example page tabs">
+        {(["Home", "Links"] as const).map((name) => <Button key={name} size="sm" variant="ghost" onClick={() => setTab(name)} aria-pressed={tab === name} className={tab === name ? "bg-hub-elevated text-hub-accent" : "text-hub-muted"}>{name}</Button>)}
+      </div>
+      <div className="min-h-64 p-4 sm:p-5">
+        {tab === "Home" ? <div><p className="text-xs text-hub-muted">Good evening</p><p className="mt-1 font-display text-3xl">21:31</p><p className="mt-1 text-xs text-hub-muted">India time</p><div className="mt-6"><p className="text-xs font-semibold text-hub-accent">Favourite links</p><div className="mt-2 flex gap-2">{["Gmail", "Drive", "Canva"].map((name) => <span key={name} className="rounded-md border border-hub-border bg-hub-surface px-3 py-2 text-xs">{name}</span>)}</div></div></div> : <div className="grid gap-3 sm:grid-cols-2">{exampleFolders.map((folder) => <section key={folder.name} className="overflow-hidden rounded-md border border-hub-border bg-hub-surface"><h3 className="border-b border-hub-border px-3 py-2 text-xs font-semibold text-hub-accent">{folder.name}</h3>{folder.links.map((name) => <button key={name} type="button" className="flex min-h-10 w-full items-center gap-2 border-b border-hub-border/60 px-3 text-left text-xs last:border-0 hover:bg-hub-elevated"><span className="grid size-6 place-items-center rounded-sm bg-hub-elevated font-semibold text-hub-accent">{name[0]}</span>{name}<span className="ml-auto text-[10px] text-hub-muted">Example</span></button>)}</section>)}</div>}
       </div>
     </div>
   );
