@@ -19,7 +19,7 @@ const OPTIONS: { value: ThemeChoice; label: string; icon: typeof Sun }[] = [
 
 export function ThemeToggle({ className }: { className?: string }) {
   const choice = useThemeChoice();
-  const current = OPTIONS.find((option) => option.value === choice) ?? OPTIONS[2];
+  const current = OPTIONS.find((option) => option.value === choice) ?? OPTIONS[2]!;
   const CurrentIcon = current.icon;
 
   return (
