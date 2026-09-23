@@ -145,13 +145,10 @@ export async function findUnlockedDevice(ownerId: string, pageId: string) {
   return check(readDeviceCookie(pageId), true);
 }
 
-/** Profile PIN if set, otherwise the legacy account PIN. */
-export async function getPinRecord(ownerId: string, pageId: string) {
+/** The profile's own PIN. Account-level PINs are no longer used. */
+export async function getPinRecord(_ownerId: string, pageId: string) {
   const admin = await getAdmin();
-  const { data: own, error } = await admin.from("page_security").select("pin_hash, pin_salt, updated_at").eq("page_id", pageId).maybeSingle();
+  const { data, error } = await admin.from("page_security").select("pin_hash, pin_salt, updated_at").eq("page_id", pageId).maybeSingle();
   if (error) throw error;
-  if (own) return own;
-  const { data: legacy, error: e2 } = await admin.from("account_security").select("pin_hash, pin_salt, updated_at").eq("user_id", ownerId).maybeSingle();
-  if (e2) throw e2;
-  return legacy;
+  return data;
 }

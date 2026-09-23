@@ -58,8 +58,9 @@ export const setPin = createServerFn({ method: "POST" })
       .from("page_security")
       .upsert({ page_id: data.pageId, user_id: context.userId, pin_hash: hash, pin_salt: salt }, { onConflict: "page_id" });
     if (error) throw new Error("Couldn't save your PIN");
-    // A new PIN ends short visits to this profile; trusted browsers stay trusted.
-    await admin.from("device_tokens").delete().eq("page_id", data.pageId).eq("kind", "session");
+    // A new PIN revokes every visit and trusted browser for this profile.
+    const { error: revokeError } = await admin.from("device_tokens").delete().eq("page_id", data.pageId);
+    if (revokeError) throw new Error("PIN saved, but couldn't sign out trusted browsers");
     return { ok: true };
   });
 
