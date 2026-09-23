@@ -245,7 +245,7 @@ function Landing() {
           <h2 className="mt-4 font-display text-2xl sm:text-3xl">Have feedback or an idea?</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
             If you have any feedback about the website or think of an enhancement, we'd love to hear from you. Please write to
-            {" "}<a href="mailto:andcodeslabs@gmail.com" className="font-medium text-primary underline-offset-4 hover:underline">andcodeslabs@gmail.com</a>.
+            {" "}<a href="mailto:antcodeslabs@gmail.com" className="font-medium text-primary underline-offset-4 hover:underline">antcodeslabs@gmail.com</a>.
           </p>
         </div>
       </section>
@@ -256,7 +256,8 @@ function Landing() {
           <span>by <a href="https://aurunex.com/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">AuruNex</a></span>
         </div>
         <div className="flex items-center gap-4">
-          <a href="mailto:andcodeslabs@gmail.com" className="inline-flex items-center gap-1 hover:text-foreground"><Mail className="h-3 w-3" /> andcodeslabs@gmail.com</a>
+          <a href="mailto:antcodeslabs@gmail.com" className="inline-flex items-center gap-1 hover:text-foreground"><Mail className="h-3 w-3" /> antcodeslabs@gmail.com</a>
+          <a href="/privacy.html" className="hover:text-foreground">Privacy Policy</a>
           <Link to="/setup" className="inline-flex items-center gap-1 hover:text-foreground">Browser setup instructions <ExternalLink className="h-3 w-3" /></Link>
         </div>
       </footer>
