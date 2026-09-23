@@ -29,7 +29,7 @@
 - [x] Verify sign-up, dashboard, publish, public page, photo upload
 
 ## Homepage rework (Sep 22)
-- [x] Homepage preview uses the real page layout (sample "Shreya Anit" page)
+- [x] Homepage preview uses the real page layout (sample "Shreya" page)
 - [x] Explain the product clearly; free (download) vs account (personal link) comparison
 - [x] Privacy section: 6-digit PIN + trusted devices (marked Coming soon)
 - [x] Landing Page Builder logo in browser tab + on every app page
