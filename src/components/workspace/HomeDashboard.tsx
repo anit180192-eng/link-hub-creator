@@ -84,11 +84,11 @@ export function HomeDashboard({ profileId, profileName, slug, published, links, 
             <div>
               <p className="text-[10px] font-semibold uppercase text-hub-accent">Your daily starting point</p>
               <h2 className="mt-1 font-display text-2xl font-medium text-hub-foreground sm:text-3xl">Good afternoon, Shreya.</h2>
-              <p className="mt-1 text-xs text-hub-muted">{dateValue(leadClock.tz)} · {profileName}</p>
+              <p className="mt-1 text-xs text-hub-muted" suppressHydrationWarning>{dateValue(leadClock.tz)} · {profileName}</p>
             </div>
           </div>
           <div className="flex items-end justify-between gap-5 border-t border-hub-border pt-4 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
-            <div><p className="font-display text-4xl font-light tabular-nums text-hub-accent sm:text-5xl">{clockValue(leadClock.tz)}</p><p className="mt-1 text-[10px] uppercase text-hub-muted">{leadClock.label} · Local time</p></div>
+            <div><p className="font-display text-4xl font-light tabular-nums text-hub-accent sm:text-5xl" suppressHydrationWarning>{clockValue(leadClock.tz)}</p><p className="mt-1 text-[10px] uppercase text-hub-muted">{leadClock.label} · Local time</p></div>
             <span className="mb-2 size-2 rounded-full bg-hub-accent shadow-[0_0_12px_var(--hub-accent)] motion-safe:animate-pulse" aria-label="Clock is live" />
           </div>
         </div>
@@ -98,7 +98,7 @@ export function HomeDashboard({ profileId, profileName, slug, published, links, 
         <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-7">
           <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">World time</p><h3 className="mt-1 font-display text-base font-semibold">Your places, at a glance</h3></div>{editing ? <Button variant="ghost" size="sm" className="text-hub-muted hover:text-hub-accent" onClick={onEditClocks}><Pencil /> Edit clocks</Button> : null}</div>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            {clocks.map((clock, index) => <div key={`${clock.tz}-${clock.label}`} className={`rounded-md border p-3 transition-colors hover:border-hub-accent/60 ${index === 0 ? "border-hub-accent/35 bg-hub-elevated/55" : "border-hub-border bg-hub-background/45"}`}><div className="flex items-center justify-between"><span className="flex items-center gap-1.5 text-xs text-hub-muted"><Globe2 className="size-3.5" />{clock.label}</span><span className="text-[10px] text-hub-muted">{dateValue(clock.tz)}</span></div><p className="mt-3 font-display text-2xl tabular-nums text-hub-foreground">{clockValue(clock.tz)}</p></div>)}
+            {clocks.map((clock, index) => <div key={`${clock.tz}-${clock.label}`} className={`rounded-md border p-3 transition-colors hover:border-hub-accent/60 ${index === 0 ? "border-hub-accent/35 bg-hub-elevated/55" : "border-hub-border bg-hub-background/45"}`}><div className="flex items-center justify-between"><span className="flex items-center gap-1.5 text-xs text-hub-muted"><Globe2 className="size-3.5" />{clock.label}</span><span className="text-[10px] text-hub-muted" suppressHydrationWarning>{dateValue(clock.tz)}</span></div><p className="mt-3 font-display text-2xl tabular-nums text-hub-foreground" suppressHydrationWarning>{clockValue(clock.tz)}</p></div>)}
           </div>
         </section>
 
