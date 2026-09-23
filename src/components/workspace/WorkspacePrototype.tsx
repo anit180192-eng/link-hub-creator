@@ -62,7 +62,7 @@ type DemoLink = {
 
 type DemoFolder = { id: string; name: string; links: DemoLink[] };
 type DemoTab = { id: string; name: string; folders: DemoFolder[] };
-type DemoProfile = { id: string; name: string; initials: string; slug: string; protected: boolean; tabs: DemoTab[] };
+type DemoProfile = { id: string; name: string; initials: string; slug: string; protected: boolean; published: boolean; tabs: DemoTab[] };
 type Selection =
   | { type: "link"; tabId: string; folderId: string; item: DemoLink }
   | { type: "folder"; tabId: string; item: DemoFolder }
@@ -79,6 +79,7 @@ const EMPTY_PROFILE: DemoProfile = {
   initials: "MS",
   slug: "my-space",
   protected: false,
+  published: false,
   tabs: [EMPTY_TAB],
 };
 
@@ -89,6 +90,7 @@ const SAMPLE_PROFILES: DemoProfile[] = [
     initials: "SP",
     slug: "shreya-personal",
     protected: true,
+    published: true,
     tabs: [
       { id: "home", name: "Home", folders: [] },
       {
@@ -154,6 +156,7 @@ const SAMPLE_PROFILES: DemoProfile[] = [
     initials: "SO",
     slug: "shreya-office",
     protected: false,
+    published: true,
     tabs: [
       { id: "work-home", name: "Home", folders: [] },
       {
@@ -284,7 +287,7 @@ export function WorkspacePrototype() {
   const [dirty, setDirty] = useState(false);
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const [addingLink, setAddingLink] = useState<{ tabId: string; folderId: string } | null>(null);
-  const [pin, setPin] = useState("482731");
+  const [pin, setPin] = useState("");
 
   useEffect(() => {
     if (!dirty) return;
@@ -384,6 +387,29 @@ export function WorkspacePrototype() {
     setTabId(next.id);
   }
 
+  function addProfile() {
+    const id = uid();
+    const next: DemoProfile = {
+      id,
+      name: "New page",
+      initials: "NP",
+      slug: `new-page-${profiles.length + 1}`,
+      protected: false,
+      published: false,
+      tabs: [{ id: uid(), name: "Home", folders: [] }],
+    };
+    setProfiles((items) => [...items, next]);
+    setProfileId(id);
+    setTabId(next.tabs[0]?.id ?? "");
+    setQuery("");
+  }
+
+  function publishProfile() {
+    updateProfile((current) => ({ ...current, published: true }));
+    setSaveState("saving");
+    window.setTimeout(() => setSaveState("saved"), 600);
+  }
+
   function openSecurity() {
     setSelection({ type: "security" });
     setDirty(false);
@@ -412,6 +438,7 @@ export function WorkspacePrototype() {
                   {profiles.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <Button variant="ghost" size="icon" className="size-8 shrink-0 text-hub-muted hover:text-hub-accent" onClick={addProfile} aria-label="Create another landing page"><Plus /></Button>
               <span className="hidden items-center gap-1.5 text-xs text-hub-muted md:inline-flex" role="status">
                 {saveState === "saving" ? <Clock3 className="size-3.5" /> : saveState === "error" ? <span className="size-2 rounded-full bg-destructive" /> : <Check className="size-3.5 text-hub-accent" />}
                 {saveState === "saving" ? "Saving…" : saveState === "error" ? "Needs attention" : "Saved"}
@@ -425,8 +452,8 @@ export function WorkspacePrototype() {
               <Button variant="outline" size="sm" className="hidden border-hub-border bg-hub-background text-hub-foreground hover:text-hub-foreground sm:inline-flex" onClick={() => setPreview((value) => !value)}>
                 {preview ? <Pencil /> : <Eye />} {preview ? "Edit" : "Preview"}
               </Button>
-              <Button size="sm" onClick={() => { setSaveState("saving"); window.setTimeout(() => setSaveState("saved"), 600); }}>
-                Publish
+              <Button size="sm" onClick={publishProfile}>
+                {profile.published ? "Update" : "Publish"}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -484,7 +511,7 @@ export function WorkspacePrototype() {
                   <img src={sampleProfilePhoto} alt="Sample profile for Shreya" width={816} height={816} className="size-10 shrink-0 rounded-md border border-hub-border object-cover" />
                   <div className="min-w-0">
                     <h1 className="truncate font-display text-xl font-semibold text-hub-foreground">{profile.name}</h1>
-                    <p className="truncate text-xs text-hub-muted">{tab.name} · {currentLinks.length} links · <span className="text-hub-accent">/p/{profile.slug}</span></p>
+                    <p className="truncate text-xs text-hub-muted">{tab.name} · {currentLinks.length} links · <span className="text-hub-accent">{profile.published ? `/p/${profile.slug}` : "Not published yet"}</span></p>
                   </div>
                 </div>
                 <div className="relative w-44 sm:w-64">
@@ -577,7 +604,7 @@ export function WorkspacePrototype() {
               <div className="rounded-md border border-hub-border bg-hub-background p-4">
                 <div className="flex items-center justify-between"><p className="text-sm font-semibold">Your 6-digit PIN</p><span className="flex items-center gap-1 text-xs text-hub-accent"><Check className="size-3.5" /> PIN is set</span></div>
                 <p className="mt-1 text-xs text-hub-muted">Change it here. The PIN itself is never shown on your published page.</p>
-                <Input value={pin} onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" maxLength={6} aria-label="Six digit PIN" className="mt-3 max-w-40 border-hub-border bg-hub-surface font-mono text-lg" />
+                <Input value={pin} onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" maxLength={6} placeholder="New 6-digit PIN" aria-label="New six digit PIN" className="mt-3 max-w-48 border-hub-border bg-hub-surface font-mono text-base" />
                 <Button size="sm" className="mt-3" disabled={pin.length !== 6}>Save PIN</Button>
               </div>
               <div className="rounded-md border border-hub-border bg-hub-background p-4">
