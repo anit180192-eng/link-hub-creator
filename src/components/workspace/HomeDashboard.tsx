@@ -35,6 +35,16 @@ function dateValue(tz: string) {
   return new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "short", day: "numeric", month: "short" }).format(new Date());
 }
 
+function greetingValue(tz: string) {
+  const hourPart = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "numeric", hourCycle: "h23" })
+    .formatToParts(new Date())
+    .find((part) => part.type === "hour");
+  const hour = Number(hourPart?.value ?? 12);
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 function LinkItem({ link, onOpen }: { link: DashboardLink; onOpen: () => void }) {
   const icon = faviconFor(link.url);
   return (
@@ -115,7 +125,7 @@ export function HomeDashboard({ profileId, profileName, displayName, tagline, av
             <div className="shrink-0">{avatarUrl ? <img src={avatarUrl} alt={`${displayName} profile`} className="size-16 rounded-md border border-hub-border object-cover sm:size-20" /> : <span className="grid size-16 place-items-center rounded-md border border-hub-border bg-hub-elevated font-display text-xl font-semibold text-hub-accent sm:size-20 sm:text-2xl">{displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "?"}</span>}</div>
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase text-hub-accent">Your daily starting point</p>
-              <h2 className="mt-1 font-display text-2xl font-medium leading-tight text-hub-foreground sm:text-3xl">Good afternoon, {displayName}.</h2>
+              <h2 className="mt-1 font-display text-2xl font-medium leading-tight text-hub-foreground sm:text-3xl" suppressHydrationWarning>{greetingValue(leadClock.tz)}, {displayName}.</h2>
               <p className="mt-1 line-clamp-2 text-xs text-hub-muted">{tagline}</p>
               <p className="mt-1 text-[10px] text-hub-muted" suppressHydrationWarning>{dateValue(leadClock.tz)} · {profileName}</p>
               {editing ? <Button variant="ghost" size="sm" className="mt-2 h-8 px-0 text-hub-accent hover:bg-transparent hover:text-hub-foreground" onClick={onEditIdentity}><Pencil className="size-3.5" /> Edit name & picture</Button> : null}
