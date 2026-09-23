@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import {
   ArrowDown,
@@ -169,8 +169,27 @@ function Dashboard() {
   const links = linksQuery.data ?? [];
 
   const [form, setForm] = useState<ProfileRow | null>(null);
+  // Last server copy the form was synced from. When the server copy refreshes
+  // (after a save or a background refetch), only fields the user hasn't edited
+  // locally are updated, so unsaved typing is never wiped.
+  const syncedProfileRef = useRef<ProfileRow | null>(null);
   useEffect(() => {
-    if (profile) setForm(profile);
+    if (!profile) return;
+    const prev = syncedProfileRef.current;
+    syncedProfileRef.current = profile;
+    if (!prev || prev.id !== profile.id) {
+      setForm(profile);
+      return;
+    }
+    setForm((current) => {
+      if (!current || current.id !== profile.id) return profile;
+      const next: Record<string, unknown> = { ...current };
+      for (const key of Object.keys(profile) as (keyof ProfileRow)[]) {
+        const untouched = JSON.stringify(current[key]) === JSON.stringify(prev[key]);
+        if (untouched) next[key] = profile[key];
+      }
+      return next as ProfileRow;
+    });
   }, [profile]);
 
   const [newLink, setNewLink] = useState({
