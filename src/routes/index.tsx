@@ -21,7 +21,7 @@ import {
 import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { StartPageView } from "@/components/StartPageView";
+import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { Button } from "@/components/ui/button";
 import { LandingAdSlot } from "@/components/LandingAdSlot";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,12 +153,14 @@ function Landing() {
 
             <aside id="sign-in" className="scroll-mt-6 border-t border-border bg-muted/30 p-5 md:border-l md:border-t-0 md:p-6 lg:p-8">
               {signedIn ? (
-                <div className="flex h-full min-h-96 flex-col justify-between rounded-lg border border-border bg-card p-8">
-                  <div>
+                <div className="rounded-lg border border-border bg-card p-5 lg:p-6">
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between md:flex-col md:items-stretch lg:flex-row lg:items-center">
+                    <div>
                     <p className="text-xs font-semibold uppercase text-primary">Welcome back</p>
-                    <h2 className="mt-3 font-display text-3xl">Your landing page is ready when you are.</h2>
+                    <h2 className="mt-2 font-display text-xl">Your page is ready.</h2>
+                    </div>
+                    <Button asChild><Link to="/dashboard">Open builder <ArrowRight /></Link></Button>
                   </div>
-                  <Button asChild size="lg"><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
                 </div>
               ) : (
                 <div className="flex h-full flex-col gap-4">
@@ -185,7 +187,7 @@ function Landing() {
               <h2 className="mt-3 font-display text-3xl sm:text-4xl">A faster first tab.</h2>
             </div>
             <p className="max-w-xl text-muted-foreground">
-              This is a real page made with Landing Page Builder — the same layout you'll get. Your name and photo, your
+              This is a real page made with Landing Page Builder — the same layout you'll get. Your name or initials, your
               folders, your clocks, and every link ready to open. Try clicking around.
             </p>
           </div>
@@ -204,7 +206,25 @@ function Landing() {
             </div>
             <div className="page-preview-stage !h-[26rem] sm:!h-[34rem] lg:!h-[45rem]">
               <div className="page-preview-canvas page-preview-canvas--desktop">
-                <StartPageView profile={sampleProfile} links={sampleLinks} />
+                <div className="dark min-h-screen bg-hub-background px-5 py-3 text-hub-foreground">
+                  <HomeDashboard
+                    profileId="sample-shreya"
+                    profileName="Personal"
+                    displayName={sampleProfile.display_name}
+                    tagline={sampleProfile.tagline}
+                    avatarUrl={null}
+                    slug={sampleProfile.slug}
+                    published
+                    links={sampleLinks.map((link) => ({ id: link.id, name: link.label, url: link.url, favourite: ["1", "3", "7", "10"].includes(link.id) }))}
+                    clocks={sampleProfile.clocks}
+                    weatherCity="London"
+                    editing={false}
+                    onEditIdentity={() => undefined}
+                    onEditClocks={() => undefined}
+                    onEditWeather={() => undefined}
+                    onPublish={() => undefined}
+                  />
+                </div>
               </div>
             </div>
           </div>
