@@ -456,8 +456,9 @@ export function WorkspacePrototype() {
     }
     const reader = new FileReader();
     reader.onload = () => {
-      if (typeof reader.result !== "string") return;
-      updateProfile((current) => ({ ...current, avatarUrl: reader.result }));
+      const result = reader.result;
+      if (typeof result !== "string") return;
+      updateProfile((current) => ({ ...current, avatarUrl: result }));
       setPhotoError("");
       setSaveState("saved");
     };
