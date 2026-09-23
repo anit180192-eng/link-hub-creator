@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
+  Camera,
   Check,
   ChevronDown,
   Clock3,
@@ -63,7 +64,7 @@ type DemoLink = {
 
 type DemoFolder = { id: string; name: string; links: DemoLink[] };
 type DemoTab = { id: string; name: string; folders: DemoFolder[] };
-type DemoProfile = { id: string; name: string; initials: string; slug: string; protected: boolean; published: boolean; tabs: DemoTab[] };
+type DemoProfile = { id: string; name: string; displayName: string; tagline: string; avatarUrl: string | null; slug: string; protected: boolean; published: boolean; tabs: DemoTab[] };
 type Selection =
   | { type: "link"; tabId: string; folderId: string; item: DemoLink }
   | { type: "folder"; tabId: string; item: DemoFolder }
@@ -79,7 +80,9 @@ const EMPTY_TAB: DemoTab = { id: "empty", name: "Home", folders: [] };
 const EMPTY_PROFILE: DemoProfile = {
   id: "empty-profile",
   name: "My Space",
-  initials: "MS",
+  displayName: "Your name",
+  tagline: "A useful place for everything that matters.",
+  avatarUrl: null,
   slug: "my-space",
   protected: false,
   published: false,
@@ -90,7 +93,9 @@ const SAMPLE_PROFILES: DemoProfile[] = [
   {
     id: "my-space",
     name: "Personal",
-    initials: "SP",
+    displayName: "Shreya",
+    tagline: "Personal links, projects, and creative work.",
+    avatarUrl: sampleProfilePhoto,
     slug: "shreya-personal",
     protected: true,
     published: true,
@@ -137,7 +142,6 @@ const SAMPLE_PROFILES: DemoProfile[] = [
             name: "Publish",
             links: [
               { id: "youtube", name: "YouTube Studio", url: "https://studio.youtube.com" },
-              { id: "ig-publish", name: "Instagram", url: "https://instagram.com" },
             ],
           },
           {
@@ -156,7 +160,9 @@ const SAMPLE_PROFILES: DemoProfile[] = [
   {
     id: "work-space",
     name: "Office",
-    initials: "SO",
+    displayName: "Shreya",
+    tagline: "Work tools, projects, and useful resources.",
+    avatarUrl: null,
     slug: "shreya-office",
     protected: false,
     published: true,
@@ -295,6 +301,8 @@ export function WorkspacePrototype() {
   const [weatherCity, setWeatherCity] = useState("");
   const [clockDraft, setClockDraft] = useState({ label: "", tz: "" });
   const [weatherDraft, setWeatherDraft] = useState("");
+  const [profileDraft, setProfileDraft] = useState({ pageName: "", displayName: "", tagline: "" });
+  const [photoError, setPhotoError] = useState("");
 
   useEffect(() => {
     if (!dirty) return;
@@ -399,7 +407,9 @@ export function WorkspacePrototype() {
     const next: DemoProfile = {
       id,
       name: "New page",
-      initials: "NP",
+      displayName: "Your name",
+      tagline: "A useful place for everything that matters.",
+      avatarUrl: null,
       slug: `new-page-${profiles.length + 1}`,
       protected: false,
       published: false,
@@ -415,6 +425,44 @@ export function WorkspacePrototype() {
     updateProfile((current) => ({ ...current, published: true }));
     setSaveState("saving");
     window.setTimeout(() => setSaveState("saved"), 600);
+  }
+
+  function openSettings() {
+    setProfileDraft({ pageName: profile.name, displayName: profile.displayName, tagline: profile.tagline });
+    setPhotoError("");
+    setSelection({ type: "settings" });
+    setDirty(false);
+    setDrawerOpen(true);
+  }
+
+  function saveProfileDetails() {
+    const pageName = profileDraft.pageName.trim();
+    const displayName = profileDraft.displayName.trim();
+    if (!pageName || !displayName) {
+      setSaveState("error");
+      return;
+    }
+    updateProfile((current) => ({ ...current, name: pageName, displayName, tagline: profileDraft.tagline.trim() }));
+    setDirty(false);
+    setSaveState("saving");
+    window.setTimeout(() => { setSaveState("saved"); setDrawerOpen(false); }, 450);
+  }
+
+  function changeProfilePhoto(file: File | undefined) {
+    if (!file) return;
+    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
+      setPhotoError("Choose a JPG, PNG, WebP, or GIF image under 5 MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== "string") return;
+      updateProfile((current) => ({ ...current, avatarUrl: result }));
+      setPhotoError("");
+      setSaveState("saved");
+    };
+    reader.readAsDataURL(file);
   }
 
   function openSecurity() {
@@ -479,7 +527,7 @@ export function WorkspacePrototype() {
                   <Button variant="ghost" size="icon" className="size-8 text-hub-muted" aria-label="Account menu"><Menu /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onSelect={() => { setSelection({ type: "settings" }); setDrawerOpen(true); }}><Settings /> Profile settings</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={openSettings}><Settings /> Profile settings</DropdownMenuItem>
                   <DropdownMenuItem onSelect={openSecurity}><ShieldCheck /> PIN & trusted browsers</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -511,7 +559,7 @@ export function WorkspacePrototype() {
               <div className="p-3">
                 <p className="px-2 pb-2 text-[10px] font-semibold uppercase text-hub-muted">This profile</p>
                 <Button variant="secondary" className="h-9 w-full justify-start text-xs"><Monitor /> Page canvas</Button>
-                <Button variant="ghost" className="mt-1 h-9 w-full justify-start text-xs text-hub-muted" onClick={() => { setSelection({ type: "settings" }); setDrawerOpen(true); }}><Settings /> Settings</Button>
+                <Button variant="ghost" className="mt-1 h-9 w-full justify-start text-xs text-hub-muted" onClick={openSettings}><Settings /> Settings</Button>
                 <Button variant="ghost" className="mt-1 h-9 w-full justify-start text-xs text-hub-muted" onClick={openSecurity}><ShieldCheck /> PIN & access {profile.protected ? <span className="ml-auto size-1.5 rounded-full bg-hub-accent" /> : null}</Button>
                 <div className="my-4 border-t border-hub-border" />
                 <p className="px-2 pb-2 text-[10px] font-semibold uppercase text-hub-muted">Selected tab</p>
@@ -525,9 +573,9 @@ export function WorkspacePrototype() {
 
           <main className="min-w-0 flex-1 overflow-auto bg-hub-background">
             <div className="mx-auto w-full max-w-[1480px] px-3 py-5 sm:px-5 lg:px-7">
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b border-hub-border pb-4">
+              {tab.name !== "Home" ? <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b border-hub-border pb-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  <img src={sampleProfilePhoto} alt="Sample profile for Shreya" width={816} height={816} className="size-10 shrink-0 rounded-md border border-hub-border object-cover" />
+                  {profile.avatarUrl ? <img src={profile.avatarUrl} alt={`${profile.displayName} profile`} className="size-10 shrink-0 rounded-md border border-hub-border object-cover" /> : <span className="grid size-10 shrink-0 place-items-center rounded-md border border-hub-border bg-hub-elevated font-display text-sm font-semibold text-hub-accent">{profile.displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "?"}</span>}
                   <div className="min-w-0">
                     <h1 className="truncate font-display text-xl font-semibold text-hub-foreground">{profile.name}</h1>
                     <p className="truncate text-xs text-hub-muted">{tab.name} · {currentLinks.length} links · <span className="text-hub-accent">{profile.published ? `/p/${profile.slug}` : "Not published yet"}</span></p>
@@ -537,10 +585,10 @@ export function WorkspacePrototype() {
                   <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-hub-muted" />
                   <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search links" aria-label="Search links in this profile" className="border-hub-border bg-hub-surface pl-9 text-hub-foreground" />
                 </div>
-              </div>
+              </div> : null}
 
               {tab.name === "Home" ? (
-                <HomeDashboard profileId={profile.id} profileName={profile.name} slug={profile.slug} published={profile.published} links={profileLinks} clocks={clocks} weatherCity={weatherCity} editing={!preview} onEditClocks={openClocks} onEditWeather={openWeather} onPublish={publishProfile} />
+                <HomeDashboard profileId={profile.id} profileName={profile.name} displayName={profile.displayName} tagline={profile.tagline} avatarUrl={profile.avatarUrl} slug={profile.slug} published={profile.published} links={profileLinks} clocks={clocks} weatherCity={weatherCity} editing={!preview} onEditIdentity={openSettings} onEditClocks={openClocks} onEditWeather={openWeather} onPublish={publishProfile} />
               ) : tab.folders.length ? (
                 <div className="mt-5 columns-1 gap-4 space-y-4 md:columns-2 xl:columns-3">
                   {tab.folders.map((folder) => (
@@ -611,12 +659,23 @@ export function WorkspacePrototype() {
           ) : selection?.type === "weather" ? (
             <div className="mt-6 rounded-md border border-hub-border bg-hub-background p-4"><Label htmlFor="weather-city">City</Label><Input id="weather-city" value={weatherDraft} onChange={(event) => setWeatherDraft(event.target.value.slice(0, 80))} placeholder="London" className="mt-2 border-hub-border bg-hub-surface" /><p className="mt-3 text-xs leading-5 text-hub-muted">The city will be saved now. Live conditions remain unavailable until a weather provider is configured.</p><div className="mt-4 flex gap-2"><Button size="sm" onClick={() => { setWeatherCity(weatherDraft.trim()); setDrawerOpen(false); setSaveState("saved"); }}>Save city</Button><Button variant="ghost" size="sm" className="text-hub-muted" onClick={() => setWeatherDraft("")}>Clear</Button></div></div>
           ) : selection?.type === "settings" ? (
-            <div className="mt-6 space-y-2">
-              <div className="mb-4 rounded-md border border-hub-border bg-hub-background p-3"><p className="text-xs text-hub-muted">Published address</p><p className="mt-1 truncate font-mono text-xs text-hub-foreground">landingpagebuilder.aurunex.com/p/{profile.slug}</p></div>
-              {["Profile details", "Appearance", "Export HTML", "Browser setup"].map((label) => (
-                <Button key={label} variant="outline" className="h-11 w-full justify-start border-hub-border bg-hub-background text-hub-foreground"><Settings /> {label}</Button>
-              ))}
-              <Button variant="outline" className="h-11 w-full justify-start border-hub-border bg-hub-background text-hub-foreground" onClick={openSecurity}><ShieldCheck /> PIN & trusted browsers</Button>
+            <div className="mt-6 space-y-5">
+              <div className="rounded-md border border-hub-border bg-hub-background p-4">
+                <div className="flex items-center gap-4">
+                  {profile.avatarUrl ? <img src={profile.avatarUrl} alt={`${profile.displayName} profile`} className="size-16 rounded-md border border-hub-border object-cover" /> : <span className="grid size-16 place-items-center rounded-md border border-hub-border bg-hub-elevated font-display text-xl font-semibold text-hub-accent">{profile.displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "?"}</span>}
+                  <div className="flex flex-wrap gap-2"><Label htmlFor="profile-photo" className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground"><Camera className="size-4" /> {profile.avatarUrl ? "Change picture" : "Add picture"}</Label><input id="profile-photo" type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="sr-only" onChange={(event) => changeProfilePhoto(event.target.files?.[0])} />{profile.avatarUrl ? <Button variant="ghost" size="sm" className="text-hub-muted" onClick={() => updateProfile((current) => ({ ...current, avatarUrl: null }))}>Remove</Button> : null}</div>
+                </div>
+                {photoError ? <p role="alert" className="mt-3 text-xs text-destructive">{photoError}</p> : <p className="mt-3 text-xs leading-5 text-hub-muted">No picture? Your initials appear automatically.</p>}
+              </div>
+              <div className="space-y-4 rounded-md border border-hub-border bg-hub-background p-4">
+                <div className="space-y-1.5"><Label htmlFor="profile-display-name">Your display name</Label><Input id="profile-display-name" value={profileDraft.displayName} onChange={(event) => { setProfileDraft({ ...profileDraft, displayName: event.target.value }); setDirty(true); }} maxLength={60} className="border-hub-border bg-hub-surface" /></div>
+                <div className="space-y-1.5"><Label htmlFor="profile-tagline">Short introduction</Label><Input id="profile-tagline" value={profileDraft.tagline} onChange={(event) => { setProfileDraft({ ...profileDraft, tagline: event.target.value }); setDirty(true); }} maxLength={120} className="border-hub-border bg-hub-surface" /></div>
+                <div className="space-y-1.5"><Label htmlFor="profile-page-name">Page name</Label><Input id="profile-page-name" value={profileDraft.pageName} onChange={(event) => { setProfileDraft({ ...profileDraft, pageName: event.target.value }); setDirty(true); }} maxLength={50} className="border-hub-border bg-hub-surface" /></div>
+                {saveState === "error" ? <p role="alert" className="text-xs text-destructive">Add both your display name and page name.</p> : null}
+                <Button onClick={saveProfileDetails}>Save profile</Button>
+              </div>
+              <div className="rounded-md border border-hub-border bg-hub-background p-3"><p className="text-xs text-hub-muted">Published address</p><p className="mt-1 truncate font-mono text-xs text-hub-foreground">landingpagebuilder.aurunex.com/p/{profile.slug}</p></div>
+              <div className="grid gap-2 sm:grid-cols-2"><Button variant="outline" className="justify-start border-hub-border bg-hub-background text-hub-foreground"><Sparkles /> Appearance</Button><Button variant="outline" className="justify-start border-hub-border bg-hub-background text-hub-foreground"><Copy /> Export HTML</Button></div>
             </div>
           ) : (
             <form className="mt-6 space-y-4" onSubmit={(event) => { event.preventDefault(); saveDrawer(); }}>
