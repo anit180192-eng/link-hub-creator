@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MAX_CLOCKS, TIMEZONES, faviconFor, hostOf, isSafeUrl, normalizeUrl, openAllLinks, parseClocks, renderStartPageHtml, slugify, timezoneLabel, type StartPageClock, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 
 type PageRow = Omit<StartPageProfile,"clocks"> & { id:string; user_id:string; name:string; published:boolean; pin_protected:boolean; weather_city:string; clocks:Json };
