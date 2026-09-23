@@ -191,13 +191,13 @@ function Landing() {
                 This is a real page made with Landing Page Builder — the same layout you'll get. Your name or initials, your
                 folders, your clocks, and every link ready to open. Try clicking around.
               </p>
-              <a href="/p/shreya07" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-foreground">
-                View Shreya07's page <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              <a href="#shreya07" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-foreground">
+                View Shreya07's page <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
             </div>
           </div>
 
-          <div className="mx-auto mt-10 max-w-[1120px] overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
+          <div id="shreya07" className="mx-auto mt-10 max-w-[1120px] scroll-mt-6 overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
             <div className="flex items-center gap-3 border-b border-border px-4 py-3">
               <div className="flex gap-1.5" aria-hidden="true">
                 <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
@@ -206,7 +206,7 @@ function Landing() {
               </div>
               <div className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground">
                 <Lock className="h-3 w-3 shrink-0" aria-hidden="true" />
-                <a href="/p/shreya07" target="_blank" rel="noopener noreferrer" className="truncate hover:text-foreground">landingpagebuilder.aurunex.com/p/<span className="text-foreground">shreya07</span></a>
+                <span className="truncate">landingpagebuilder.aurunex.com/p/<span className="text-foreground">shreya07</span></span>
               </div>
             </div>
             <div className="page-preview-stage !h-[26rem] sm:!h-[34rem] lg:!h-[45rem]">
