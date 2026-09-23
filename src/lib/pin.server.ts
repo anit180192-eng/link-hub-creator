@@ -141,8 +141,8 @@ export async function findUnlockedDevice(ownerId: string, pageId: string) {
     if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return null;
     return { ...data, token };
   };
-  // Per-profile unlock first; legacy account-wide unlocks still honoured.
-  return (await check(readDeviceCookie(pageId), true)) ?? (await check(readDeviceCookie(ownerId), false));
+  // Only per-profile unlocks count; old account-wide unlocks are no longer accepted.
+  return check(readDeviceCookie(pageId), true);
 }
 
 /** Profile PIN if set, otherwise the legacy account PIN. */

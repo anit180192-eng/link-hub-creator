@@ -31,7 +31,7 @@ export const getSecurityStatus = createServerFn({ method: "GET" })
         .from("device_tokens")
         .select("id, label, created_at, last_used_at")
         .eq("kind", "trusted")
-        .or(`page_id.eq.${data.pageId},page_id.is.null`)
+        .eq("page_id", data.pageId)
         .order("last_used_at", { ascending: false }),
     ]);
     return {
@@ -70,9 +70,12 @@ export const removePin = createServerFn({ method: "POST" })
     await assertOwner(context.supabase, data.pageId);
     const { getAdmin } = await import("./pin.server");
     const admin = await getAdmin();
-    await context.supabase.from("pages").update({ pin_protected: false }).eq("id", data.pageId);
-    await admin.from("page_security").delete().eq("page_id", data.pageId);
-    await admin.from("device_tokens").delete().eq("page_id", data.pageId);
+    const r1 = await context.supabase.from("pages").update({ pin_protected: false }).eq("id", data.pageId);
+    if (r1.error) throw new Error("Couldn't remove the PIN");
+    const r2 = await admin.from("page_security").delete().eq("page_id", data.pageId);
+    if (r2.error) throw new Error("Couldn't remove the PIN");
+    const r3 = await admin.from("device_tokens").delete().eq("page_id", data.pageId);
+    if (r3.error) throw new Error("Couldn't remove the PIN");
     return { ok: true };
   });
 
