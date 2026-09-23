@@ -241,8 +241,12 @@ export type Database = {
     }
     Functions: {
       reserve_pin_attempt: {
-        Args: { p_owner_id: string; p_ip_hash: string }
-        Returns: { allowed: boolean; attempt_id: string | null; remaining: number }[]
+        Args: { p_ip_hash: string; p_owner_id: string }
+        Returns: {
+          allowed: boolean
+          attempt_id: string
+          remaining: number
+        }[]
       }
     }
     Enums: {
