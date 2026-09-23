@@ -49,5 +49,5 @@
 - [x] Stage B: additive tabs/folders migration, existing-data backfill, editing, publishing, PIN and export integration
 - [x] Stage C: browser-local recents, favourites and optional Home widgets
 - [x] Remove weather and add browser-local seven-day most-visited links
-- [x] Clarify the editor hierarchy as profiles → folders → links and remove the misleading extra tab controls
+- [x] Correct editor hierarchy to profiles → Home/tabs → saved folders → links, including empty folders and bottom-left sign-out
 - [ ] Review the staged preview before any production publish
