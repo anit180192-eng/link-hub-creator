@@ -42,3 +42,9 @@
 - [x] Multiple pages per account, each with its own link (Personal, Office, …)
 - [x] Light / dark / match-device theme switcher on every app page (published pages keep their navy look)
 - [x] Page layout choice (dashboard / single column) and Dark page switch actually change the published page, preview and download
+
+## Compact profile workspace redesign (Sep 23)
+- [ ] Stage A: sample-only Modular Midnight Canvas editor and interactive start-page preview
+- [ ] Stage B: additive tabs/folders migration, existing-data backfill, editing, publishing, PIN and export integration
+- [ ] Stage C: browser-local recents, favourites, optional Home widgets and matching homepage preview
+- [ ] Review the staged preview before any production publish
