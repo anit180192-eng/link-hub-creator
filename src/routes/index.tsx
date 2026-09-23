@@ -189,15 +189,15 @@ function Landing() {
             <div className="max-w-xl">
               <p className="text-muted-foreground">
                 This is a real page made with Landing Page Builder — the same layout you'll get. Your name or initials, your
-                folders, your clocks, and every link ready to open. Try clicking around.
+                folders, your clocks, multiple profiles, and every link ready to open. Try clicking around.
               </p>
-              <a href="#shreya07" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-foreground">
-                View Shreya07's page <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              <a href="#shreya-page" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-foreground">
+                View Shreya's page, one of our early customers <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
             </div>
           </div>
 
-          <div id="shreya07" className="mx-auto mt-10 max-w-[1120px] scroll-mt-6 overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
+          <div id="shreya-page" className="mx-auto mt-10 max-w-[1120px] scroll-mt-6 overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
             <div className="flex items-center gap-3 border-b border-border px-4 py-3">
               <div className="flex gap-1.5" aria-hidden="true">
                 <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
@@ -206,8 +206,16 @@ function Landing() {
               </div>
               <div className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground">
                 <Lock className="h-3 w-3 shrink-0" aria-hidden="true" />
-                <span className="truncate">landingpagebuilder.aurunex.com/p/<span className="text-foreground">shreya07</span></span>
+                <span className="truncate">landingpagebuilder.aurunex.com/p/<span className="text-foreground">shreya</span></span>
               </div>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto border-b border-border bg-background px-4 py-2" aria-label="Example profiles">
+              <span className="shrink-0 text-[10px] font-semibold uppercase text-muted-foreground">Profiles</span>
+              {['Personal', 'Creative', 'Work', 'Relaxation'].map((profile, index) => (
+                <span key={profile} className={`shrink-0 rounded-sm border px-3 py-1 text-xs font-medium ${index === 0 ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground'}`}>
+                  {profile}
+                </span>
+              ))}
             </div>
             <div className="page-preview-stage !h-[26rem] sm:!h-[34rem] lg:!h-[45rem]">
               <div className="page-preview-canvas page-preview-canvas--desktop">
