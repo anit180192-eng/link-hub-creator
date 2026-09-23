@@ -15,9 +15,9 @@ const schema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters").max(72),
 });
 
-export function AuthPanel({ className }: { className?: string }) {
+export function AuthPanel({ className, initialMode = "signin" }: { className?: string; initialMode?: "signin" | "signup" }) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);

@@ -4,8 +4,10 @@ import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: z.object({ mode: z.enum(["signin", "signup"]).optional() }),
   staticData: { sitemap: false },
   head: () => ({ meta: [
     { title: "Sign in — Landing Page Builder" },
@@ -19,6 +21,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const { mode } = Route.useSearch();
   const navigate = useNavigate();
   const [popupDone, setPopupDone] = useState(false);
   useEffect(() => {
@@ -41,5 +44,5 @@ function AuthPage() {
   if (popupDone) {
     return <div className="flex min-h-screen items-center justify-center px-5 text-center"><div><Brand className="text-lg" /><p className="mt-4 text-sm text-muted-foreground">You're signed in. You can close this window.</p></div></div>;
   }
-  return <div className="min-h-screen px-5 py-8"><div className="mx-auto max-w-5xl"><div className="flex items-center justify-between gap-3"><Link to="/"><Brand className="text-lg" /></Link><ThemeToggle /></div><div className="mx-auto mt-12 max-w-md"><AuthPanel /></div></div></div>;
+  return <div className="min-h-screen px-5 py-8"><div className="mx-auto max-w-5xl"><div className="flex items-center justify-between gap-3"><Link to="/"><Brand className="text-lg" /></Link><ThemeToggle /></div><div className="mx-auto mt-12 max-w-md"><AuthPanel key={mode} initialMode={mode ?? "signin"} /></div></div></div>;
 }
