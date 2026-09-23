@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronRight, Clock3, CloudSun, ExternalLink, Globe2, MapPin, Pencil, Rocket, RotateCcw, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { faviconFor, hostOf, normalizeUrl } from "@/lib/startpage";
-import sampleProfilePhoto from "@/assets/sample-shreya-profile.jpg";
 
 export type DashboardLink = { id: string; name: string; url: string; favourite?: boolean };
 export type DashboardClock = { tz: string; label: string };
@@ -10,12 +9,16 @@ export type DashboardClock = { tz: string; label: string };
 type Props = {
   profileId: string;
   profileName: string;
+  displayName: string;
+  tagline: string;
+  avatarUrl: string | null;
   slug: string;
   published: boolean;
   links: DashboardLink[];
   clocks: DashboardClock[];
   weatherCity: string;
   editing: boolean;
+  onEditIdentity: () => void;
   onEditClocks: () => void;
   onEditWeather: () => void;
   onPublish: () => void;
@@ -42,7 +45,7 @@ function LinkItem({ link, onOpen }: { link: DashboardLink; onOpen: () => void })
   );
 }
 
-export function HomeDashboard({ profileId, profileName, slug, published, links, clocks, weatherCity, editing, onEditClocks, onEditWeather, onPublish }: Props) {
+export function HomeDashboard({ profileId, profileName, displayName, tagline, avatarUrl, slug, published, links, clocks, weatherCity, editing, onEditIdentity, onEditClocks, onEditWeather, onPublish }: Props) {
   const [tick, setTick] = useState(0);
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const favourites = useMemo(() => links.filter((link) => link.favourite).slice(0, 6), [links]);
@@ -79,12 +82,13 @@ export function HomeDashboard({ profileId, profileName, slug, published, links, 
       <section className="relative overflow-hidden rounded-lg border border-hub-border bg-hub-surface p-5 sm:p-6">
         <div className="absolute inset-x-0 top-0 h-px bg-hub-accent/70" />
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div className="flex items-center gap-4">
-            <img src={sampleProfilePhoto} alt="Sample profile for Shreya" width={816} height={816} className="size-16 rounded-md border border-hub-border object-cover sm:size-20" />
-            <div>
+          <div className="group relative flex min-w-0 items-center gap-4">
+            <div className="relative shrink-0">{avatarUrl ? <img src={avatarUrl} alt={`${displayName} profile`} className="size-16 rounded-md border border-hub-border object-cover sm:size-20" /> : <span className="grid size-16 place-items-center rounded-md border border-hub-border bg-hub-elevated font-display text-xl font-semibold text-hub-accent sm:size-20 sm:text-2xl">{displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "?"}</span>}{editing ? <Button variant="secondary" size="icon" className="absolute -bottom-2 -right-2 size-8 border border-hub-border" onClick={onEditIdentity} aria-label="Edit name and profile picture"><Pencil className="size-3.5" /></Button> : null}</div>
+            <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase text-hub-accent">Your daily starting point</p>
-              <h2 className="mt-1 font-display text-2xl font-medium text-hub-foreground sm:text-3xl">Good afternoon, Shreya.</h2>
-              <p className="mt-1 text-xs text-hub-muted" suppressHydrationWarning>{dateValue(leadClock.tz)} · {profileName}</p>
+              <h2 className="mt-1 truncate font-display text-2xl font-medium text-hub-foreground sm:text-3xl">Good afternoon, {displayName}.</h2>
+              <p className="mt-1 line-clamp-2 text-xs text-hub-muted">{tagline}</p>
+              <p className="mt-1 text-[10px] text-hub-muted" suppressHydrationWarning>{dateValue(leadClock.tz)} · {profileName}</p>
             </div>
           </div>
           <div className="flex items-end justify-between gap-5 border-t border-hub-border pt-4 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
