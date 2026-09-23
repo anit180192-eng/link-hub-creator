@@ -50,4 +50,5 @@
 - [x] Stage C: browser-local recents, favourites and optional Home widgets
 - [x] Remove weather and add browser-local seven-day most-visited links
 - [x] Correct editor hierarchy to profiles → Home/tabs → saved folders → links, including empty folders and bottom-left sign-out
+- [x] Match the Home greeting to its lead clock timezone and make homepage sample tabs interactive
 - [ ] Review the staged preview before any production publish

@@ -85,6 +85,7 @@ const features = [
 
 function Landing() {
   const [signedIn, setSignedIn] = useState(false);
+  const [previewTab, setPreviewTab] = useState("Home");
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(Boolean(data.session)));
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setSignedIn(Boolean(session)));
@@ -216,29 +217,43 @@ function Landing() {
                 <span className="hidden text-[10px] text-hub-muted sm:inline">Also: Work</span>
               </div>
               <div className="flex gap-1 overflow-x-auto px-4" aria-label="Example tabs">
-                {['Home', 'Creative', 'Music', 'Part-time work'].map((t, i) => (
-                  <span key={t} className={`shrink-0 border-b-2 px-3 py-2 text-xs font-medium ${i === 0 ? 'border-hub-accent text-hub-accent' : 'border-transparent text-hub-muted'}`}>{t}</span>
+                {['Home', 'Creative', 'Music', 'Part-time work'].map((t) => (
+                  <Button
+                    key={t}
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setPreviewTab(t)}
+                    aria-pressed={previewTab === t}
+                    className={`h-auto shrink-0 rounded-none border-b-2 px-3 py-2 text-xs font-medium hover:bg-hub-elevated ${previewTab === t ? 'border-hub-accent text-hub-accent' : 'border-transparent text-hub-muted'}`}
+                  >
+                    {t}
+                  </Button>
                 ))}
               </div>
             </div>
             <div className="page-preview-stage !h-[26rem] sm:!h-[34rem] lg:!h-[45rem]">
               <div className="page-preview-canvas page-preview-canvas--desktop">
                 <div className="dark min-h-screen bg-hub-background px-5 py-3 text-hub-foreground">
-                  <HomeDashboard
-                    profileId="sample-shreya"
-                    profileName="Personal"
-                    displayName={sampleProfile.display_name}
-                    tagline={sampleProfile.tagline}
-                    avatarUrl={null}
-                    slug={sampleProfile.slug}
-                    published
-                    links={sampleLinks.map((link) => ({ id: link.id, name: link.label, url: link.url, favourite: ["1", "3", "7", "10"].includes(link.id) }))}
-                    clocks={sampleProfile.clocks ?? []}
-                    editing={false}
-                    onEditIdentity={() => undefined}
-                    onEditClocks={() => undefined}
-                    onPublish={() => undefined}
-                  />
+                  {previewTab === "Home" ? (
+                    <HomeDashboard
+                      profileId="sample-shreya"
+                      profileName="Personal"
+                      displayName={sampleProfile.display_name}
+                      tagline={sampleProfile.tagline}
+                      avatarUrl={null}
+                      slug={sampleProfile.slug}
+                      published
+                      links={sampleLinks.map((link) => ({ id: link.id, name: link.label, url: link.url, favourite: ["1", "3", "7", "10"].includes(link.id) }))}
+                      clocks={sampleProfile.clocks ?? []}
+                      editing={false}
+                      onEditIdentity={() => undefined}
+                      onEditClocks={() => undefined}
+                      onPublish={() => undefined}
+                    />
+                  ) : (
+                    <SampleTab name={previewTab} />
+                  )}
                 </div>
               </div>
             </div>
@@ -383,6 +398,57 @@ function Landing() {
         </div>
         <Link to="/setup" className="inline-flex items-center gap-1 hover:text-foreground">Browser setup instructions <ExternalLink className="h-3 w-3" /></Link>
       </footer>
+    </div>
+  );
+}
+
+const previewTabLinks: Record<string, Array<{ name: string; url: string; folder: string }>> = {
+  Creative: [
+    { name: "Canva", url: "https://www.canva.com", folder: "Design" },
+    { name: "Pinterest", url: "https://www.pinterest.com", folder: "Inspiration" },
+    { name: "Behance", url: "https://www.behance.net", folder: "Inspiration" },
+  ],
+  Music: [
+    { name: "YouTube", url: "https://www.youtube.com", folder: "Listen" },
+    { name: "Spotify", url: "https://open.spotify.com", folder: "Listen" },
+    { name: "SoundCloud", url: "https://soundcloud.com", folder: "Create" },
+  ],
+  "Part-time work": [
+    { name: "Gmail", url: "https://mail.google.com", folder: "Daily tools" },
+    { name: "Google Drive", url: "https://drive.google.com", folder: "Daily tools" },
+    { name: "LinkedIn", url: "https://www.linkedin.com", folder: "Career" },
+  ],
+};
+
+function SampleTab({ name }: { name: string }) {
+  const links = previewTabLinks[name] ?? [];
+  const folders = Array.from(new Set(links.map((link) => link.folder)));
+  return (
+    <div className="mt-5 min-h-screen space-y-4">
+      <div>
+        <p className="text-[10px] font-semibold uppercase text-hub-accent">Personal profile</p>
+        <h2 className="mt-1 font-display text-2xl font-semibold text-hub-foreground">{name}</h2>
+        <p className="mt-1 text-xs text-hub-muted">Folders and links for {name.toLowerCase()}.</p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {folders.map((folder) => (
+          <section key={folder} className="rounded-lg border border-hub-border bg-hub-surface p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-display text-sm font-semibold text-hub-foreground">{folder}</h3>
+              <span className="text-[10px] text-hub-muted">{links.filter((link) => link.folder === folder).length}</span>
+            </div>
+            <div className="space-y-1">
+              {links.filter((link) => link.folder === folder).map((link) => (
+                <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" className="group flex min-h-11 items-center gap-3 rounded-md px-2.5 transition-colors hover:bg-hub-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent">
+                  <span className="grid size-7 place-items-center rounded-sm bg-hub-elevated text-xs font-semibold text-hub-accent">{link.name.charAt(0)}</span>
+                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-hub-foreground">{link.name}</span>
+                  <ArrowRight className="size-3.5 text-hub-muted transition-transform group-hover:translate-x-0.5 group-hover:text-hub-accent" />
+                </a>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }
