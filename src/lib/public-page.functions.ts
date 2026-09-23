@@ -58,7 +58,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
     if (error) throw new Error("This page couldn't be loaded right now.");
     if (!page) return null;
 
-    const device = page.pin_protected ? await findUnlockedDevice(page.user_id) : null;
+    const device = page.pin_protected ? await findUnlockedDevice(page.user_id, page.id) : null;
     if (page.pin_protected && !device) {
       return { profile: null, links: [], locked: true, protected: true, trusted: false };
     }
@@ -113,7 +113,7 @@ export const unlockPage = createServerFn({ method: "POST" })
 
     const { data: page } = await admin
       .from("pages")
-      .select("user_id")
+      .select("id, user_id")
       .eq("slug", data.slug)
       .eq("published", true)
       .eq("pin_protected", true)
@@ -134,12 +134,12 @@ export const unlockPage = createServerFn({ method: "POST" })
     }
     if (!reservation.attempt_id) throw new Error("PIN check unavailable. Please try again later.");
 
-    const { data: security, error: securityError } = await admin
-      .from("account_security")
-      .select("pin_hash, pin_salt")
-      .eq("user_id", ownerId)
-      .maybeSingle();
-    if (securityError) throw new Error("PIN check unavailable. Please try again later.");
+    let security: { pin_hash: string; pin_salt: string } | null;
+    try {
+      security = await pin.getPinRecord(ownerId, page.id);
+    } catch {
+      throw new Error("PIN check unavailable. Please try again later.");
+    }
     if (!security) return { ok: false, reason: "no_pin" };
 
     const attempt = await pin.hashPin(data.pin, security.pin_salt);
@@ -152,6 +152,7 @@ export const unlockPage = createServerFn({ method: "POST" })
     const token = pin.randomHex(32);
     const { error: tokenError } = await admin.from("device_tokens").insert({
         user_id: ownerId,
+        page_id: page.id,
         token_hash: await pin.sha256(token),
         kind: "session",
         label: pin.describeBrowser(),
@@ -160,7 +161,7 @@ export const unlockPage = createServerFn({ method: "POST" })
     if (tokenError) throw new Error("Couldn't unlock this browser. Please try again later.");
     // Remove only this successful reservation; preserve concurrent failed guesses.
     await admin.from("pin_attempts").delete().eq("id", reservation.attempt_id).eq("owner_id", ownerId);
-    pin.writeVisitCookie(ownerId, token);
+    pin.writeVisitCookie(page.id, token);
     return { ok: true };
   });
 
@@ -171,20 +172,20 @@ export const trustThisBrowser = createServerFn({ method: "POST" })
     const admin = await pin.getAdmin();
     const { data: page } = await admin
       .from("pages")
-      .select("user_id")
+      .select("id, user_id")
       .eq("slug", data.slug)
       .eq("published", true)
       .maybeSingle();
     if (!page) return { ok: false };
 
-    const device = await pin.findUnlockedDevice(page.user_id);
+    const device = await pin.findUnlockedDevice(page.user_id, page.id);
     if (!device) return { ok: false };
 
     const { error } = await admin
       .from("device_tokens")
-      .update({ kind: "trusted", expires_at: new Date(Date.now() + pin.TRUSTED_MAX_AGE * 1000).toISOString(), label: pin.describeBrowser() })
+      .update({ page_id: page.id, kind: "trusted", expires_at: new Date(Date.now() + pin.TRUSTED_MAX_AGE * 1000).toISOString(), label: pin.describeBrowser() })
       .eq("id", device.id);
     if (error) return { ok: false };
-    pin.writeTrustedCookie(page.user_id, device.token);
+    pin.writeTrustedCookie(page.id, device.token);
     return { ok: true };
   });
