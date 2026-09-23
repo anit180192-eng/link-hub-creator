@@ -73,6 +73,7 @@ function Landing() {
           <a href="#plans" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Free vs account</a>
           <a href="#privacy" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Privacy</a>
           <Link to="/setup" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Setup guide</Link>
+          <a href="#contact" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Feedback</a>
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle />
