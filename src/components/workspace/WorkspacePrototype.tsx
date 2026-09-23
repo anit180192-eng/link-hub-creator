@@ -24,6 +24,7 @@ import {
 import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { WorldClocks } from "@/components/WorldClocks";
+import { HomeDashboard, type DashboardClock } from "@/components/workspace/HomeDashboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,6 +69,8 @@ type Selection =
   | { type: "folder"; tabId: string; item: DemoFolder }
   | { type: "settings" }
   | { type: "security" }
+  | { type: "clocks" }
+  | { type: "weather" }
   | null;
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -288,6 +291,10 @@ export function WorkspacePrototype() {
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const [addingLink, setAddingLink] = useState<{ tabId: string; folderId: string } | null>(null);
   const [pin, setPin] = useState("");
+  const [clocks, setClocks] = useState<DashboardClock[]>([{ tz: "Europe/London", label: "London" }, { tz: "Asia/Kolkata", label: "New Delhi" }]);
+  const [weatherCity, setWeatherCity] = useState("");
+  const [clockDraft, setClockDraft] = useState({ label: "", tz: "" });
+  const [weatherDraft, setWeatherDraft] = useState("");
 
   useEffect(() => {
     if (!dirty) return;
@@ -297,7 +304,7 @@ export function WorkspacePrototype() {
   }, [dirty]);
 
   const currentLinks = useMemo(() => tab.folders.flatMap((folder) => folder.links), [tab.folders]);
-  const favourites = currentLinks.filter((link) => link.favourite).slice(0, 6);
+  const profileLinks = useMemo(() => profile.tabs.flatMap((profileTab) => profileTab.folders.flatMap((folder) => folder.links)), [profile.tabs]);
 
   function selectProfile(nextId: string) {
     if (dirty && !window.confirm("Discard the unsaved changes in the open drawer?")) return;
@@ -416,6 +423,18 @@ export function WorkspacePrototype() {
     setDrawerOpen(true);
   }
 
+  function openClocks() {
+    setSelection({ type: "clocks" });
+    setClockDraft({ label: "", tz: "" });
+    setDrawerOpen(true);
+  }
+
+  function openWeather() {
+    setSelection({ type: "weather" });
+    setWeatherDraft(weatherCity);
+    setDrawerOpen(true);
+  }
+
   function toggleProtection(checked: boolean) {
     updateProfile((current) => ({ ...current, protected: checked }));
     setSaveState("saving");
@@ -521,37 +540,7 @@ export function WorkspacePrototype() {
               </div>
 
               {tab.name === "Home" ? (
-                <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,.85fr)]">
-                  <div className="space-y-4">
-                    <section className="overflow-hidden rounded-md border border-hub-border bg-hub-surface">
-                      <div className="grid gap-5 p-5 sm:grid-cols-[112px_minmax(0,1fr)] sm:items-center">
-                        <img src={sampleProfilePhoto} alt="Sample profile for Shreya" width={816} height={816} className="size-28 rounded-md border border-hub-border object-cover" />
-                        <div>
-                          <p className="text-xs font-medium text-hub-accent">Good afternoon, Shreya</p>
-                          <h2 className="mt-1 font-display text-2xl font-semibold">Welcome to your day.</h2>
-                          <p className="mt-2 max-w-md text-sm leading-6 text-hub-muted">Your favourite places, current time and everyday links are ready in one calm view.</p>
-                        </div>
-                      </div>
-                    </section>
-                    <WorldClocks clocks={[{ tz: "Europe/London", label: "London" }, { tz: "Asia/Kolkata", label: "New Delhi" }]} dark compact />
-                    <section className="rounded-md border border-hub-border bg-hub-surface p-4">
-                      <div className="flex items-center justify-between"><h2 className="font-display text-sm font-semibold">Favourite links</h2><span className="text-[10px] text-hub-muted">{favourites.length}</span></div>
-                      {favourites.length ? <div className="mt-2 grid gap-1 sm:grid-cols-2">{favourites.map((link) => <LinkRow key={link.id} link={link} editing={false} onSelect={() => undefined} />)}</div> : <p className="mt-3 text-xs text-hub-muted">Favourite links from every tab will appear here.</p>}
-                    </section>
-                  </div>
-                  <div className="space-y-4">
-                    <section className="rounded-md border border-hub-border bg-hub-surface p-4">
-                      <div className="flex items-center justify-between"><h2 className="font-display text-sm font-semibold">Weather</h2><Sparkles className="size-4 text-hub-accent" /></div>
-                      <p className="mt-3 text-sm text-hub-muted">Choose a city or use your location to enable weather.</p>
-                      <Button variant="outline" size="sm" className="mt-3 border-hub-border bg-hub-background text-hub-foreground">Set up weather</Button>
-                    </section>
-                    <section className="rounded-md border border-hub-border bg-hub-surface p-4">
-                      <div className="flex items-center justify-between"><h2 className="font-display text-sm font-semibold">Recently opened here</h2><Button variant="ghost" size="sm" className="h-7 text-hub-muted">Hide</Button></div>
-                      <p className="mt-2 text-xs text-hub-muted">Links opened from this page in this browser.</p>
-                      <p className="mt-4 text-xs text-hub-muted">Nothing opened yet.</p>
-                    </section>
-                  </div>
-                </div>
+                <HomeDashboard profileId={profile.id} profileName={profile.name} slug={profile.slug} published={profile.published} links={profileLinks} clocks={clocks} weatherCity={weatherCity} editing={!preview} onEditClocks={openClocks} onEditWeather={openWeather} onPublish={publishProfile} />
               ) : tab.folders.length ? (
                 <div className="mt-5 columns-1 gap-4 space-y-4 md:columns-2 xl:columns-3">
                   {tab.folders.map((folder) => (
@@ -590,8 +579,8 @@ export function WorkspacePrototype() {
       <Sheet open={drawerOpen} onOpenChange={(open) => { if (!open && dirty && !window.confirm("Discard your unsaved changes?")) return; setDrawerOpen(open); if (!open) { setDirty(false); setSelection(null); setAddingLink(null); } }}>
         <SheetContent className="dark w-full border-hub-border bg-hub-surface text-hub-foreground sm:max-w-md">
           <SheetHeader>
-            <SheetTitle className="font-display text-hub-foreground">{selection?.type === "folder" ? "Folder settings" : selection?.type === "security" ? "PIN & trusted browsers" : selection?.type === "settings" ? "Profile settings" : selection?.type === "link" ? "Edit link" : "Add link"}</SheetTitle>
-            <SheetDescription className="text-hub-muted">{selection?.type === "security" ? `Control access to the published ${profile.name} page.` : selection?.type === "settings" ? "Appearance, export and profile details live here." : "Only the essentials are shown first."}</SheetDescription>
+            <SheetTitle className="font-display text-hub-foreground">{selection?.type === "folder" ? "Folder settings" : selection?.type === "security" ? "PIN & trusted browsers" : selection?.type === "settings" ? "Profile settings" : selection?.type === "clocks" ? "World clocks" : selection?.type === "weather" ? "Weather" : selection?.type === "link" ? "Edit link" : "Add link"}</SheetTitle>
+            <SheetDescription className="text-hub-muted">{selection?.type === "security" ? `Control access to the published ${profile.name} page.` : selection?.type === "settings" ? "Appearance, export and profile details live here." : selection?.type === "clocks" ? "Choose up to five clocks for this page." : selection?.type === "weather" ? "Set a city for this page. Live data requires a weather provider." : "Only the essentials are shown first."}</SheetDescription>
           </SheetHeader>
           {selection?.type === "security" ? (
             <div className="mt-6 space-y-4">
@@ -614,6 +603,13 @@ export function WorkspacePrototype() {
               </div>
               <div className="rounded-md border border-hub-border bg-hub-elevated/35 p-4 text-xs leading-5 text-hub-muted"><strong className="text-hub-foreground">How it works:</strong> a new browser enters the PIN once, then can be trusted. Other browsers continue to ask for it.</div>
             </div>
+          ) : selection?.type === "clocks" ? (
+            <div className="mt-6 space-y-4">
+              <div className="space-y-2">{clocks.map((clock) => <div key={`${clock.tz}-${clock.label}`} className="flex items-center gap-3 rounded-md border border-hub-border bg-hub-background p-3"><Clock3 className="size-4 text-hub-accent" /><div className="min-w-0 flex-1"><p className="text-sm font-medium">{clock.label}</p><p className="truncate text-xs text-hub-muted">{clock.tz}</p></div><Button variant="ghost" size="icon" className="size-8 text-hub-muted" onClick={() => setClocks((items) => items.filter((item) => item !== clock))} disabled={clocks.length === 1} aria-label={`Remove ${clock.label}`}><Trash2 /></Button></div>)}</div>
+              {clocks.length < 5 ? <div className="rounded-md border border-hub-border bg-hub-background p-4"><Label htmlFor="clock-label">City label</Label><Input id="clock-label" value={clockDraft.label} onChange={(event) => setClockDraft({ ...clockDraft, label: event.target.value })} placeholder="Singapore" className="mt-2 border-hub-border bg-hub-surface" /><Label htmlFor="clock-zone" className="mt-3 block">Time zone</Label><Input id="clock-zone" value={clockDraft.tz} onChange={(event) => setClockDraft({ ...clockDraft, tz: event.target.value })} placeholder="Asia/Singapore" className="mt-2 border-hub-border bg-hub-surface" /><Button size="sm" className="mt-3" disabled={!clockDraft.label.trim() || !clockDraft.tz.trim()} onClick={() => { try { new Intl.DateTimeFormat("en", { timeZone: clockDraft.tz }).format(); setClocks((items) => [...items, { label: clockDraft.label.trim(), tz: clockDraft.tz.trim() }]); setClockDraft({ label: "", tz: "" }); } catch { setSaveState("error"); } }}><Plus /> Add clock</Button>{saveState === "error" ? <p className="mt-2 text-xs text-destructive">Enter a valid time zone, such as Europe/London.</p> : null}</div> : null}
+            </div>
+          ) : selection?.type === "weather" ? (
+            <div className="mt-6 rounded-md border border-hub-border bg-hub-background p-4"><Label htmlFor="weather-city">City</Label><Input id="weather-city" value={weatherDraft} onChange={(event) => setWeatherDraft(event.target.value.slice(0, 80))} placeholder="London" className="mt-2 border-hub-border bg-hub-surface" /><p className="mt-3 text-xs leading-5 text-hub-muted">The city will be saved now. Live conditions remain unavailable until a weather provider is configured.</p><div className="mt-4 flex gap-2"><Button size="sm" onClick={() => { setWeatherCity(weatherDraft.trim()); setDrawerOpen(false); setSaveState("saved"); }}>Save city</Button><Button variant="ghost" size="sm" className="text-hub-muted" onClick={() => setWeatherDraft("")}>Clear</Button></div></div>
           ) : selection?.type === "settings" ? (
             <div className="mt-6 space-y-2">
               <div className="mb-4 rounded-md border border-hub-border bg-hub-background p-3"><p className="text-xs text-hub-muted">Published address</p><p className="mt-1 truncate font-mono text-xs text-hub-foreground">landingpagebuilder.aurunex.com/p/{profile.slug}</p></div>
