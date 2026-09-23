@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { StartPageView } from "@/components/StartPageView";
 import { PinGate } from "@/components/PinGate";
+import { PublishedTabs } from "@/components/PublishedTabs";
 import { getPublicPage } from "@/lib/public-page.functions";
 
 export const Route = createFileRoute("/p/$slug")({
@@ -69,5 +69,5 @@ function PublicStartPage() {
   const page = Route.useLoaderData();
   const { slug } = Route.useParams();
   if (page.locked) return <PinGate slug={slug} />;
-  return <StartPageView profile={page.profile} links={page.links} />;
+  return <PublishedTabs profile={page.profile} links={page.links} tabs={page.tabs ?? []} />;
 }

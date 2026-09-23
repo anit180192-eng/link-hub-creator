@@ -19,6 +19,7 @@ export type PublicPage = {
   protected: boolean;
   /** True when this browser is saved as trusted for this page's owner. */
   trusted: boolean;
+  tabs?: { id: string; name: string }[];
 } | null;
 
 function publicClient() {
@@ -73,6 +74,9 @@ export const getPublicPage = createServerFn({ method: "GET" })
       clocks: parseClocks(page.clocks),
     };
 
+    const { data: tabRows } = await admin.from("page_tabs").select("id, name").eq("page_id", page.id).order("position");
+    const tabs = (tabRows ?? []) as { id: string; name: string }[];
+
     if (!page.pin_protected) {
       const supabase = publicClient();
       const { data: links } = await supabase
@@ -80,7 +84,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
         .select(LINK_COLUMNS)
         .eq("page_id", page.id)
         .order("position", { ascending: true });
-      return { profile, links: (links ?? []) as StartPageLink[], locked: false, protected: false, trusted: false };
+      return { profile, links: (links ?? []) as StartPageLink[], locked: false, protected: false, trusted: false, tabs };
     }
 
     if (!device) throw new Error("This page couldn't be loaded right now.");
@@ -94,6 +98,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
       locked: false,
       protected: true,
       trusted: device.kind === "trusted",
+      tabs,
     };
   });
 
