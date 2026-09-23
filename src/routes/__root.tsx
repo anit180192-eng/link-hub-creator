@@ -90,6 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Collect every important account and website in one personal landing page for your browser.",
       },
       { name: "author", content: "Landing Page Builder" },
+      { name: "google-site-verification", content: "WhcBVrWm_yPbpD5cCe0SwTinWfzMQarbWYuVF01f6ho" },
       { property: "og:title", content: "Landing Page Builder — all your links in one place" },
       {
         property: "og:description",
