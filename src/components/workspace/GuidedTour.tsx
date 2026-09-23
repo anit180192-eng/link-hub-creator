@@ -58,7 +58,8 @@ export function GuidedTour({
   }, [open, step]);
 
   if (!open || !step || !box) return null;
-  const placeBelow = box.top + box.height + 230 < window.innerHeight;
+  const tall = box.height > 260;
+  const placeBelow = !tall && box.top + box.height + 230 < window.innerHeight;
 
   return (
     <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Builder guided tour">
@@ -69,8 +70,8 @@ export function GuidedTour({
       <section
         className="fixed left-3 right-3 z-[101] max-w-sm rounded-md border border-hub-accent bg-hub-surface p-4 text-hub-foreground shadow-xl sm:left-auto"
         style={{
-          top: placeBelow ? Math.min(box.top + box.height + 14, window.innerHeight - 220) : undefined,
-          bottom: placeBelow ? undefined : Math.max(window.innerHeight - box.top + 14, 12),
+          top: tall ? Math.max(12, Math.round(window.innerHeight / 2 - 110)) : placeBelow ? Math.min(box.top + box.height + 14, window.innerHeight - 220) : undefined,
+          bottom: !tall && !placeBelow ? Math.max(window.innerHeight - box.top + 14, 12) : undefined,
           right: Math.max(12, Math.min(window.innerWidth - box.left - box.width, window.innerWidth - 396)),
         }}
       >
