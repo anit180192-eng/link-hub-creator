@@ -7,6 +7,7 @@ import {
   Download,
   ExternalLink,
   FolderOpen,
+  Mail,
   Globe2,
   Image as ImageIcon,
   KeyRound,
@@ -72,6 +73,7 @@ function Landing() {
           <a href="#plans" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Free vs account</a>
           <a href="#privacy" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Privacy</a>
           <Link to="/setup" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Setup guide</Link>
+          <a href="#contact" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Feedback</a>
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle />
@@ -237,12 +239,26 @@ function Landing() {
 
       </main>
 
+      <section id="contact" className="scroll-mt-6 border-t border-border bg-card">
+        <div className="mx-auto max-w-7xl px-5 py-12 text-center lg:px-8">
+          <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary"><Mail className="h-5 w-5" aria-hidden="true" /></span>
+          <h2 className="mt-4 font-display text-2xl sm:text-3xl">Have feedback or an idea?</h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+            If you have any feedback about the website or think of an enhancement, we'd love to hear from you. Please write to
+            {" "}<a href="mailto:andcodeslabs@gmail.com" className="font-medium text-primary underline-offset-4 hover:underline">andcodeslabs@gmail.com</a>.
+          </p>
+        </div>
+      </section>
+
       <footer className="mx-auto mt-10 flex max-w-7xl flex-col gap-4 border-t border-border px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between lg:px-8">
         <div className="flex flex-wrap items-center gap-3">
           <Brand className="text-sm text-foreground" />
           <span>by <a href="https://aurunex.com/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">AuruNex</a></span>
         </div>
-        <Link to="/setup" className="inline-flex items-center gap-1 hover:text-foreground">Browser setup instructions <ExternalLink className="h-3 w-3" /></Link>
+        <div className="flex items-center gap-4">
+          <a href="mailto:andcodeslabs@gmail.com" className="inline-flex items-center gap-1 hover:text-foreground"><Mail className="h-3 w-3" /> andcodeslabs@gmail.com</a>
+          <Link to="/setup" className="inline-flex items-center gap-1 hover:text-foreground">Browser setup instructions <ExternalLink className="h-3 w-3" /></Link>
+        </div>
       </footer>
     </div>
   );
