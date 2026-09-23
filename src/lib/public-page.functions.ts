@@ -38,7 +38,7 @@ function publicClient() {
   });
 }
 
-const LINK_COLUMNS = "id, platform, label, url, group_name, position, icon_only";
+const LINK_COLUMNS = "id, platform, label, url, group_name, position, icon_only, favourite, tab_id";
 
 export const getPublicPage = createServerFn({ method: "GET" })
   .inputValidator((slug: string) => String(slug).slice(0, 60))

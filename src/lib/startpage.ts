@@ -8,6 +8,8 @@ export type StartPageLink = {
   group_name: string;
   position: number;
   icon_only?: boolean;
+  favourite?: boolean;
+  tab_id?: string | null;
 };
 
 export type StartPageClock = {
