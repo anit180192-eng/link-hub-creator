@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as WorkspacePreviewRouteImport } from './routes/workspace-preview'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 
@@ -41,6 +42,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkspacePreviewRoute = WorkspacePreviewRouteImport.update({
+  id: '/workspace-preview',
+  path: '/workspace-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/workspace-preview': typeof WorkspacePreviewRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/p/$slug': typeof PSlugRoute
 }
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/workspace-preview': typeof WorkspacePreviewRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/p/$slug': typeof PSlugRoute
 }
@@ -75,15 +83,29 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/workspace-preview': typeof WorkspacePreviewRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/p/$slug': typeof PSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/setup' | '/sitemap.xml' | '/dashboard' | '/p/$slug'
+    | '/'
+    | '/auth'
+    | '/setup'
+    | '/sitemap.xml'
+    | '/workspace-preview'
+    | '/dashboard'
+    | '/p/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/setup' | '/sitemap.xml' | '/dashboard' | '/p/$slug'
+  to:
+    | '/'
+    | '/auth'
+    | '/setup'
+    | '/sitemap.xml'
+    | '/workspace-preview'
+    | '/dashboard'
+    | '/p/$slug'
   id:
     | '__root__'
     | '/'
@@ -91,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/setup'
     | '/sitemap.xml'
+    | '/workspace-preview'
     | '/_authenticated/dashboard'
     | '/p/$slug'
   fileRoutesById: FileRoutesById
@@ -101,6 +124,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   SetupRoute: typeof SetupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  WorkspacePreviewRoute: typeof WorkspacePreviewRoute
   PSlugRoute: typeof PSlugRoute
 }
 
@@ -141,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workspace-preview': {
+      id: '/workspace-preview'
+      path: '/workspace-preview'
+      fullPath: '/workspace-preview'
+      preLoaderRoute: typeof WorkspacePreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -175,6 +206,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   SetupRoute: SetupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  WorkspacePreviewRoute: WorkspacePreviewRoute,
   PSlugRoute: PSlugRoute,
 }
 export const routeTree = rootRouteImport
