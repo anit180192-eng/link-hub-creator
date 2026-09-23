@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
@@ -40,5 +41,5 @@ function AuthPage() {
   if (popupDone) {
     return <div className="flex min-h-screen items-center justify-center px-5 text-center"><div><Brand className="text-lg" /><p className="mt-4 text-sm text-muted-foreground">You're signed in. You can close this window.</p></div></div>;
   }
-  return <div className="min-h-screen px-5 py-8"><div className="mx-auto max-w-5xl"><Link to="/"><Brand className="text-lg" /></Link><div className="mx-auto mt-12 max-w-md"><AuthPanel /></div></div></div>;
+  return <div className="min-h-screen px-5 py-8"><div className="mx-auto max-w-5xl"><div className="flex items-center justify-between gap-3"><Link to="/"><Brand className="text-lg" /></Link><ThemeToggle /></div><div className="mx-auto mt-12 max-w-md"><AuthPanel /></div></div></div>;
 }

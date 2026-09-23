@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { StartPageView } from "@/components/StartPageView";
 import { Button } from "@/components/ui/button";
 import { LandingAdSlot } from "@/components/LandingAdSlot";
@@ -106,11 +107,14 @@ function Landing() {
           <a href="#privacy" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Privacy</a>
           <Link to="/setup" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Setup guide</Link>
         </nav>
-        {signedIn ? (
-          <Button asChild size="sm"><Link to="/dashboard">Open my builder</Link></Button>
-        ) : (
-          <Button asChild size="sm" variant="outline"><a href="#sign-in">Sign in</a></Button>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {signedIn ? (
+            <Button asChild size="sm"><Link to="/dashboard">Open my builder</Link></Button>
+          ) : (
+            <Button asChild size="sm" variant="outline"><a href="#sign-in">Sign in</a></Button>
+          )}
+        </div>
       </header>
 
       <main>
