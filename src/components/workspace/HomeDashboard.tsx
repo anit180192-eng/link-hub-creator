@@ -143,13 +143,13 @@ export function HomeDashboard({ profileId, profileName, displayName, tagline, av
 
         <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-6">
           <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">This browser · last 7 days</p><h3 className="mt-1 flex items-center gap-2 font-display text-base font-semibold"><BarChart3 className="size-4 text-hub-accent" /> Most visited</h3></div></div>
-          <p className="mt-2 text-[11px] text-hub-muted">Ranked from links opened through this page.</p>
+          <p className="mt-2 text-[11px] text-hub-muted">(Counts only links you open from this landing page)</p>
           {mostVisited.length ? <div className="mt-2 space-y-1">{mostVisited.map(({ link, count }) => <div key={link.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2"><LinkItem link={link} onOpen={() => remember(link)} /><span className="pr-2 text-[10px] tabular-nums text-hub-muted">{count} {count === 1 ? "open" : "opens"}</span></div>)}</div> : <div className="mt-5 flex items-center gap-3 rounded-md border border-dashed border-hub-border p-3 text-xs text-hub-muted"><BarChart3 className="size-4" />Your most-used links will appear here.</div>}
         </section>
 
         <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-6">
           <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">This browser only</p><h3 className="mt-1 flex items-center gap-2 font-display text-base font-semibold"><Clock3 className="size-4 text-hub-accent" /> Recently opened here</h3></div>{recent.length ? <Button variant="ghost" size="icon" className="size-8 text-hub-muted" onClick={clearRecent} aria-label="Clear recently opened links"><X /></Button> : null}</div>
-          <p className="mt-2 text-[11px] text-hub-muted">Links opened from this page in this browser.</p>
+          <p className="mt-2 text-[11px] text-hub-muted">(Only links you open from this landing page)</p>
           {recent.length ? <div className="mt-2 space-y-1">{recent.slice(0, 4).map((link) => <LinkItem key={link.id} link={link} onOpen={() => remember(link)} />)}</div> : <div className="mt-5 flex items-center gap-3 rounded-md border border-dashed border-hub-border p-3 text-xs text-hub-muted"><RotateCcw className="size-4" />Your recent links will collect here.</div>}
         </section>
       </div>

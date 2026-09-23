@@ -209,13 +209,17 @@ function Landing() {
                 <span className="truncate">landingpagebuilder.aurunex.com/p/<span className="text-foreground">shreya</span></span>
               </div>
             </div>
-            <div className="flex items-center gap-2 overflow-x-auto border-b border-border bg-background px-4 py-2" aria-label="Example profiles">
-              <span className="shrink-0 text-[10px] font-semibold uppercase text-muted-foreground">Profiles</span>
-              {['Personal', 'Creative', 'Work', 'Relaxation'].map((profile, index) => (
-                <span key={profile} className={`shrink-0 rounded-sm border px-3 py-1 text-xs font-medium ${index === 0 ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground'}`}>
-                  {profile}
-                </span>
-              ))}
+            <div className="dark border-b border-hub-border bg-hub-surface text-hub-foreground">
+              <div className="flex items-center gap-2 px-4 py-2">
+                <span className="text-[10px] font-semibold uppercase text-hub-muted">Profile</span>
+                <span className="rounded-md border border-hub-border bg-hub-background px-3 py-1 text-xs">Personal ▾</span>
+                <span className="hidden text-[10px] text-hub-muted sm:inline">Also: Work</span>
+              </div>
+              <div className="flex gap-1 overflow-x-auto px-4" aria-label="Example tabs">
+                {['Home', 'Creative', 'Music', 'Part-time work'].map((t, i) => (
+                  <span key={t} className={`shrink-0 border-b-2 px-3 py-2 text-xs font-medium ${i === 0 ? 'border-hub-accent text-hub-accent' : 'border-transparent text-hub-muted'}`}>{t}</span>
+                ))}
+              </div>
             </div>
             <div className="page-preview-stage !h-[26rem] sm:!h-[34rem] lg:!h-[45rem]">
               <div className="page-preview-canvas page-preview-canvas--desktop">
