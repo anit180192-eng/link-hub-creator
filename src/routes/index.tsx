@@ -18,18 +18,14 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
-import { AuthPanel } from "@/components/AuthPanel";
 import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { Button } from "@/components/ui/button";
-import { LandingAdSlot } from "@/components/LandingAdSlot";
 import { supabase } from "@/integrations/supabase/client";
-import type { StartPageLink, StartPageProfile } from "@/lib/startpage";
 
-const TITLE = "Landing Page Builder — your personal start page for every browser";
+const TITLE = "Landing Page Builder — your personal browser start page";
 const DESCRIPTION =
-  "Put your accounts, channels, tools and favourite websites into one organised page with folders and world clocks. Build your landing page for every browser and device.";
+  "Keep the websites you use every day in one organised page. Add your links, group them by topic, and open your page from any browser.";
 
 export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
@@ -46,36 +42,6 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-/* Sample page shown in the "A faster first tab" preview — rendered with the
-   exact same component as real published pages, so it always matches. */
-const sampleProfile: StartPageProfile = {
-  slug: "shreya07",
-  display_name: "Shreya",
-  tagline: "Creator, property and family — everything I open daily.",
-  avatar_url: null,
-  theme: "grid",
-  dark_mode: true,
-  clocks: [
-    { label: "India", tz: "Asia/Kolkata" },
-    { label: "London", tz: "Europe/London" },
-    { label: "Sydney", tz: "Australia/Sydney" },
-  ],
-};
-
-const sampleLinks: StartPageLink[] = [
-  { id: "1", platform: "linkedin", label: "LinkedIn", url: "https://www.linkedin.com", group_name: "Personal", position: 1 },
-  { id: "2", platform: "website", label: "Gmail", url: "https://mail.google.com", group_name: "Personal", position: 2 },
-  { id: "3", platform: "website", label: "Google Calendar", url: "https://calendar.google.com", group_name: "Personal", position: 3 },
-  { id: "4", platform: "website", label: "Google Drive", url: "https://drive.google.com", group_name: "Personal", position: 4 },
-  { id: "5", platform: "instagram", label: "Instagram", url: "https://www.instagram.com", group_name: "Personal", position: 5, icon_only: true },
-  { id: "6", platform: "website", label: "Facebook", url: "https://www.facebook.com", group_name: "Personal", position: 6, icon_only: true },
-  { id: "7", platform: "youtube", label: "YouTube channel", url: "https://www.youtube.com", group_name: "Music", position: 7 },
-  { id: "8", platform: "website", label: "SoundCloud", url: "https://soundcloud.com", group_name: "Music", position: 8 },
-  { id: "9", platform: "instagram", label: "Instagram", url: "https://www.instagram.com", group_name: "Music", position: 9, icon_only: true },
-  { id: "10", platform: "website", label: "Rightmove", url: "https://www.rightmove.co.uk", group_name: "Property", position: 10 },
-  { id: "11", platform: "website", label: "Zoopla", url: "https://www.zoopla.co.uk", group_name: "Property", position: 11 },
-];
-
 const features = [
   { icon: FolderOpen, title: "Folders for every part of your life", body: "One folder per brand, project or person. Five Instagram accounts? Each sits in the folder it belongs to." },
   { icon: ImageIcon, title: "Logo-only tiles", body: "Accounts you know by sight can show as a small logo. One click and you're there — no label taking up space." },
@@ -85,7 +51,6 @@ const features = [
 
 function Landing() {
   const [signedIn, setSignedIn] = useState(false);
-  const [previewTab, setPreviewTab] = useState("Home");
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(Boolean(data.session)));
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setSignedIn(Boolean(session)));
@@ -95,7 +60,7 @@ function Landing() {
   const primaryCta = signedIn ? (
     <Button asChild size="lg"><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
   ) : (
-    <Button asChild size="lg"><a href="#sign-in">Build your landing page <ArrowRight /></a></Button>
+    <Button asChild size="lg"><Link to="/auth" search={{ mode: "signup" }}>Create my free start page <ArrowRight /></Link></Button>
   );
 
   return (
@@ -113,7 +78,7 @@ function Landing() {
           {signedIn ? (
             <Button asChild size="sm"><Link to="/dashboard">Open my builder</Link></Button>
           ) : (
-            <Button asChild size="sm" variant="outline"><a href="#sign-in">Sign in</a></Button>
+            <Button asChild size="sm" variant="outline"><Link to="/auth" search={{ mode: "signin" }}>Sign in</Link></Button>
           )}
         </div>
       </header>
@@ -121,142 +86,23 @@ function Landing() {
       <main>
         {/* Hero */}
         <section className="border-y border-border">
-          <div className="mx-auto grid max-w-7xl md:grid-cols-[1.1fr_0.9fr] lg:grid-cols-[1.3fr_0.7fr]">
+          <div className="mx-auto grid max-w-7xl md:grid-cols-[0.9fr_1.1fr] md:items-center">
             <div className="flex flex-col justify-center px-5 py-14 lg:px-8 lg:py-20">
               <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
-                <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" /> Your browser's first page — made by you
+                <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" /> Personal browser start page
               </p>
               <h1 className="mt-5 max-w-3xl font-display text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
-                One page for every link <span className="text-primary">you open every day.</span>
+                Start every browser with <span className="text-primary">your links, organised.</span>
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                Landing Page Builder turns your Instagram accounts, YouTube channels, LinkedIn, work tools and favourite
-                websites into one tidy page. Set it as the page your browser opens, and everything you need is one click away.
+                Keep the websites you use every day in one organised page. Add your links, group them by topic, and open your page from any browser.
               </p>
-              <ul className="mt-7 grid max-w-2xl gap-3 text-sm sm:grid-cols-2">
-                {[
-                  "Organise links into folders by brand, project or person",
-                  "Show busy accounts as compact logo tiles",
-                  "Keep up to five world clocks on the page",
-                  "Build your landing page for every device",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent"><Check className="h-3.5 w-3.5" aria-hidden="true" /></span>
-                    <span className="text-foreground/90">{item}</span>
-                  </li>
-                ))}
-              </ul>
               <div className="mt-8 flex flex-wrap gap-3">
                 {primaryCta}
-                <Button asChild size="lg" variant="outline"><a href="#preview">See what you'll build</a></Button>
+                {!signedIn ? <Button asChild size="lg" variant="ghost"><Link to="/auth" search={{ mode: "signin" }}>Sign in</Link></Button> : null}
               </div>
             </div>
-
-            <aside id="sign-in" className="scroll-mt-6 border-t border-border bg-muted/30 p-5 md:border-l md:border-t-0 md:p-6 lg:p-8">
-              {signedIn ? (
-                <div className="rounded-lg border border-border bg-card p-5 lg:p-6">
-                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between md:flex-col md:items-stretch lg:flex-row lg:items-center">
-                    <div>
-                    <p className="text-xs font-semibold uppercase text-primary">Welcome back</p>
-                    <h2 className="mt-2 font-display text-xl">Your page is ready.</h2>
-                    </div>
-                    <Button asChild><Link to="/dashboard">Open builder <ArrowRight /></Link></Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex h-full flex-col gap-4">
-                  <div className="rounded-lg border border-primary/40 bg-primary/10 p-4">
-                    <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <Link2 className="h-4 w-4 text-primary" aria-hidden="true" /> Sign in to build your landing page
-                    </p>
-                    <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
-                      Your page gets its own address, like <span className="font-medium text-foreground">landingpagebuilder.aurunex.com/p/yourname</span>, so it opens the same way on every browser, laptop and phone. Free.
-                    </p>
-                  </div>
-                  <AuthPanel className="flex-1" />
-                </div>
-              )}
-            </aside>
-          </div>
-        </section>
-
-        {/* Real preview */}
-        <section id="preview" className="mx-auto max-w-7xl scroll-mt-6 px-5 py-16 lg:px-8 lg:py-24">
-          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">What you create</p>
-              <h2 className="mt-3 font-display text-3xl sm:text-4xl">A faster first tab.</h2>
-            </div>
-            <div className="max-w-xl">
-              <p className="text-muted-foreground">
-                This is a real page made with Landing Page Builder — the same layout you'll get. Your name or initials, your
-                folders, your clocks, multiple profiles, and every link ready to open. Try clicking around.
-              </p>
-              <a href="#shreya-page" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-foreground">
-                View Shreya's page, one of our early customers <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </a>
-            </div>
-          </div>
-
-          <div id="shreya-page" className="mx-auto mt-10 max-w-[1120px] scroll-mt-6 overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
-            <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-              <div className="flex gap-1.5" aria-hidden="true">
-                <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
-                <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
-                <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
-              </div>
-              <div className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground">
-                <Lock className="h-3 w-3 shrink-0" aria-hidden="true" />
-                <span className="truncate">landingpagebuilder.aurunex.com/p/<span className="text-foreground">shreya</span></span>
-              </div>
-            </div>
-            <div className="dark border-b border-hub-border bg-hub-surface text-hub-foreground">
-              <div className="flex items-center gap-2 px-4 py-2">
-                <span className="text-[10px] font-semibold uppercase text-hub-muted">Profile</span>
-                <span className="rounded-md border border-hub-border bg-hub-background px-3 py-1 text-xs">Personal ▾</span>
-                <span className="hidden text-[10px] text-hub-muted sm:inline">Also: Work</span>
-              </div>
-              <div className="flex gap-1 overflow-x-auto px-4" aria-label="Example tabs">
-                {['Home', 'Creative', 'Music', 'Part-time work'].map((t) => (
-                  <Button
-                    key={t}
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPreviewTab(t)}
-                    aria-pressed={previewTab === t}
-                    className={`h-auto shrink-0 rounded-none border-b-2 px-3 py-2 text-xs font-medium hover:bg-hub-elevated ${previewTab === t ? 'border-hub-accent text-hub-accent' : 'border-transparent text-hub-muted'}`}
-                  >
-                    {t}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div className="page-preview-stage !h-[26rem] sm:!h-[34rem] lg:!h-[45rem]">
-              <div className="page-preview-canvas page-preview-canvas--desktop">
-                <div className="dark min-h-screen bg-hub-background px-5 py-3 text-hub-foreground">
-                  {previewTab === "Home" ? (
-                    <HomeDashboard
-                      profileId="sample-shreya"
-                      profileName="Personal"
-                      displayName={sampleProfile.display_name}
-                      tagline={sampleProfile.tagline}
-                      avatarUrl={null}
-                      slug={sampleProfile.slug}
-                      published
-                      links={sampleLinks.map((link) => ({ id: link.id, name: link.label, url: link.url, favourite: ["1", "3", "7", "10"].includes(link.id) }))}
-                      clocks={sampleProfile.clocks ?? []}
-                      editing={false}
-                      onEditIdentity={() => undefined}
-                      onEditClocks={() => undefined}
-                      onPublish={() => undefined}
-                    />
-                  ) : (
-                    <SampleTab name={previewTab} />
-                  )}
-                </div>
-              </div>
-            </div>
+            <div className="border-t border-border p-4 md:border-l md:border-t-0 lg:p-7"><CompactExample /></div>
           </div>
         </section>
 
@@ -276,8 +122,6 @@ function Landing() {
             </div>
           </div>
         </section>
-
-        <LandingAdSlot />
 
         {/* Free vs account */}
         <section id="plans" className="mx-auto max-w-7xl scroll-mt-6 px-5 py-16 lg:px-8 lg:py-24">
@@ -311,7 +155,7 @@ function Landing() {
               ]}
               cta={signedIn
                 ? <Button asChild><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
-                : <Button asChild><a href="#sign-in">Create my free account <ArrowRight /></a></Button>}
+                : <Button asChild><Link to="/auth" search={{ mode: "signup" }}>Create my free start page <ArrowRight /></Link></Button>}
             />
           </div>
         </section>
