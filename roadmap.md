@@ -52,3 +52,10 @@
 - [x] Correct editor hierarchy to profiles → Home/tabs → saved folders → links, including empty folders and bottom-left sign-out
 - [x] Match the Home greeting to its lead clock timezone and make homepage sample tabs interactive
 - [ ] Review the staged preview before any production publish
+
+## First-time usability (Sep 23)
+- [ ] Simplify homepage and add first-screen interactive example
+- [ ] Open registration directly from the primary CTA
+- [ ] Add default tab/folder and guided one-link first run
+- [ ] Add post-publish open/setup actions
+- [ ] Verify desktop, mobile, and available account-flow behaviour
