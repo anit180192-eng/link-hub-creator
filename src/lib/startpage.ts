@@ -381,3 +381,12 @@ ${clockScript}
 </html>`;
 }
 
+
+export function openAllLinks(urls: string[]) {
+  let blocked = 0;
+  for (const u of urls) {
+    const w = window.open(normalizeUrl(u), "_blank", "noopener,noreferrer");
+    if (!w) blocked++;
+  }
+  return blocked;
+}
