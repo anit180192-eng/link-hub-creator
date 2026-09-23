@@ -217,11 +217,9 @@ function Landing() {
                     published
                     links={sampleLinks.map((link) => ({ id: link.id, name: link.label, url: link.url, favourite: ["1", "3", "7", "10"].includes(link.id) }))}
                     clocks={sampleProfile.clocks ?? []}
-                    weatherCity="London"
                     editing={false}
                     onEditIdentity={() => undefined}
                     onEditClocks={() => undefined}
-                    onEditWeather={() => undefined}
                     onPublish={() => undefined}
                   />
                 </div>

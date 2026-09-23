@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronRight, Clock3, CloudSun, ExternalLink, Globe2, MapPin, Pencil, Rocket, RotateCcw, Star, X } from "lucide-react";
+import { BarChart3, Check, ChevronRight, Clock3, ExternalLink, Globe2, Pencil, Rocket, RotateCcw, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { faviconFor, hostOf, normalizeUrl } from "@/lib/startpage";
 
@@ -16,15 +16,16 @@ type Props = {
   published: boolean;
   links: DashboardLink[];
   clocks: DashboardClock[];
-  weatherCity: string;
   editing: boolean;
   onEditIdentity: () => void;
   onEditClocks: () => void;
-  onEditWeather: () => void;
   onPublish: () => void;
 };
 
 const recentKey = (profileId: string) => `landing-page-builder:recent:${profileId}`;
+const visitsKey = (profileId: string) => `landing-page-builder:visits:${profileId}`;
+const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+type Visit = { id: string; at: number };
 
 function clockValue(tz: string) {
   return new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date());
@@ -45,11 +46,25 @@ function LinkItem({ link, onOpen }: { link: DashboardLink; onOpen: () => void })
   );
 }
 
-export function HomeDashboard({ profileId, profileName, displayName, tagline, avatarUrl, slug, published, links, clocks, weatherCity, editing, onEditIdentity, onEditClocks, onEditWeather, onPublish }: Props) {
+export function HomeDashboard({ profileId, profileName, displayName, tagline, avatarUrl, slug, published, links, clocks, editing, onEditIdentity, onEditClocks, onPublish }: Props) {
   const [tick, setTick] = useState(0);
   const [recentIds, setRecentIds] = useState<string[]>([]);
+  const [visits, setVisits] = useState<Visit[]>([]);
   const favourites = useMemo(() => links.filter((link) => link.favourite).slice(0, 6), [links]);
   const recent = recentIds.map((id) => links.find((link) => link.id === id)).filter((link): link is DashboardLink => Boolean(link)).slice(0, 8);
+  const mostVisited = useMemo(() => {
+    const cutoff = Date.now() - SEVEN_DAYS;
+    const totals = new Map<string, { count: number; last: number }>();
+    visits.filter((visit) => visit.at >= cutoff).forEach((visit) => {
+      const current = totals.get(visit.id) ?? { count: 0, last: 0 };
+      totals.set(visit.id, { count: current.count + 1, last: Math.max(current.last, visit.at) });
+    });
+    return Array.from(totals.entries())
+      .map(([id, activity]) => ({ link: links.find((link) => link.id === id), ...activity }))
+      .filter((item): item is { link: DashboardLink; count: number; last: number } => Boolean(item.link))
+      .sort((a, b) => b.count - a.count || b.last - a.last)
+      .slice(0, 4);
+  }, [links, visits]);
   const leadClock = clocks[0] ?? { tz: "Europe/London", label: "London" };
 
   useEffect(() => {
@@ -61,15 +76,29 @@ export function HomeDashboard({ profileId, profileName, displayName, tagline, av
     try {
       const stored = window.localStorage.getItem(recentKey(profileId));
       setRecentIds(stored ? JSON.parse(stored) : []);
+      const storedVisits = window.localStorage.getItem(visitsKey(profileId));
+      const cutoff = Date.now() - SEVEN_DAYS;
+      const nextVisits = storedVisits ? (JSON.parse(storedVisits) as Visit[]).filter((visit) => visit.at >= cutoff) : [];
+      setVisits(nextVisits);
+      window.localStorage.setItem(visitsKey(profileId), JSON.stringify(nextVisits));
     } catch {
       setRecentIds([]);
+      setVisits([]);
     }
   }, [profileId]);
 
   function remember(link: DashboardLink) {
-    const next = [link.id, ...recentIds.filter((id) => id !== link.id)].slice(0, 10);
-    setRecentIds(next);
-    try { window.localStorage.setItem(recentKey(profileId), JSON.stringify(next)); } catch { /* Browser storage is optional. */ }
+    setRecentIds((current) => {
+      const next = [link.id, ...current.filter((id) => id !== link.id)].slice(0, 10);
+      try { window.localStorage.setItem(recentKey(profileId), JSON.stringify(next)); } catch { /* Browser storage is optional. */ }
+      return next;
+    });
+    setVisits((current) => {
+      const cutoff = Date.now() - SEVEN_DAYS;
+      const next = [...current.filter((visit) => visit.at >= cutoff), { id: link.id, at: Date.now() }].slice(-500);
+      try { window.localStorage.setItem(visitsKey(profileId), JSON.stringify(next)); } catch { /* Browser storage is optional. */ }
+      return next;
+    });
   }
 
   function clearRecent() {
@@ -100,25 +129,25 @@ export function HomeDashboard({ profileId, profileName, displayName, tagline, av
       </section>
 
       <div className="grid gap-4 xl:grid-cols-12">
-        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-7">
+        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-12">
           <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">World time</p><h3 className="mt-1 font-display text-base font-semibold">Your places, at a glance</h3></div>{editing ? <Button variant="ghost" size="sm" className="text-hub-muted hover:text-hub-accent" onClick={onEditClocks}><Pencil /> Edit clocks</Button> : null}</div>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             {clocks.map((clock, index) => <div key={`${clock.tz}-${clock.label}`} className={`rounded-md border p-3 transition-colors hover:border-hub-accent/60 ${index === 0 ? "border-hub-accent/35 bg-hub-elevated/55" : "border-hub-border bg-hub-background/45"}`}><div className="flex items-center justify-between"><span className="flex items-center gap-1.5 text-xs text-hub-muted"><Globe2 className="size-3.5" />{clock.label}</span><span className="text-[10px] text-hub-muted" suppressHydrationWarning>{dateValue(clock.tz)}</span></div><p className="mt-3 font-display text-2xl tabular-nums text-hub-foreground" suppressHydrationWarning>{clockValue(clock.tz)}</p></div>)}
           </div>
         </section>
 
-        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-5">
-          <div className="flex items-start justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">Weather</p><h3 className="mt-1 font-display text-base font-semibold">Plan the day</h3></div><CloudSun className="size-5 text-hub-accent" /></div>
-          {weatherCity ? <div className="mt-5"><p className="flex items-center gap-1.5 text-sm"><MapPin className="size-4 text-hub-accent" />{weatherCity}</p><p className="mt-2 text-xs leading-5 text-hub-muted">Weather data needs a provider before live conditions can appear.</p></div> : <p className="mt-5 text-sm leading-6 text-hub-muted">Choose a city or explicitly use this device’s location. No weather is invented.</p>}
-          {editing ? <Button variant="outline" size="sm" className="mt-4 border-hub-border bg-hub-background text-hub-foreground" onClick={onEditWeather}><Pencil /> {weatherCity ? "Edit weather" : "Set up weather"}</Button> : null}
-        </section>
-
-        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-7">
+        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-12">
           <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">Pinned across your tabs</p><h3 className="mt-1 flex items-center gap-2 font-display text-base font-semibold"><Star className="size-4 fill-hub-accent text-hub-accent" /> Favourite links</h3></div><span className="text-xs tabular-nums text-hub-muted">{favourites.length}</span></div>
           {favourites.length ? <div className="mt-3 grid gap-1 sm:grid-cols-2">{favourites.map((link) => <LinkItem key={link.id} link={link} onOpen={() => remember(link)} />)}</div> : <p className="mt-5 text-xs text-hub-muted">Mark a link as favourite in any tab and it will appear here.</p>}
         </section>
 
-        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-5">
+        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-6">
+          <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">This browser · last 7 days</p><h3 className="mt-1 flex items-center gap-2 font-display text-base font-semibold"><BarChart3 className="size-4 text-hub-accent" /> Most visited</h3></div></div>
+          <p className="mt-2 text-[11px] text-hub-muted">Ranked from links opened through this page.</p>
+          {mostVisited.length ? <div className="mt-2 space-y-1">{mostVisited.map(({ link, count }) => <div key={link.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2"><LinkItem link={link} onOpen={() => remember(link)} /><span className="pr-2 text-[10px] tabular-nums text-hub-muted">{count} {count === 1 ? "open" : "opens"}</span></div>)}</div> : <div className="mt-5 flex items-center gap-3 rounded-md border border-dashed border-hub-border p-3 text-xs text-hub-muted"><BarChart3 className="size-4" />Your most-used links will appear here.</div>}
+        </section>
+
+        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-6">
           <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">This browser only</p><h3 className="mt-1 flex items-center gap-2 font-display text-base font-semibold"><Clock3 className="size-4 text-hub-accent" /> Recently opened here</h3></div>{recent.length ? <Button variant="ghost" size="icon" className="size-8 text-hub-muted" onClick={clearRecent} aria-label="Clear recently opened links"><X /></Button> : null}</div>
           <p className="mt-2 text-[11px] text-hub-muted">Links opened from this page in this browser.</p>
           {recent.length ? <div className="mt-2 space-y-1">{recent.slice(0, 4).map((link) => <LinkItem key={link.id} link={link} onOpen={() => remember(link)} />)}</div> : <div className="mt-5 flex items-center gap-3 rounded-md border border-dashed border-hub-border p-3 text-xs text-hub-muted"><RotateCcw className="size-4" />Your recent links will collect here.</div>}

@@ -588,7 +588,7 @@ export function WorkspacePrototype() {
               </div> : null}
 
               {tab.name === "Home" ? (
-                <HomeDashboard profileId={profile.id} profileName={profile.name} displayName={profile.displayName} tagline={profile.tagline} avatarUrl={profile.avatarUrl} slug={profile.slug} published={profile.published} links={profileLinks} clocks={clocks} weatherCity={weatherCity} editing={!preview} onEditIdentity={openSettings} onEditClocks={openClocks} onEditWeather={openWeather} onPublish={publishProfile} />
+                <HomeDashboard profileId={profile.id} profileName={profile.name} displayName={profile.displayName} tagline={profile.tagline} avatarUrl={profile.avatarUrl} slug={profile.slug} published={profile.published} links={profileLinks} clocks={clocks} editing={!preview} onEditIdentity={openSettings} onEditClocks={openClocks} onPublish={publishProfile} />
               ) : tab.folders.length ? (
                 <div className="mt-5 columns-1 gap-4 space-y-4 md:columns-2 xl:columns-3">
                   {tab.folders.map((folder) => (
