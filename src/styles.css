@@ -65,6 +65,7 @@
   --color-hub-foreground: var(--hub-foreground);
   --color-hub-muted: var(--hub-muted);
   --color-hub-border: var(--hub-border);
+  --color-hub-elevated: var(--hub-elevated);
 }
 
 /* Light theme — warm paper, navy text, deep gold + deep teal (all WCAG AA). */
