@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Landing Page Builder – Bookmark Importer",
+  "version": "1.0.0",
+  "description": "Send your browser bookmarks to Landing Page Builder in one click.",
+  "permissions": ["bookmarks", "activeTab", "scripting"],
+  "action": { "default_popup": "popup.html", "default_icon": "icon.png" },
+  "icons": { "48": "icon.png", "128": "icon.png" }
+}
