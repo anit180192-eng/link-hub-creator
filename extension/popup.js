@@ -15,10 +15,17 @@ document.getElementById("go").onclick = async () => {
     const results = await chrome.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, world: "MAIN", args: [html],
       func: (h) => new Promise((resolve) => {
         if (!/\/dashboard/.test(location.pathname)) return resolve(null);
-        const t = setTimeout(() => { removeEventListener("message", on); resolve("The builder didn't respond. Reload the dashboard and try again."); }, 60000);
-        function on(e) { if (e.source === window && e.data && e.data.type === "LPB_BOOKMARKS_RESULT") { clearTimeout(t); removeEventListener("message", on); resolve(e.data.msg); } }
+        let ready = false;
+        const done = (m) => { clearTimeout(p); clearTimeout(t); removeEventListener("message", on); resolve(m); };
+        const p = setTimeout(() => { if (!ready) done("This builder page doesn't support the extension yet. Publish the latest version of the site (or use the preview), reload the dashboard, and try again."); }, 4000);
+        const t = setTimeout(() => done("The builder didn't finish in time. Reload the dashboard and check if the tab was created."), 90000);
+        function on(e) {
+          if (e.source !== window || !e.data) return;
+          if (e.data.type === "LPB_PONG" && !ready) { ready = true; postMessage({ type: "LPB_BOOKMARKS", html: h }, location.origin); }
+          if (e.data.type === "LPB_BOOKMARKS_RESULT") done(e.data.msg);
+        }
         addEventListener("message", on);
-        postMessage({ type: "LPB_BOOKMARKS", html: h }, location.origin);
+        postMessage({ type: "LPB_PING" }, location.origin);
       }) });
     const msg = results.map((r) => r.result).find(Boolean);
     s.textContent = msg ? (msg.startsWith("OK: ") ? "Done! " + msg.slice(4) : msg) : "Open your Landing Page Builder dashboard (signed in) in this tab first.";
