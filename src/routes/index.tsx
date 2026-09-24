@@ -145,32 +145,38 @@ function Landing() {
           </div>
         </section>
 
-        {/* Free account */}
+        {/* Plans */}
         <section id="plans" className="mx-auto max-w-7xl scroll-mt-6 px-5 py-16 lg:px-8 lg:py-24">
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary">One simple way to use it</p>
-          <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl">A link that follows you everywhere.</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Free vs premium</p>
+          <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl">Two plans, one builder.</h2>
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
             <PlanCard
               highlight
               icon={Link2}
-              eyebrow="With a free account"
-              title="Your personal link"
-              badge={<span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground"><Check className="h-3 w-3" aria-hidden="true" /> Recommended</span>}
+              eyebrow="Free account"
+              title="Free"
+              badge={<span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground"><Check className="h-3 w-3" aria-hidden="true" /> Start here</span>}
               points={[
-                "Your own address: landingpagebuilder.aurunex.com/p/yourname",
-                "Set it as your start page in every browser, on any laptop or phone",
-                "Edit once — every device shows the change instantly",
-                "Protect it with a 6-digit PIN and trusted devices",
+                "2 profiles — for example Personal and Work",
+                "5 tabs per profile",
+                "Unlimited links and folders",
+                "PIN protection, publishing, and bookmark import",
               ]}
               cta={signedIn
                 ? <Button asChild><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
                 : <Button asChild><Link to="/auth" search={{ mode: "signup" }}>Create my free start page <ArrowRight /></Link></Button>}
             />
-            <div className="flex flex-col justify-center rounded-xl border border-dashed border-border bg-card/30 p-6 sm:p-8">
-              <StatusBadge>Coming soon</StatusBadge>
-              <h3 className="mt-4 font-display text-2xl">Build and download</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">Prefer no account at all? A build-and-download option — your page as a single HTML file — is on the way.</p>
-            </div>
+            <PlanCard
+              icon={Globe2}
+              eyebrow="Premium account"
+              title="Premium"
+              badge={<StatusBadge>Coming soon</StatusBadge>}
+              points={[
+                "10 profiles",
+                "50 tabs per profile",
+                "Everything in Free, with room for much more",
+              ]}
+            />
           </div>
         </section>
 
