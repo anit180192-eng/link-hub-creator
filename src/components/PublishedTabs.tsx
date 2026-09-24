@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { isSafeUrl, linkTitle, parseClocks, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 
 export function PublishedTabs({ profile, links, tabs }: { profile: StartPageProfile; links: StartPageLink[]; tabs: { id: string; name: string }[] }) {
-  const [active, setActive] = useState("__home");
+  const [active, setActive] = useState(() => (links.some((l) => l.favourite) || !tabs[0] ? "__home" : tabs[0].id));
   const palette = profile.dark_mode ? "dark" : "hub-light";
   const first = tabs[0]?.id;
   const tabLinks = links.filter((l) => l.tab_id === active || (!l.tab_id && active === first));
