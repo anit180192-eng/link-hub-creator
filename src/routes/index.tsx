@@ -8,7 +8,6 @@ import {
   FolderTree,
   Globe2,
   KeyRound,
-  Layers3,
   Mail,
   MousePointer2,
   Sparkles,
@@ -53,9 +52,6 @@ function Landing() {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  const builderLink = signedIn ? "/dashboard" : "/auth";
-  const builderSearch = signedIn ? undefined : { mode: "signup" as const };
-
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <header className="dark sticky top-0 z-40 border-b border-border/70 bg-background/95 text-foreground backdrop-blur-lg">
@@ -92,7 +88,7 @@ function Landing() {
                 Keep your everyday websites in one personal start page. Organise them by profile, tab and folder, then open your page from any browser.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
-                <Button asChild size="lg"><Link to={builderLink} search={builderSearch}>{signedIn ? "Open my builder" : "Create my free start page"}<ArrowRight /></Link></Button>
+                <PrimaryCta signedIn={signedIn} />
                 <Button asChild size="lg" variant="ghost"><a href="#how-it-works">See how it works<ChevronDown /></a></Button>
               </div>
               <p className="mt-5 flex items-center gap-2 text-xs text-muted-foreground"><Check className="h-4 w-4 text-primary" aria-hidden="true" /> Free account · your page works across browsers and devices</p>
@@ -207,7 +203,7 @@ function Landing() {
             <h2 className="mx-auto mt-6 max-w-3xl font-display text-4xl font-semibold sm:text-5xl">Build the page you want to open first.</h2>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground">Start with one link. Add structure when you need it. Your personal start page stays ready on every browser where you open it.</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Button asChild size="lg"><Link to={builderLink} search={builderSearch}>{signedIn ? "Open my builder" : "Create my free start page"}<ArrowRight /></Link></Button>
+              <PrimaryCta signedIn={signedIn} />
               {!signedIn ? <Button asChild size="lg" variant="outline"><Link to="/auth" search={{ mode: "signin" }}>Sign in</Link></Button> : null}
             </div>
           </div>
@@ -233,6 +229,14 @@ function Landing() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function PrimaryCta({ signedIn }: { signedIn: boolean }) {
+  return signedIn ? (
+    <Button asChild size="lg"><Link to="/dashboard">Open my builder<ArrowRight /></Link></Button>
+  ) : (
+    <Button asChild size="lg"><Link to="/auth" search={{ mode: "signup" }}>Create my free start page<ArrowRight /></Link></Button>
   );
 }
 
