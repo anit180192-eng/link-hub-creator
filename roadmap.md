@@ -1,7 +1,7 @@
 # Task Roadmap
 
 ## In Progress
-- [ ] Redesign only the public homepage as a screenshot-led editorial story; verify desktop and mobile preview
+- [x] Redesign only the public homepage as a screenshot-led editorial story; verify desktop and mobile preview
 - [x] Wire AdSense publisher ID (ca-pub-7242078241100237) into ads-config; auto-ads active on published pages. Ad slot ID still optional for manual placement.
 
 ## Done
