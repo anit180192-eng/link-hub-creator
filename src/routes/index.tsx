@@ -207,6 +207,7 @@ function Landing() {
                   </li>
                 ))}
               </ol>
+              <a href="/privacy.html" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline">Read the full privacy policy <ExternalLink className="h-3 w-3" aria-hidden="true" /></a>
             </div>
 
             <div className="mx-auto w-full max-w-sm rounded-xl border border-border bg-background p-6 shadow-2xl" aria-label="Example of the PIN screen">
