@@ -142,23 +142,11 @@ function Landing() {
           </div>
         </section>
 
-        {/* Free vs account */}
+        {/* Free account */}
         <section id="plans" className="mx-auto max-w-7xl scroll-mt-6 px-5 py-16 lg:px-8 lg:py-24">
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Two ways to use it</p>
-          <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl">Download a file, or get a link that follows you everywhere.</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">One simple way to use it</p>
+          <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl">A link that follows you everywhere.</h2>
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
-            <PlanCard
-              icon={Download}
-              eyebrow="Without an account"
-              title="Build and download"
-              badge={<StatusBadge>Coming soon</StatusBadge>}
-              points={[
-                "Build your page right here, no sign-up",
-                "Download it as a single HTML file",
-                "Opens only on the computer where you save the file",
-                "Change a link? Download and replace the file again",
-              ]}
-            />
             <PlanCard
               highlight
               icon={Link2}
@@ -169,13 +157,17 @@ function Landing() {
                 "Your own address: landingpagebuilder.aurunex.com/p/yourname",
                 "Set it as your start page in every browser, on any laptop or phone",
                 "Edit once — every device shows the change instantly",
-                "Still download the HTML file whenever you like",
                 "Protect it with a 6-digit PIN and trusted devices",
               ]}
               cta={signedIn
                 ? <Button asChild><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
                 : <Button asChild><Link to="/auth" search={{ mode: "signup" }}>Create my free start page <ArrowRight /></Link></Button>}
             />
+            <div className="flex flex-col justify-center rounded-xl border border-dashed border-border bg-card/30 p-6 sm:p-8">
+              <StatusBadge>Coming soon</StatusBadge>
+              <h3 className="mt-4 font-display text-2xl">Build and download</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Prefer no account at all? A build-and-download option — your page as a single HTML file — is on the way.</p>
+            </div>
           </div>
         </section>
 
