@@ -148,7 +148,7 @@ export function HomeDashboard({ profileId, profileName, displayName, tagline, av
 
         <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-12">
           <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">Pinned across your tabs</p><h3 className="mt-1 flex items-center gap-2 font-display text-base font-semibold"><Star className="size-4 fill-hub-accent text-hub-accent" /> Favourite links</h3></div><span className="text-xs tabular-nums text-hub-muted">{favourites.length}</span></div>
-          {favourites.length ? <div className="mt-3 grid gap-1 sm:grid-cols-2">{favourites.map((link) => <LinkItem key={link.id} link={link} onOpen={() => remember(link)} />)}</div> : <p className="mt-5 text-xs text-hub-muted">Mark a link as favourite in any tab and it will appear here.</p>}
+          {favourites.length ? <div className="mt-3 grid gap-1 sm:grid-cols-2">{favourites.map((link) => <LinkItem key={link.id} link={link} onOpen={() => remember(link)} />)}</div> : <p className="mt-5 text-xs text-hub-muted">{editing ? "Mark a link as favourite in any tab and it will appear here." : "No favourites yet — open a tab above to see all links."}</p>}
         </section>
 
         <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-6">
