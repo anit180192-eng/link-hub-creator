@@ -23,6 +23,9 @@ import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import builderImage from "@/assets/homepage/03-builder-demo.webp.asset.json";
+import homeImage from "@/assets/homepage/04-published-home-demo.webp.asset.json";
+import creativeImage from "@/assets/homepage/05-creative-tab-demo.webp.asset.json";
 
 const TITLE = "Landing Page Builder — your personal browser start page";
 const DESCRIPTION =
@@ -218,6 +221,27 @@ function Landing() {
                 <span className="flex items-center gap-1.5"><Smartphone className="h-3.5 w-3.5 text-accent" aria-hidden="true" /> My phone · trusted</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Sample screenshots */}
+        <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">See it in action</p>
+          <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl">A look at the pages you'll build.</h2>
+          <p className="mt-4 max-w-2xl text-muted-foreground">Sample screens from the builder and a published page — your own page will carry your name, links and clocks.</p>
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { src: builderImage.url, alt: "The builder workspace with tabs, folders and saved links", label: "The builder" },
+              { src: homeImage.url, alt: "A published Home page with a greeting, world clocks and favourite links", label: "Published Home page" },
+              { src: creativeImage.url, alt: "A published tab with a folder of creative project links", label: "A published tab" },
+            ].map((shot) => (
+              <figure key={shot.label} className="group">
+                <div className="overflow-hidden rounded-lg border border-border bg-card shadow-lg transition-transform duration-500 motion-reduce:transition-none md:group-hover:-translate-y-1">
+                  <img src={shot.src} alt={shot.alt} width={1600} height={900} loading="lazy" decoding="async" className="aspect-[16/9] h-full w-full object-cover" />
+                </div>
+                <figcaption className="mt-3 flex items-center gap-2 text-xs font-medium text-muted-foreground"><span className="h-px w-5 bg-current" aria-hidden="true" />{shot.label}</figcaption>
+              </figure>
+            ))}
           </div>
         </section>
 
