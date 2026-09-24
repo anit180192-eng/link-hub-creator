@@ -55,7 +55,7 @@ function Landing() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <header className="dark sticky top-0 z-40 border-b border-border/70 bg-background/95 text-foreground backdrop-blur-lg">
-        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-4 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-4 lg:px-8">
           <Link to="/" aria-label="Landing Page Builder home" className="min-w-0">
             <Brand className="truncate text-sm sm:text-lg" />
           </Link>
