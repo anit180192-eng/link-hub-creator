@@ -63,7 +63,7 @@ export function parseBookmarksHtml(html: string): ParsedBookmarks {
   if (root) walkRoot(root);
   if (loose.length) {
     if (!tabs.length) tabs.push({ name: "Bookmarks", folders: new Map() });
-    const first = tabs[0].folders;
+    const first = tabs[0]!.folders;
     first.set(UNGROUPED, [...(first.get(UNGROUPED) ?? []), ...loose]);
   }
   return { tabs };
