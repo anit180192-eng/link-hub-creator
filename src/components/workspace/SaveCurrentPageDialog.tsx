@@ -88,6 +88,7 @@ export function SaveCurrentPageDialog({ ready, currentPageId, currentTabId, onSa
       close();
     } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't save this page"); }
     finally { setSaving(false); }
+    return undefined;
   };
 
   return (
