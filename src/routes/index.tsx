@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowRight,
@@ -24,6 +26,7 @@ import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { getPublicPaddleConfig } from "@/lib/billing.functions";
 import builderImage from "@/assets/homepage/03-builder-demo.webp.asset.json";
 import homeImage from "@/assets/homepage/04-published-home-demo.webp.asset.json";
 import creativeImage from "@/assets/homepage/05-creative-tab-demo.webp.asset.json";
@@ -56,6 +59,9 @@ const features = [
 
 function Landing() {
   const [signedIn, setSignedIn] = useState(false);
+  const fetchBilling = useServerFn(getPublicPaddleConfig);
+  const { data: billing } = useQuery({ queryKey: ["public-billing-config"], queryFn: () => fetchBilling() });
+  const premiumLive = billing?.environment === "production" && Boolean(billing.clientToken);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(Boolean(data.session)));
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setSignedIn(Boolean(session)));
@@ -171,13 +177,17 @@ function Landing() {
               icon={Globe2}
               eyebrow="Premium account"
               title="Premium"
-              badge={<StatusBadge>Coming soon</StatusBadge>}
+              badge={<StatusBadge>{premiumLive ? "9-day free trial" : "Coming soon"}</StatusBadge>}
               points={[
-                "£9.99 per year (GBP), billed yearly — coming soon",
+                premiumLive ? "9 days free, then £9.99 per year (GBP) unless you cancel" : "£9.99 per year (GBP), billed yearly — coming soon",
                 "10 profiles",
                 "50 tabs per profile",
                 "Everything in Free, with room for much more",
               ]}
+              cta={premiumLive ? signedIn
+                ? <Button asChild variant="outline"><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
+                : <Button asChild variant="outline"><Link to="/auth" search={{ mode: "signup" }}>Start free trial <ArrowRight /></Link></Button>
+                : undefined}
             />
           </div>
         </section>
@@ -302,6 +312,8 @@ function Landing() {
           <a href="mailto:antcodeslabs@gmail.com" className="inline-flex items-center gap-1 hover:text-foreground"><Mail className="h-3 w-3" /> antcodeslabs@gmail.com</a>
           <a href="https://ko-fi.com/aurunex" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-foreground"><Coffee className="h-3 w-3" aria-hidden="true" /> Support development</a>
           <a href="/privacy.html" className="hover:text-foreground">Privacy Policy</a>
+          <a href="/terms.html" className="hover:text-foreground">Terms</a>
+          <a href="/refunds.html" className="hover:text-foreground">Refunds &amp; cancellation</a>
           <Link to="/setup" className="inline-flex items-center gap-1 hover:text-foreground">Browser setup instructions <ExternalLink className="h-3 w-3" /></Link>
         </div>
       </footer>
