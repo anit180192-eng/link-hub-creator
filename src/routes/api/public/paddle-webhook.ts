@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { mapSubscriptionEvent, verifyPaddleSignature } from "@/lib/paddle";
 
 export const Route = createFileRoute("/api/public/paddle-webhook")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {
