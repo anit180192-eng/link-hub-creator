@@ -30,7 +30,7 @@ export async function verifyPaddleSignature(rawBody: string, header: string | nu
 export type EntitlementUpdate = {
   user_id: string;
   plan: "free" | "premium";
-  status: "active" | "past_due" | "canceled";
+  status: "active" | "trialing" | "past_due" | "canceled";
   current_period_end: string | null;
   scheduled_cancel_at: string | null;
   paddle_customer_id: string | null;
@@ -53,7 +53,7 @@ export function mapSubscriptionEvent(event: any, premiumPriceId: string, environ
   const end = d.current_billing_period?.ends_at ?? d.scheduled_change?.effective_at ?? null;
   const scheduledCancelAt = d.scheduled_change?.action === "cancel" ? d.scheduled_change.effective_at ?? null : null;
   const s = d.status;
-  const status = s === "active" || s === "trialing" ? "active" : s === "past_due" ? "past_due" : "canceled";
+  const status = s === "active" || s === "trialing" ? s : s === "past_due" ? "past_due" : "canceled";
   return {
     user_id: userId,
     plan: "premium", // effective access for canceled/past_due is decided by current_period_end
