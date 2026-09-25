@@ -4,35 +4,24 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { createBillingPortal, getBillingConfig } from "@/lib/billing.functions";
+import { loadPaddle } from "@/lib/paddleClient";
+import { createBillingPortal, createCheckoutTransaction, getBillingConfig } from "@/lib/billing.functions";
 import { PLAN_LIMITS, PREMIUM_PRICE_LABEL, type Plan } from "@/lib/plans";
-
-declare global { interface Window { Paddle?: any } }
-let paddleLoad: Promise<void> | null = null;
-function loadPaddle(env: string, token: string) {
-  paddleLoad ??= new Promise<void>((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
-    s.onload = () => { if (env === "sandbox") window.Paddle.Environment.set("sandbox"); window.Paddle.Initialize({ token }); resolve(); };
-    s.onerror = () => { paddleLoad = null; reject(new Error("Couldn't load checkout")); };
-    document.head.appendChild(s);
-  });
-  return paddleLoad;
-}
 
 export function PremiumDialog({ open, onOpenChange, plan }: { open: boolean; onOpenChange: (o: boolean) => void; plan: Plan }) {
   const fetchConfig = useServerFn(getBillingConfig);
   const portal = useServerFn(createBillingPortal);
+  const startTxn = useServerFn(createCheckoutTransaction);
   const cfg = useQuery({ queryKey: ["billing-config"], queryFn: () => fetchConfig(), enabled: open, staleTime: 60_000 });
   const [busy, setBusy] = useState(false);
   const c = cfg.data;
 
   const checkout = async () => {
-    if (!c?.configured || !c.clientToken || !c.priceId) return;
+    if (!c?.configured || !c.clientToken) return;
     setBusy(true);
     try {
-      await loadPaddle(c.environment, c.clientToken);
-      window.Paddle.Checkout.open({ items: [{ priceId: c.priceId, quantity: 1 }], customData: { user_id: c.userId }, ...(c.email ? { customer: { email: c.email } } : {}) });
+      const [Paddle, { transactionId }] = await Promise.all([loadPaddle(c.environment, c.clientToken), startTxn()]);
+      Paddle.Checkout.open({ transactionId, ...(c.email ? { customer: { email: c.email } } : {}) });
       onOpenChange(false);
     } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't open checkout"); } finally { setBusy(false); }
   };

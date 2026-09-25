@@ -62,4 +62,14 @@ export function mapSubscriptionEvent(event: any, premiumPriceId: string): Entitl
   };
 }
 
+/** Server-issued tag binding a checkout to a Supabase user; browsers can't forge it without the webhook secret. */
+export const bindingSig = (userId: string, secret: string) => hmacHex(secret, `lpb-user-binding:v1:${userId}`);
+export async function verifyBinding(event: any, secret: string) {
+  const cd = event?.data?.custom_data;
+  if (!cd || typeof cd.user_id !== "string" || typeof cd.lpb_sig !== "string" || !secret) return false;
+  return safeEqual(cd.lpb_sig, await bindingSig(cd.user_id, secret));
+}
+/** Paddle transaction IDs passed as ?_ptxn= on payment links (checkout, payment-method update, dunning). */
+export const isTransactionId = (v: unknown): v is string => typeof v === "string" && /^txn_[a-z0-9]{26}$/.test(v);
+
 export const paddleApiBase = (env: string | undefined) => (env === "production" ? "https://api.paddle.com" : "https://sandbox-api.paddle.com");
