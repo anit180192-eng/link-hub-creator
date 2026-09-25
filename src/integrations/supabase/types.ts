@@ -16,34 +16,40 @@ export type Database = {
     Tables: {
       account_entitlements: {
         Row: {
+          billing_environment: string
           created_at: string
           current_period_end: string | null
           last_event_at: string | null
           paddle_customer_id: string | null
           paddle_subscription_id: string | null
           plan: string
+          scheduled_cancel_at: string | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          billing_environment?: string
           created_at?: string
           current_period_end?: string | null
           last_event_at?: string | null
           paddle_customer_id?: string | null
           paddle_subscription_id?: string | null
           plan?: string
+          scheduled_cancel_at?: string | null
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          billing_environment?: string
           created_at?: string
           current_period_end?: string | null
           last_event_at?: string | null
           paddle_customer_id?: string | null
           paddle_subscription_id?: string | null
           plan?: string
+          scheduled_cancel_at?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -71,6 +77,21 @@ export type Database = {
           pin_salt?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      billing_settings: {
+        Row: {
+          active_environment: string
+          id: boolean
+        }
+        Insert: {
+          active_environment: string
+          id?: boolean
+        }
+        Update: {
+          active_environment?: string
+          id?: boolean
         }
         Relationships: []
       }
