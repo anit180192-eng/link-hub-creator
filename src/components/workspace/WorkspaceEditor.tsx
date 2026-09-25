@@ -40,11 +40,11 @@ const TOUR_STEPS:TourStep[]=[
 const uidSuffix=()=>Math.random().toString(36).slice(2,6);
 const initials=(value:string)=>value.split(/\s+/).map((x)=>x[0]).join("").slice(0,2).toUpperCase()||"?";
 
-function LinkItem({link,editing,onEdit,onFavourite}:{link:LinkRow;editing:boolean;onEdit:()=>void;onFavourite:()=>void}){
+function LinkItem({link,editing,onEdit,onFavourite,onDelete}:{link:LinkRow;editing:boolean;onEdit:()=>void;onFavourite:()=>void;onDelete:()=>void}){
  const icon=faviconFor(link.url); return <div className="group grid min-h-11 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-2 border-t border-hub-border/70 px-3 first:border-t-0 hover:bg-hub-elevated/55">
   {icon?<img src={icon} alt="" className="size-6 rounded-sm"/>:<span className="grid size-6 place-items-center rounded-sm bg-hub-accent text-[10px] font-bold text-hub-background">{(link.label||link.platform)[0]?.toUpperCase()}</span>}
   <a href={editing?undefined:normalizeUrl(link.url)} target={editing?undefined:"_blank"} rel="noopener noreferrer" onClick={editing?(e)=>{e.preventDefault();onEdit();}:undefined} className="min-w-0 rounded-sm py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent"><span className="block truncate text-[13px] font-medium text-hub-foreground">{link.label||link.platform}</span><span className="block truncate text-[10px] text-hub-muted">{hostOf(link.url)}</span></a>
-  {editing?<div className="flex"><Button variant="ghost" size="icon" className="size-7 text-hub-muted" onClick={onFavourite} aria-label={link.favourite?"Remove favourite":"Mark favourite"}><Star className={`size-3.5 ${link.favourite?"fill-hub-accent text-hub-accent":""}`}/></Button><Button variant="ghost" size="icon" className="size-7 text-hub-muted" onClick={onEdit} aria-label={`Edit ${link.label||link.platform}`}><Pencil className="size-3.5"/></Button></div>:link.favourite?<Star className="size-3.5 fill-hub-accent text-hub-accent"/>:null}
+  {editing?<div className="flex"><Button variant="ghost" size="icon" className="size-7 text-hub-muted" onClick={onFavourite} aria-label={link.favourite?"Remove favourite":"Mark favourite"}><Star className={`size-3.5 ${link.favourite?"fill-hub-accent text-hub-accent":""}`}/></Button><Button variant="ghost" size="icon" className="size-7 text-hub-muted" onClick={onEdit} aria-label={`Edit ${link.label||link.platform}`}><Pencil className="size-3.5"/></Button><Button variant="ghost" size="icon" className="size-7 text-hub-muted hover:text-destructive" onClick={onDelete} aria-label={`Delete ${link.label||link.platform}`} title="Delete link"><Trash2 className="size-3.5"/></Button></div>:link.favourite?<Star className="size-3.5 fill-hub-accent text-hub-accent"/>:null}
  </div>
 }
 
