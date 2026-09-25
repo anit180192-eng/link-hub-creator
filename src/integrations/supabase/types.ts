@@ -445,6 +445,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_paddle_event: {
+        Args: {
+          p_ent: Json
+          p_event_id: string
+          p_event_type: string
+          p_occurred_at: string
+        }
+        Returns: string
+      }
       effective_plan: { Args: { _user_id: string }; Returns: string }
       reserve_pin_attempt: {
         Args: { p_ip_hash: string; p_owner_id: string }
