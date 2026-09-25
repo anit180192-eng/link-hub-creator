@@ -172,6 +172,7 @@ function Landing() {
               title="Premium"
               badge={<StatusBadge>Coming soon</StatusBadge>}
               points={[
+                "£9.99 per year (GBP), billed yearly — coming soon",
                 "10 profiles",
                 "50 tabs per profile",
                 "Everything in Free, with room for much more",
