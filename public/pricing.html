@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Compare Free and Premium plans for Landing Page Builder. Premium is £9.99 per year after a 9-day free trial." />
+    <title>Pricing — Landing Page Builder</title>
+    <style>
+      :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0e1b24; color: #f4f4f1; }
+      * { box-sizing: border-box; } body { margin: 0; } a { color: #f1d38c; } a:focus-visible { outline: 2px solid #f1d38c; outline-offset: 3px; }
+      header, main, footer { width: min(100% - 2rem, 960px); margin-inline: auto; }
+      header { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1.5rem 0; border-bottom: 1px solid #344855; }
+      header a:first-child { font-weight: 700; text-decoration: none; }
+      main { padding: 2.5rem 0 3rem; } h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 .5rem; }
+      h2 { font-size: 1.3rem; margin: 0 0 .75rem; } p, li { line-height: 1.65; color: #cbd3d7; }
+      .lead { max-width: 680px; } .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 1rem; margin: 2rem 0; }
+      .plan { border: 1px solid #344855; border-radius: 12px; background: #122a38; padding: 1.5rem; }
+      .plan.premium { border-color: #d8ba72; } .price { color: #f1d38c; font-size: 1.75rem; font-weight: 700; margin: 0; }
+      .detail { font-size: .95rem; } ul { padding-left: 1.25rem; } li { margin: .4rem 0; }
+      .button { display: inline-block; margin-top: .8rem; border-radius: 7px; background: #e5c77d; color: #0e1b24; padding: .75rem 1rem; font-weight: 700; text-decoration: none; }
+      .note { border-top: 1px solid #344855; padding-top: 1.5rem; margin-top: 1.5rem; }
+      footer { border-top: 1px solid #344855; padding: 1.5rem 0 2rem; font-size: .9rem; display: flex; flex-wrap: wrap; gap: 1rem; }
+    </style>
+  </head>
+  <body>
+    <header><a href="/">Landing Page Builder</a><a href="/auth">Sign in or create an account</a></header>
+    <main>
+      <h1>Simple pricing for your start page</h1>
+      <p class="lead">Save and organise your everyday websites in profiles, tabs, and folders. Start free, then choose Premium if you need more space.</p>
+      <div class="plans">
+        <section class="plan" aria-labelledby="free-heading">
+          <h2 id="free-heading">Free</h2>
+          <p class="price">£0</p>
+          <p class="detail">No payment required.</p>
+          <ul>
+            <li>2 profiles</li><li>5 tabs per profile</li><li>Unlimited links and folders</li>
+            <li>PIN protection, publishing, and bookmark import</li>
+          </ul>
+          <a class="button" href="/auth">Create a free account</a>
+        </section>
+        <section class="plan premium" aria-labelledby="premium-heading">
+          <h2 id="premium-heading">Premium</h2>
+          <p class="price">£9.99 per year</p>
+          <p class="detail">9-day free trial, then £9.99 for your first year unless you cancel before the trial ends. Renews yearly unless cancelled. The checkout shows any applicable taxes and the exact charge date before you confirm.</p>
+          <ul>
+            <li>10 profiles</li><li>50 tabs per profile</li><li>Everything in Free</li>
+            <li>Manage or cancel renewal from your Membership page</li>
+          </ul>
+          <a class="button" href="/auth">Create an account to choose Premium</a>
+        </section>
+      </div>
+      <div class="note">
+        <h2>Trial, cancellation, and saved content</h2>
+        <p>You can cancel during the trial to avoid the first charge. After a paid year begins, cancelling stops the next renewal; it does not itself refund a payment already made. If Premium access ends, content above Free limits remains saved but archived until Premium is restored. Paddle processes Premium purchases as seller of record.</p>
+        <p>Read our <a href="/terms.html">Terms and Conditions</a> and <a href="/refunds.html">Refund and Cancellation Policy</a> before subscribing. For help, email <a href="mailto:antcodeslabs@gmail.com">antcodeslabs@gmail.com</a>.</p>
+      </div>
+    </main>
+    <footer><a href="/">Home</a><a href="/terms.html">Terms</a><a href="/refunds.html">Refunds and cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:antcodeslabs@gmail.com">Contact</a></footer>
+  </body>
+</html>

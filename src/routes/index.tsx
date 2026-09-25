@@ -74,7 +74,7 @@ function Landing() {
         <Link to="/" aria-label="Landing Page Builder home"><Brand className="text-base sm:text-lg" /></Link>
         <nav className="hidden items-center gap-1 text-sm md:flex" aria-label="Main">
           <a href="#example" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">What you build</a>
-          <a href="#plans" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Free vs account</a>
+          <a href="#plans" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Pricing</a>
           <a href="#privacy" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Privacy</a>
           <Link to="/setup" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Setup guide</Link>
           <a href="#contact" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Feedback</a>
@@ -171,15 +171,19 @@ function Landing() {
               icon={Globe2}
               eyebrow="Premium account"
               title="Premium"
-              badge={<StatusBadge>Coming soon</StatusBadge>}
+              badge={<StatusBadge>9-day free trial</StatusBadge>}
               points={[
-                "£9.99 per year (GBP), billed yearly — coming soon",
+                "9 days free, then £9.99 per year (GBP) unless you cancel",
                 "10 profiles",
                 "50 tabs per profile",
                 "Everything in Free, with room for much more",
               ]}
+              cta={signedIn
+                ? <Button asChild variant="outline"><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
+                : <Button asChild variant="outline"><Link to="/auth" search={{ mode: "signup" }}>Create account <ArrowRight /></Link></Button>}
             />
           </div>
+          <p className="mt-5 text-sm text-muted-foreground">See the full <a href="/pricing.html" className="font-medium text-primary underline-offset-4 hover:underline">plan comparison and billing details</a>. Paddle handles Premium payments; the checkout shows the final price, applicable taxes, and renewal date before you confirm.</p>
         </section>
 
         {/* Privacy */}
@@ -301,7 +305,10 @@ function Landing() {
         <div className="flex items-center gap-4">
           <a href="mailto:antcodeslabs@gmail.com" className="inline-flex items-center gap-1 hover:text-foreground"><Mail className="h-3 w-3" /> antcodeslabs@gmail.com</a>
           <a href="https://ko-fi.com/aurunex" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-foreground"><Coffee className="h-3 w-3" aria-hidden="true" /> Support development</a>
+          <a href="/pricing.html" className="hover:text-foreground">Pricing</a>
           <a href="/privacy.html" className="hover:text-foreground">Privacy Policy</a>
+          <a href="/terms.html" className="hover:text-foreground">Terms</a>
+          <a href="/refunds.html" className="hover:text-foreground">Refunds &amp; cancellation</a>
           <Link to="/setup" className="inline-flex items-center gap-1 hover:text-foreground">Browser setup instructions <ExternalLink className="h-3 w-3" /></Link>
         </div>
       </footer>

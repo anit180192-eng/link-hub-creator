@@ -32,6 +32,9 @@ describe("mapSubscriptionEvent", () => {
     expect(mapSubscriptionEvent(ev({ status: "canceled" }), "pri_premium")?.status).toBe("canceled");
     expect(mapSubscriptionEvent(ev({ status: "past_due" }), "pri_premium")?.status).toBe("past_due");
   });
+  it("preserves trialing status and its trial end date", () => {
+    expect(mapSubscriptionEvent(ev({ status: "trialing", current_billing_period: { ends_at: "2026-10-04T12:00:00Z" } }), "pri_premium") ).toMatchObject({ status: "trialing", current_period_end: "2026-10-04T12:00:00Z" });
+  });
   it("tracks an end-of-period cancellation without revoking active access", () => {
     const update = mapSubscriptionEvent(ev({ scheduled_change: { action: "cancel", effective_at: "2027-09-25T12:00:00Z" } }), "pri_premium");
     expect(update).toMatchObject({ status: "active", scheduled_cancel_at: "2027-09-25T12:00:00Z" });
