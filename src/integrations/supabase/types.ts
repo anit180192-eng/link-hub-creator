@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_entitlements: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          plan: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          plan?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          plan?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       account_security: {
         Row: {
           created_at: string
@@ -388,6 +415,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      effective_plan: { Args: { _user_id: string }; Returns: string }
       reserve_pin_attempt: {
         Args: { p_ip_hash: string; p_owner_id: string }
         Returns: {
