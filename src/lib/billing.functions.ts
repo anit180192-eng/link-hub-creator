@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { bindingSig, paddleApiBase } from "./paddle";
 
@@ -74,5 +73,3 @@ export const createBillingPortal = createServerFn({ method: "POST" })
     if (typeof url !== "string") throw new Error("Couldn't open billing management");
     return { url };
   });
-
-export const _zod = z; // keep zod import tree-shake safe

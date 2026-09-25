@@ -43,3 +43,25 @@ describe("mapSubscriptionEvent", () => {
     expect(paddleApiBase("production")).toBe("https://api.paddle.com");
   });
 });
+
+import { bindingSig, isTransactionId, verifyBinding } from "../src/lib/paddle";
+describe("server-issued user binding", () => {
+  const ws = "pdl_ntfset_secret";
+  const withCd = (cd: any) => ({ data: { custom_data: cd } });
+  it("accepts a binding created by the server", async () => expect(await verifyBinding(withCd({ user_id: uid, lpb_sig: await bindingSig(uid, ws) }), ws)).toBe(true));
+  it("rejects browser-edited user ids and missing/forged tags", async () => {
+    const sig = await bindingSig(uid, ws);
+    expect(await verifyBinding(withCd({ user_id: "3f1c2b8e-2222-4a2b-9c3d-123456789abc", lpb_sig: sig }), ws)).toBe(false);
+    expect(await verifyBinding(withCd({ user_id: uid }), ws)).toBe(false);
+    expect(await verifyBinding(withCd({ user_id: uid, lpb_sig: await bindingSig(uid, "other") }), ws)).toBe(false);
+    expect(await verifyBinding(withCd({ user_id: uid, lpb_sig: sig }), "")).toBe(false);
+  });
+});
+describe("_ptxn payment links", () => {
+  it("accepts Paddle transaction ids only", () => {
+    expect(isTransactionId("txn_01h04vsc0qhwtsbsxh3422wjs4")).toBe(true);
+    expect(isTransactionId("txn_bad")).toBe(false);
+    expect(isTransactionId("javascript:alert(1)")).toBe(false);
+    expect(isTransactionId(undefined)).toBe(false);
+  });
+});
