@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Check,
   Clock3,
-  Coffee,
   Download,
   ExternalLink,
   FolderOpen,
@@ -266,24 +265,6 @@ function Landing() {
           </div>
         </section>
 
-        {/* Optional one-time support, separate from Premium billing. */}
-        <section aria-labelledby="support-heading" className="border-t border-border bg-card/40">
-          <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-12 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Optional support</p>
-              <h2 id="support-heading" className="mt-2 font-display text-2xl">Enjoying Landing Page Builder?</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                Leave a one-time tip on Ko-fi to support its development. It's entirely optional and doesn't unlock Premium.
-              </p>
-            </div>
-            <Button asChild size="lg" variant="outline" className="shrink-0">
-              <a href="https://ko-fi.com/aurunex" target="_blank" rel="noopener noreferrer">
-                <Coffee aria-hidden="true" /> Support me on Ko-fi <ExternalLink aria-hidden="true" />
-              </a>
-            </Button>
-          </div>
-        </section>
-
       </main>
 
       <section id="contact" className="scroll-mt-6 border-t border-border bg-card">
@@ -304,7 +285,6 @@ function Landing() {
         </div>
         <div className="flex items-center gap-4">
           <a href="mailto:antcodeslabs@gmail.com" className="inline-flex items-center gap-1 hover:text-foreground"><Mail className="h-3 w-3" /> antcodeslabs@gmail.com</a>
-          <a href="https://ko-fi.com/aurunex" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-foreground"><Coffee className="h-3 w-3" aria-hidden="true" /> Support development</a>
           <a href="/pricing.html" className="hover:text-foreground">Pricing</a>
           <a href="/privacy.html" className="hover:text-foreground">Privacy Policy</a>
           <a href="/terms.html" className="hover:text-foreground">Terms</a>
