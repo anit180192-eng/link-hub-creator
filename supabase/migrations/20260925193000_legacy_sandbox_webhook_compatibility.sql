@@ -1,0 +1,39 @@
+-- Accept legacy webhook payloads as sandbox only while the published site catches up.
+CREATE OR REPLACE FUNCTION public.apply_paddle_event(
+  p_event_id text, p_event_type text, p_occurred_at timestamptz, p_ent jsonb)
+RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE uid uuid; n int; active_env text;
+BEGIN
+  IF p_event_id IS NULL OR length(p_event_id) = 0 OR length(p_event_id) > 200 THEN
+    RAISE EXCEPTION 'invalid event id' USING ERRCODE = '22023';
+  END IF;
+  INSERT INTO public.paddle_webhook_events(event_id, event_type, occurred_at)
+    VALUES (p_event_id, left(coalesce(p_event_type, ''), 100), p_occurred_at)
+    ON CONFLICT (event_id) DO NOTHING;
+  GET DIAGNOSTICS n = ROW_COUNT;
+  IF n = 0 THEN RETURN 'duplicate'; END IF;
+  IF p_ent IS NULL THEN RETURN 'ignored'; END IF;
+  SELECT active_environment INTO active_env FROM public.billing_settings WHERE id = true;
+  IF active_env IS NULL OR coalesce(p_ent->>'billing_environment', 'sandbox') IS DISTINCT FROM active_env THEN
+    RETURN 'wrong_environment';
+  END IF;
+
+  uid := (p_ent->>'user_id')::uuid;
+  PERFORM pg_advisory_xact_lock(hashtext('entitlement:' || uid::text));
+  INSERT INTO public.account_entitlements AS e
+    (user_id, plan, status, current_period_end, scheduled_cancel_at, paddle_customer_id, paddle_subscription_id, billing_environment, last_event_at)
+  VALUES (uid, p_ent->>'plan', p_ent->>'status', (p_ent->>'current_period_end')::timestamptz,
+    (p_ent->>'scheduled_cancel_at')::timestamptz, p_ent->>'paddle_customer_id', p_ent->>'paddle_subscription_id', active_env, p_occurred_at)
+  ON CONFLICT (user_id) DO UPDATE SET
+    plan = EXCLUDED.plan, status = EXCLUDED.status, current_period_end = EXCLUDED.current_period_end,
+    scheduled_cancel_at = EXCLUDED.scheduled_cancel_at,
+    paddle_customer_id = COALESCE(EXCLUDED.paddle_customer_id, e.paddle_customer_id),
+    paddle_subscription_id = EXCLUDED.paddle_subscription_id,
+    billing_environment = EXCLUDED.billing_environment, last_event_at = EXCLUDED.last_event_at
+  WHERE e.billing_environment <> EXCLUDED.billing_environment
+    OR e.last_event_at IS NULL OR e.last_event_at <= EXCLUDED.last_event_at;
+  GET DIAGNOSTICS n = ROW_COUNT;
+  RETURN CASE WHEN n = 0 THEN 'stale' ELSE 'applied' END;
+END $$;
+REVOKE ALL ON FUNCTION public.apply_paddle_event(text, text, timestamptz, jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.apply_paddle_event(text, text, timestamptz, jsonb) TO service_role;

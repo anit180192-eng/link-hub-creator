@@ -6,6 +6,7 @@ BEGIN
   SELECT user_id INTO u FROM public.pages LIMIT 1;
   ent := jsonb_build_object('user_id',u,'plan','premium','status','active','current_period_end',now()+interval '1 year','paddle_customer_id','ctm_t','paddle_subscription_id','sub_t','billing_environment','sandbox');
   r := public.apply_paddle_event('evt_other_env','subscription.activated',now(),ent || '{"billing_environment":"production"}'); IF r<>'wrong_environment' THEN RAISE EXCEPTION 'FAIL environment %',r; END IF;
+  r := public.apply_paddle_event('evt_legacy_sandbox','subscription.activated',now(),ent - 'billing_environment'); IF r<>'applied' THEN RAISE EXCEPTION 'FAIL legacy sandbox %',r; END IF;
   r := public.apply_paddle_event('evt_t2','subscription.updated',now(),ent);                 IF r<>'applied' THEN RAISE EXCEPTION 'FAIL newer %',r; END IF;
   r := public.apply_paddle_event('evt_t2','subscription.updated',now(),ent);                 IF r<>'duplicate' THEN RAISE EXCEPTION 'FAIL dup %',r; END IF;
   r := public.apply_paddle_event('evt_t1','subscription.canceled',now()-interval '1 hour',
