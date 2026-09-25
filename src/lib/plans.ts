@@ -9,11 +9,16 @@ export const PREMIUM_PRICE_LABEL = "£9.99 per year";
 /** Checkout is not configured yet — keep Premium marked as coming soon. */
 export const PREMIUM_CHECKOUT_AVAILABLE = false;
 
+/** Renewal webhooks can arrive late; allow 24h after period end before an "active" row stops counting. */
+export const ACTIVE_GRACE_MS = 24 * 60 * 60 * 1000;
+
 /** Mirrors public.effective_plan() in the database. */
 export function effectivePlan(row: EntitlementRow, now = new Date()): Plan {
-  if (!row || row.plan !== "premium") return "free";
-  if (row.status === "active") return "premium";
-  if ((row.status === "past_due" || row.status === "canceled") && row.current_period_end && new Date(row.current_period_end) > now) return "premium";
+  if (!row || row.plan !== "premium" || !row.current_period_end) return "free";
+  const end = new Date(row.current_period_end).getTime();
+  if (isNaN(end)) return "free";
+  if (row.status === "active") return end + ACTIVE_GRACE_MS > now.getTime() ? "premium" : "free";
+  if (row.status === "past_due" || row.status === "canceled") return end > now.getTime() ? "premium" : "free";
   return "free";
 }
 export const limitsFor = (plan: Plan) => PLAN_LIMITS[plan];
