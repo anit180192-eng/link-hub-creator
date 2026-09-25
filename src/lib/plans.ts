@@ -7,6 +7,7 @@ export const PLAN_LIMITS: Record<Plan, { profiles: number; tabsPerProfile: numbe
   premium: { profiles: 10, tabsPerProfile: 50 },
 };
 export const PREMIUM_PRICE_LABEL = "£9.99 per year";
+export const PREMIUM_TRIAL_LABEL = "9 days free, then £9.99 per year";
 
 /** Renewal webhooks can arrive late; allow 24h after period end before an "active" row stops counting. */
 export const ACTIVE_GRACE_MS = 24 * 60 * 60 * 1000;
@@ -17,6 +18,7 @@ export function effectivePlan(row: EntitlementRow, now = new Date(), environment
   const end = new Date(row.current_period_end).getTime();
   if (isNaN(end)) return "free";
   if (row.status === "active") return end + ACTIVE_GRACE_MS > now.getTime() ? "premium" : "free";
+  if (row.status === "trialing") return end > now.getTime() ? "premium" : "free";
   if (row.status === "past_due" || row.status === "canceled") return end > now.getTime() ? "premium" : "free";
   return "free";
 }
