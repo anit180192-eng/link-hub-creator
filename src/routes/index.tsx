@@ -170,7 +170,7 @@ function Landing() {
               icon={Globe2}
               eyebrow="Premium account"
               title="Premium"
-              badge={<StatusBadge>9-day free trial</StatusBadge>}
+              badge={<StatusBadge>Sign-ups paused</StatusBadge>}
               points={[
                 "9 days free, then £9.99 per year (GBP) unless you cancel",
                 "10 profiles",
@@ -182,7 +182,7 @@ function Landing() {
                 : <Button asChild variant="outline"><Link to="/auth" search={{ mode: "signup" }}>Create account <ArrowRight /></Link></Button>}
             />
           </div>
-          <p className="mt-5 text-sm text-muted-foreground">See the full <a href="/pricing.html" className="font-medium text-primary underline-offset-4 hover:underline">plan comparison and billing details</a>. Paddle handles Premium payments; the checkout shows the final price, applicable taxes, and renewal date before you confirm.</p>
+          <p className="mt-5 text-sm text-muted-foreground">Premium sign-ups will reopen after payment approval. See the full <a href="/pricing.html" className="font-medium text-primary underline-offset-4 hover:underline">plan comparison and billing details</a>.</p>
         </section>
 
         {/* Privacy */}
