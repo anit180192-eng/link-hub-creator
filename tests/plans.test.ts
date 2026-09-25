@@ -28,6 +28,10 @@ describe("plans", () => {
     expect(effectivePlan({ plan: "premium", status: "canceled", current_period_end: "2026-09-01T00:00:00Z" }, now)).toBe("free");
     expect(effectivePlan({ plan: "premium", status: "past_due", current_period_end: null }, now)).toBe("free");
   });
+  it("trial access ends at the trial deadline without paid-period grace", () => {
+    expect(effectivePlan({ plan: "premium", status: "trialing", current_period_end: "2026-09-25T12:00:01Z" }, now)).toBe("premium");
+    expect(effectivePlan({ plan: "premium", status: "trialing", current_period_end: "2026-09-25T12:00:00Z" }, now)).toBe("free");
+  });
   it("unknown plan values fall back to free", () => expect(effectivePlan({ plan: "gold", status: "active", current_period_end: null }, now)).toBe("free"));
   it("sandbox entitlement never grants production access", () => {
     expect(effectivePlan({ plan: "premium", status: "active", current_period_end: "2027-09-25", billing_environment: "sandbox" }, now, "production")).toBe("free");
