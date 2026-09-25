@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { effectivePlan, friendlyLimitError, limitMessage, limitsFor, PREMIUM_CHECKOUT_AVAILABLE } from "./plans";
+import { effectivePlan, friendlyLimitError, limitMessage, limitsFor, PREMIUM_CHECKOUT_AVAILABLE } from "../src/lib/plans";
 
 const now = new Date("2026-09-25T12:00:00Z");
 describe("plans", () => {
