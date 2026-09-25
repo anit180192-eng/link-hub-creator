@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { loadPaddle } from "@/lib/paddleClient";
 import { createBillingPortal, createCancellationPortal, createCheckoutTransaction, getBillingConfig } from "@/lib/billing.functions";
-import { PLAN_LIMITS, PREMIUM_PRICE_LABEL } from "@/lib/plans";
+import { PLAN_LIMITS, PREMIUM_PRICE_LABEL, PREMIUM_TRIAL_LABEL } from "@/lib/plans";
 
 const dateLabel = (value: string | null | undefined) => value ? new Intl.DateTimeFormat("en-GB", { dateStyle: "long" }).format(new Date(value)) : "—";
 
@@ -21,6 +21,7 @@ export function PremiumDialog({ open, onOpenChange }: { open: boolean; onOpenCha
   const [busy, setBusy] = useState(false);
   const c = cfg.data;
   const premium = c?.plan === "premium";
+  const trialing = c?.membership?.status === "trialing";
   const renewalStopping = c?.membership?.status === "canceled" || Boolean(c?.membership?.scheduledCancelAt);
 
   const checkout = async () => {
@@ -29,7 +30,7 @@ export function PremiumDialog({ open, onOpenChange }: { open: boolean; onOpenCha
     try {
       const [Paddle, { transactionId }] = await Promise.all([loadPaddle(c.environment, c.clientToken, (event) => {
         if (event?.name === "checkout.completed") {
-          toast.success("Payment received. Activating your membership…");
+          toast.success("Checkout complete. Activating your membership…");
           qc.invalidateQueries({ queryKey: ["billing-config"] });
         }
       }), startTxn()]);
@@ -47,16 +48,16 @@ export function PremiumDialog({ open, onOpenChange }: { open: boolean; onOpenCha
         <DialogHeader>
           <DialogTitle>{premium ? "Your Premium membership" : c?.configured ? "Go Premium" : "Premium — coming soon"}</DialogTitle>
           <DialogDescription>
-            Premium costs {PREMIUM_PRICE_LABEL} (GBP), billed yearly. Free: {PLAN_LIMITS.free.profiles} profiles, {PLAN_LIMITS.free.tabsPerProfile} tabs per profile. Premium: {PLAN_LIMITS.premium.profiles} profiles, {PLAN_LIMITS.premium.tabsPerProfile} tabs per profile.
+            {c?.environment === "production" ? PREMIUM_TRIAL_LABEL : PREMIUM_PRICE_LABEL} (GBP). Free: {PLAN_LIMITS.free.profiles} profiles, {PLAN_LIMITS.free.tabsPerProfile} tabs per profile. Premium: {PLAN_LIMITS.premium.profiles} profiles, {PLAN_LIMITS.premium.tabsPerProfile} tabs per profile.
             {c && !c.configured ? " Checkout isn't available yet — your account stays on Free until it launches." : ""}
             {c?.configured && c.environment === "sandbox" ? " Test mode: no real charges." : ""}
           </DialogDescription>
         </DialogHeader>
-        {premium ? <div className="rounded-md border p-4 text-sm"><p className="font-semibold text-emerald-600">Active member</p><p className="mt-2">{renewalStopping ? "Access until" : "Current period ends"}: <strong>{dateLabel(c?.membership?.currentPeriodEnd)}</strong></p><p className="mt-2">{renewalStopping ? "Cancellation scheduled; no yearly renewal." : "Your subscription renews yearly unless you cancel it in Paddle."}</p></div> : null}
+        {premium ? <div className="rounded-md border p-4 text-sm"><p className="font-semibold text-emerald-600">{trialing ? "Free trial active" : "Active member"}</p><p className="mt-2">{renewalStopping ? "Access until" : trialing ? "Trial ends" : "Current period ends"}: <strong>{dateLabel(c?.membership?.currentPeriodEnd)}</strong></p><p className="mt-2">{renewalStopping ? "Cancellation scheduled; no next charge." : trialing ? "Paddle will charge £9.99 for the first year when your trial ends unless you cancel first." : "Your subscription renews yearly unless you cancel it in Paddle."}</p></div> : null}
         <div className="flex flex-wrap justify-end gap-2">
           {c?.canManage ? <Button variant="outline" disabled={busy} onClick={() => manage()}>Manage billing</Button> : null}
           {premium && c?.canManage && !renewalStopping ? <AlertDialog><AlertDialogTrigger asChild><Button variant="outline" disabled={busy}>Cancel renewal</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Cancel your next renewal?</AlertDialogTitle><AlertDialogDescription>Cancelling in Paddle stops the next yearly renewal. It does not automatically refund your current payment. Premium access continues until the paid-through date shown here. Paddle will ask you to confirm the cancellation.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Keep membership</AlertDialogCancel><AlertDialogAction onClick={() => manage(true)}>Continue to Paddle</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog> : null}
-          {!premium ? <Button disabled={busy || !c?.configured} onClick={checkout}>{c?.configured ? `Upgrade — ${PREMIUM_PRICE_LABEL}` : "Coming soon"}</Button> : null}
+          {!premium ? <Button disabled={busy || !c?.configured} onClick={checkout}>{c?.configured ? c.environment === "production" ? "Start 9-day free trial" : `Upgrade — ${PREMIUM_PRICE_LABEL}` : "Coming soon"}</Button> : null}
         </div>
       </DialogContent>
     </Dialog>
