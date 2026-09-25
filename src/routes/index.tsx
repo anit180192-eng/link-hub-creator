@@ -1,6 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowRight,
@@ -26,7 +24,6 @@ import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { getPublicPaddleConfig } from "@/lib/billing.functions";
 import builderImage from "@/assets/homepage/03-builder-demo.webp.asset.json";
 import homeImage from "@/assets/homepage/04-published-home-demo.webp.asset.json";
 import creativeImage from "@/assets/homepage/05-creative-tab-demo.webp.asset.json";
@@ -59,9 +56,6 @@ const features = [
 
 function Landing() {
   const [signedIn, setSignedIn] = useState(false);
-  const fetchBilling = useServerFn(getPublicPaddleConfig);
-  const { data: billing } = useQuery({ queryKey: ["public-billing-config"], queryFn: () => fetchBilling() });
-  const premiumLive = billing?.environment === "production" && Boolean(billing.clientToken);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(Boolean(data.session)));
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setSignedIn(Boolean(session)));
@@ -80,7 +74,7 @@ function Landing() {
         <Link to="/" aria-label="Landing Page Builder home"><Brand className="text-base sm:text-lg" /></Link>
         <nav className="hidden items-center gap-1 text-sm md:flex" aria-label="Main">
           <a href="#example" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">What you build</a>
-          <a href="#plans" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Free vs account</a>
+          <a href="#plans" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Pricing</a>
           <a href="#privacy" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Privacy</a>
           <Link to="/setup" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Setup guide</Link>
           <a href="#contact" className="rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">Feedback</a>
@@ -177,19 +171,19 @@ function Landing() {
               icon={Globe2}
               eyebrow="Premium account"
               title="Premium"
-              badge={<StatusBadge>{premiumLive ? "9-day free trial" : "Coming soon"}</StatusBadge>}
+              badge={<StatusBadge>9-day free trial</StatusBadge>}
               points={[
-                premiumLive ? "9 days free, then £9.99 per year (GBP) unless you cancel" : "£9.99 per year (GBP), billed yearly — coming soon",
+                "9 days free, then £9.99 per year (GBP) unless you cancel",
                 "10 profiles",
                 "50 tabs per profile",
                 "Everything in Free, with room for much more",
               ]}
-              cta={premiumLive ? signedIn
+              cta={signedIn
                 ? <Button asChild variant="outline"><Link to="/dashboard">Open my builder <ArrowRight /></Link></Button>
-                : <Button asChild variant="outline"><Link to="/auth" search={{ mode: "signup" }}>Start free trial <ArrowRight /></Link></Button>
-                : undefined}
+                : <Button asChild variant="outline"><Link to="/auth" search={{ mode: "signup" }}>Create account <ArrowRight /></Link></Button>}
             />
           </div>
+          <p className="mt-5 text-sm text-muted-foreground">See the full <a href="/pricing.html" className="font-medium text-primary underline-offset-4 hover:underline">plan comparison and billing details</a>. Paddle handles Premium payments; the checkout shows the final price, applicable taxes, and renewal date before you confirm.</p>
         </section>
 
         {/* Privacy */}
@@ -311,6 +305,7 @@ function Landing() {
         <div className="flex items-center gap-4">
           <a href="mailto:antcodeslabs@gmail.com" className="inline-flex items-center gap-1 hover:text-foreground"><Mail className="h-3 w-3" /> antcodeslabs@gmail.com</a>
           <a href="https://ko-fi.com/aurunex" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-foreground"><Coffee className="h-3 w-3" aria-hidden="true" /> Support development</a>
+          <a href="/pricing.html" className="hover:text-foreground">Pricing</a>
           <a href="/privacy.html" className="hover:text-foreground">Privacy Policy</a>
           <a href="/terms.html" className="hover:text-foreground">Terms</a>
           <a href="/refunds.html" className="hover:text-foreground">Refunds &amp; cancellation</a>
