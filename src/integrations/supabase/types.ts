@@ -18,6 +18,9 @@ export type Database = {
         Row: {
           created_at: string
           current_period_end: string | null
+          last_event_at: string | null
+          paddle_customer_id: string | null
+          paddle_subscription_id: string | null
           plan: string
           status: string
           updated_at: string
@@ -26,6 +29,9 @@ export type Database = {
         Insert: {
           created_at?: string
           current_period_end?: string | null
+          last_event_at?: string | null
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
           plan?: string
           status?: string
           updated_at?: string
@@ -34,6 +40,9 @@ export type Database = {
         Update: {
           created_at?: string
           current_period_end?: string | null
+          last_event_at?: string | null
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
           plan?: string
           status?: string
           updated_at?: string
@@ -171,6 +180,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      paddle_webhook_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          occurred_at: string | null
+          processed_at: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          occurred_at?: string | null
+          processed_at?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          occurred_at?: string | null
+          processed_at?: string
+        }
+        Relationships: []
       }
       page_folders: {
         Row: {
