@@ -11,7 +11,7 @@ export function parseSaveCurrent(
 ): SaveCurrentMessage | null {
   if (!meta.sourceIsWindow || meta.origin !== meta.expectedOrigin) return null;
   if (!data || typeof data !== "object") return null;
-  const d = data as Record<string, unknown>;
+  const d = data as { type?: unknown; version?: unknown; url?: unknown; title?: unknown };
   if (d.type !== "LPB_SAVE_CURRENT" || d.version !== SAVE_BRIDGE_VERSION) return null;
   if (typeof d.url !== "string" || d.url.length > 2048) return null;
   let u: URL;

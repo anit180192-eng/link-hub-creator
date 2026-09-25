@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSaveCurrent } from "./saveBridge";
+import { parseSaveCurrent } from "../src/lib/saveBridge";
 
 const ok = { sourceIsWindow: true, origin: "https://a.test", expectedOrigin: "https://a.test" };
 const msg = (o: Record<string, unknown> = {}) => ({ type: "LPB_SAVE_CURRENT", version: 1, url: "https://music.example.com/x", title: "Music", ...o });

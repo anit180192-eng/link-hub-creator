@@ -13,7 +13,7 @@ import { MAX_SAVE_TITLE, MAX_SAVE_URL, SAVE_BRIDGE_VERSION, parseSaveCurrent } f
 const NONE = "__none";
 const NEW = "__new";
 
-type Props = { ready: boolean; currentPageId?: string; currentTabId?: string; onSaved: (pageId: string, tabId: string) => void | Promise<void> };
+type Props = { ready: boolean; currentPageId?: string | undefined; currentTabId?: string | undefined; onSaved: (pageId: string, tabId: string) => void | Promise<void> };
 
 export function SaveCurrentPageDialog({ ready, currentPageId, currentTabId, onSaved }: Props) {
   const armed = useRef(false);
@@ -40,7 +40,7 @@ export function SaveCurrentPageDialog({ ready, currentPageId, currentTabId, onSa
     };
     window.addEventListener("message", on);
     window.postMessage({ type: "LPB_SAVE_READY", version: SAVE_BRIDGE_VERSION }, window.location.origin);
-    return () => window.removeEventListener("message", on);
+    return undefined;
   }, [ready]);
 
   const pagesQ = useQuery({ queryKey: ["save-pages"], enabled: open, queryFn: async () => {
@@ -53,7 +53,7 @@ export function SaveCurrentPageDialog({ ready, currentPageId, currentTabId, onSa
     const q = await supabase.from("page_folders").select("id,name").eq("tab_id", tabId).order("position"); if (q.error) throw q.error; return q.data;
   } });
 
-  useEffect(() => { const p = pagesQ.data; if (open && p?.length && !pageId) setPageId(p.find((x) => x.id === currentPageId)?.id || p[0].id); }, [open, pagesQ.data, pageId, currentPageId]);
+  useEffect(() => { const p = pagesQ.data; if (open && p?.length && !pageId) setPageId(p.find((x) => x.id === currentPageId)?.id || p[0]!.id); }, [open, pagesQ.data, pageId, currentPageId]);
   useEffect(() => { const t = tabsQ.data; if (!t) return; if (!t.some((x) => x.id === tabId)) setTabId(t.find((x) => x.id === currentTabId)?.id || t[0]?.id || ""); }, [tabsQ.data, tabId, currentTabId]);
   useEffect(() => { setFolder(NONE); setNewFolder(""); }, [tabId]);
 
