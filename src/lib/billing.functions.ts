@@ -38,6 +38,7 @@ export const getBillingConfig = createServerFn({ method: "GET" })
     const matching = dbEnvironment === e.environment && data?.billing_environment === e.environment;
     return {
       configured,
+      checkoutEnabled: configured && process.env["PADDLE_CHECKOUT_ENABLED"] === "true",
       environment: e.environment,
       clientToken: configured ? e.clientToken : null,
       email: (context.claims as any)?.email ?? null,
@@ -52,6 +53,7 @@ export const createCheckoutTransaction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const e = env();
+    if (process.env["PADDLE_CHECKOUT_ENABLED"] !== "true") throw new Error("Premium sign-ups are paused while payments are being set up");
     if (!isBillingConfigured(e) || (await activeBillingEnvironment()) !== e.environment) throw new Error("Checkout isn't available yet");
     const { data: existing } = await (context.supabase as any).from("account_entitlements").select("plan,status,current_period_end,billing_environment").eq("user_id", context.userId).maybeSingle();
     if (effectivePlan(existing, new Date(), e.environment) === "premium") throw new Error("This account already has Premium. Open Membership to manage it.");
