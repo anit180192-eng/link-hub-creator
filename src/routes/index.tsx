@@ -182,24 +182,6 @@ function Landing() {
           </div>
         </section>
 
-        {/* Optional one-time support, separate from Premium billing. */}
-        <section aria-labelledby="support-heading" className="border-t border-border bg-card/40">
-          <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-12 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Optional support</p>
-              <h2 id="support-heading" className="mt-2 font-display text-2xl">Enjoying Landing Page Builder?</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                Buy us a coffee to support its development. It's a one-time tip, entirely optional, and doesn't unlock Premium.
-              </p>
-            </div>
-            <Button asChild size="lg" variant="outline" className="shrink-0">
-              <a href="https://ko-fi.com/aurunex" target="_blank" rel="noopener noreferrer">
-                <Coffee aria-hidden="true" /> Buy us a coffee <ExternalLink aria-hidden="true" />
-              </a>
-            </Button>
-          </div>
-        </section>
-
         {/* Privacy */}
         <section id="privacy" className="scroll-mt-6 border-y border-border bg-card">
           <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-8 lg:py-20">
@@ -277,6 +259,24 @@ function Landing() {
           <div className="mt-10 flex flex-wrap gap-3">
             {primaryCta}
             <Button asChild size="lg" variant="outline"><Link to="/setup"><RefreshCw /> Browser setup guide</Link></Button>
+          </div>
+        </section>
+
+        {/* Optional one-time support, separate from Premium billing. */}
+        <section aria-labelledby="support-heading" className="border-t border-border bg-card/40">
+          <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-12 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Optional support</p>
+              <h2 id="support-heading" className="mt-2 font-display text-2xl">Enjoying Landing Page Builder?</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                Leave a one-time tip on Ko-fi to support its development. It's entirely optional and doesn't unlock Premium.
+              </p>
+            </div>
+            <Button asChild size="lg" variant="outline" className="shrink-0">
+              <a href="https://ko-fi.com/aurunex" target="_blank" rel="noopener noreferrer">
+                <Coffee aria-hidden="true" /> Support me on Ko-fi <ExternalLink aria-hidden="true" />
+              </a>
+            </Button>
           </div>
         </section>
 
