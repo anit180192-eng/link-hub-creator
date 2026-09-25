@@ -59,7 +59,7 @@ export function SaveCurrentPageDialog({ ready, currentPageId, currentTabId, onSa
 
   const close = () => { setOpen(false); setPageId(""); setTabId(""); };
 
-  const save = async () => {
+  const save = async (): Promise<unknown> => {
     const page = pagesQ.data?.find((p) => p.id === pageId);
     if (!page || !tabId) return toast.error("Choose a profile and tab");
     let parsed: URL;
