@@ -26,11 +26,16 @@ const ev = (over: any = {}) => ({
 
 describe("mapSubscriptionEvent", () => {
   it("maps an active Premium subscription", () => {
-    expect(mapSubscriptionEvent(ev(), "pri_premium")).toMatchObject({ user_id: uid, plan: "premium", status: "active", paddle_customer_id: "ctm_1", paddle_subscription_id: "sub_1", current_period_end: "2027-09-25T12:00:00Z" });
+    expect(mapSubscriptionEvent(ev(), "pri_premium", "production")).toMatchObject({ user_id: uid, plan: "premium", status: "active", paddle_customer_id: "ctm_1", paddle_subscription_id: "sub_1", billing_environment: "production", current_period_end: "2027-09-25T12:00:00Z" });
   });
   it("maps canceled and past_due", () => {
     expect(mapSubscriptionEvent(ev({ status: "canceled" }), "pri_premium")?.status).toBe("canceled");
     expect(mapSubscriptionEvent(ev({ status: "past_due" }), "pri_premium")?.status).toBe("past_due");
+  });
+  it("tracks an end-of-period cancellation without revoking active access", () => {
+    const update = mapSubscriptionEvent(ev({ scheduled_change: { action: "cancel", effective_at: "2027-09-25T12:00:00Z" } }), "pri_premium");
+    expect(update).toMatchObject({ status: "active", scheduled_cancel_at: "2027-09-25T12:00:00Z" });
+    expect(mapSubscriptionEvent(ev({ scheduled_change: null }), "pri_premium")?.scheduled_cancel_at).toBeNull();
   });
   it("ignores other prices, missing/invalid user ids, and non-subscription events", () => {
     expect(mapSubscriptionEvent(ev(), "pri_other")).toBeNull();

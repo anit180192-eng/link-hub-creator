@@ -1,49 +1,62 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { loadPaddle } from "@/lib/paddleClient";
-import { createBillingPortal, createCheckoutTransaction, getBillingConfig } from "@/lib/billing.functions";
-import { PLAN_LIMITS, PREMIUM_PRICE_LABEL, type Plan } from "@/lib/plans";
+import { createBillingPortal, createCancellationPortal, createCheckoutTransaction, getBillingConfig } from "@/lib/billing.functions";
+import { PLAN_LIMITS, PREMIUM_PRICE_LABEL } from "@/lib/plans";
 
-export function PremiumDialog({ open, onOpenChange, plan }: { open: boolean; onOpenChange: (o: boolean) => void; plan: Plan }) {
+const dateLabel = (value: string | null | undefined) => value ? new Intl.DateTimeFormat("en-GB", { dateStyle: "long" }).format(new Date(value)) : "—";
+
+export function PremiumDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  const qc = useQueryClient();
   const fetchConfig = useServerFn(getBillingConfig);
   const portal = useServerFn(createBillingPortal);
+  const cancelPortal = useServerFn(createCancellationPortal);
   const startTxn = useServerFn(createCheckoutTransaction);
-  const cfg = useQuery({ queryKey: ["billing-config"], queryFn: () => fetchConfig(), enabled: open, staleTime: 60_000 });
+  const cfg = useQuery({ queryKey: ["billing-config"], queryFn: () => fetchConfig(), enabled: open, refetchInterval: open ? 3000 : false });
   const [busy, setBusy] = useState(false);
   const c = cfg.data;
+  const premium = c?.plan === "premium";
+  const renewalStopping = c?.membership?.status === "canceled" || Boolean(c?.membership?.scheduledCancelAt);
 
   const checkout = async () => {
     if (!c?.configured || !c.clientToken) return;
     setBusy(true);
     try {
-      const [Paddle, { transactionId }] = await Promise.all([loadPaddle(c.environment, c.clientToken), startTxn()]);
+      const [Paddle, { transactionId }] = await Promise.all([loadPaddle(c.environment, c.clientToken, (event) => {
+        if (event?.name === "checkout.completed") {
+          toast.success("Payment received. Activating your membership…");
+          qc.invalidateQueries({ queryKey: ["billing-config"] });
+        }
+      }), startTxn()]);
       Paddle.Checkout.open({ transactionId, ...(c.email ? { customer: { email: c.email } } : {}) });
-      onOpenChange(false);
     } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't open checkout"); } finally { setBusy(false); }
   };
-  const manage = async () => {
+  const manage = async (cancel = false) => {
     setBusy(true);
-    try { const { url } = await portal(); window.open(url, "_blank", "noopener"); } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't open billing"); } finally { setBusy(false); }
+    try { const { url } = cancel ? await cancelPortal() : await portal(); window.location.assign(url); } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't open billing"); } finally { setBusy(false); }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{plan === "premium" ? "You're on Premium" : c?.configured ? "Go Premium" : "Premium — coming soon"}</DialogTitle>
+          <DialogTitle>{premium ? "Your Premium membership" : c?.configured ? "Go Premium" : "Premium — coming soon"}</DialogTitle>
           <DialogDescription>
             Premium costs {PREMIUM_PRICE_LABEL} (GBP), billed yearly. Free: {PLAN_LIMITS.free.profiles} profiles, {PLAN_LIMITS.free.tabsPerProfile} tabs per profile. Premium: {PLAN_LIMITS.premium.profiles} profiles, {PLAN_LIMITS.premium.tabsPerProfile} tabs per profile.
             {c && !c.configured ? " Checkout isn't available yet — your account stays on Free until it launches." : ""}
-            {c?.configured ? " Test mode: no real charges." : ""}
+            {c?.configured && c.environment === "sandbox" ? " Test mode: no real charges." : ""}
           </DialogDescription>
         </DialogHeader>
+        {premium ? <div className="rounded-md border p-4 text-sm"><p className="font-semibold text-emerald-600">Active member</p><p className="mt-2">{renewalStopping ? "Access until" : "Current period ends"}: <strong>{dateLabel(c?.membership?.currentPeriodEnd)}</strong></p><p className="mt-2">{renewalStopping ? "Cancellation scheduled; no yearly renewal." : "Your subscription renews yearly unless you cancel it in Paddle."}</p></div> : null}
         <div className="flex flex-wrap justify-end gap-2">
-          {c?.canManage ? <Button variant="outline" disabled={busy} onClick={manage}>Manage billing</Button> : null}
-          {plan !== "premium" ? <Button disabled={busy || !c?.configured} onClick={checkout}>{c?.configured ? `Upgrade — ${PREMIUM_PRICE_LABEL}` : "Coming soon"}</Button> : null}
+          {c?.canManage ? <Button variant="outline" disabled={busy} onClick={() => manage()}>Manage billing</Button> : null}
+          {premium && c?.canManage && !renewalStopping ? <AlertDialog><AlertDialogTrigger asChild><Button variant="outline" disabled={busy}>Cancel renewal</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Cancel your next renewal?</AlertDialogTitle><AlertDialogDescription>Cancelling in Paddle stops the next yearly renewal. It does not automatically refund your current payment. Premium access continues until the paid-through date shown here. Paddle will ask you to confirm the cancellation.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Keep membership</AlertDialogCancel><AlertDialogAction onClick={() => manage(true)}>Continue to Paddle</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog> : null}
+          {!premium ? <Button disabled={busy || !c?.configured} onClick={checkout}>{c?.configured ? `Upgrade — ${PREMIUM_PRICE_LABEL}` : "Coming soon"}</Button> : null}
         </div>
       </DialogContent>
     </Dialog>

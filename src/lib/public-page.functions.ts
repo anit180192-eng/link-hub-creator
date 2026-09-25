@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 import { parseClocks, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
+import { isProfileArchived, isTabArchived, type Plan } from "@/lib/plans";
 
 export type PublicPage = {
   profile: null;
@@ -19,7 +20,8 @@ export type PublicPage = {
   protected: boolean;
   /** True when this browser is saved as trusted for this page's owner. */
   trusted: boolean;
-  tabs?: { id: string; name: string }[];
+  archivedProfile: boolean;
+  tabs?: { id: string; name: string; archived: boolean }[];
 } | null;
 
 function publicClient() {
@@ -74,8 +76,16 @@ export const getPublicPage = createServerFn({ method: "GET" })
       clocks: parseClocks(page.clocks),
     };
 
-    const { data: tabRows } = await admin.from("page_tabs").select("id, name").eq("page_id", page.id).order("position");
-    const tabs = (tabRows ?? []) as { id: string; name: string }[];
+    const [{ data: tabRows, error: tabsError }, { data: ownersPages, error: pagesError }, { data: effective, error: planError }] = await Promise.all([
+      admin.from("page_tabs").select("id, name").eq("page_id", page.id).order("position").order("id"),
+      admin.from("pages").select("id").eq("user_id", page.user_id).order("created_at").order("id"),
+      admin.rpc("effective_plan", { _user_id: page.user_id }),
+    ]);
+    if (tabsError || pagesError || planError) throw new Error("This page couldn't be loaded right now.");
+    const profileIndex = (ownersPages ?? []).findIndex((item) => item.id === page.id);
+    const plan: Plan = effective === "premium" ? "premium" : "free";
+    const archivedProfile = isProfileArchived(profileIndex, plan);
+    const tabs = (tabRows ?? []).map((item, index) => ({ ...item, archived: isTabArchived(index, plan, archivedProfile) }));
 
     if (!page.pin_protected) {
       const supabase = publicClient();
@@ -84,7 +94,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
         .select(LINK_COLUMNS)
         .eq("page_id", page.id)
         .order("position", { ascending: true });
-      return { profile, links: (links ?? []) as StartPageLink[], locked: false, protected: false, trusted: false, tabs };
+      return { profile, links: (links ?? []) as StartPageLink[], locked: false, protected: false, trusted: false, archivedProfile, tabs };
     }
 
     if (!device) throw new Error("This page couldn't be loaded right now.");
@@ -98,6 +108,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
       locked: false,
       protected: true,
       trusted: device.kind === "trusted",
+      archivedProfile,
       tabs,
     };
   });

@@ -4,12 +4,13 @@ import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { cn } from "@/lib/utils";
 import { isSafeUrl, linkTitle, parseClocks, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 
-export function PublishedTabs({ profile, links, tabs }: { profile: StartPageProfile; links: StartPageLink[]; tabs: { id: string; name: string }[] }) {
+export function PublishedTabs({ profile, links, tabs, archivedProfile = false }: { profile: StartPageProfile; links: StartPageLink[]; tabs: { id: string; name: string; archived: boolean }[]; archivedProfile?: boolean }) {
   const [active, setActive] = useState(() => (links.some((l) => l.favourite) || !tabs[0] ? "__home" : tabs[0].id));
   const palette = profile.dark_mode ? "dark" : "hub-light";
   const first = tabs[0]?.id;
   const tabLinks = links.filter((l) => l.tab_id === active || (!l.tab_id && active === first));
-  const dash = links.filter((l) => isSafeUrl(l.url)).map((l) => ({ id: l.id, name: linkTitle(l), url: l.url, favourite: !!l.favourite }));
+  const activeTabIds = new Set(tabs.filter((t) => !t.archived).map((t) => t.id));
+  const dash = links.filter((l) => !archivedProfile && isSafeUrl(l.url) && (activeTabIds.has(l.tab_id ?? "") || (!l.tab_id && first && activeTabIds.has(first)))).map((l) => ({ id: l.id, name: linkTitle(l), url: l.url, favourite: !!l.favourite }));
   const name = profile.display_name || profile.slug;
   const btn = (id: string, label: string) => (
     <button
@@ -29,11 +30,12 @@ export function PublishedTabs({ profile, links, tabs }: { profile: StartPageProf
       <nav className="sticky top-0 z-10 border-b border-hub-border bg-hub-background/95 backdrop-blur" aria-label="Tabs">
         <div className="mx-auto flex max-w-[1120px] gap-1 overflow-x-auto px-4 py-2 sm:px-6">
           {btn("__home", "Home")}
-          {tabs.map((t) => btn(t.id, t.name))}
+          {tabs.map((t) => btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`))}
         </div>
       </nav>
       {active === "__home" ? (
         <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
+          {archivedProfile ? <p className="rounded-md border border-hub-accent/40 p-3 text-sm">This profile is archived on the Free plan. All links remain saved but cannot be opened until Premium is renewed.</p> : null}
           <HomeDashboard
             profileId={profile.slug}
             profileName={name}
@@ -51,7 +53,7 @@ export function PublishedTabs({ profile, links, tabs }: { profile: StartPageProf
           />
         </main>
       ) : (
-        <StartPageView profile={profile} links={tabLinks} />
+        <StartPageView profile={profile} links={tabLinks} archived={archivedProfile || !!tabs.find((t) => t.id === active)?.archived} />
       )}
     </div>
   );

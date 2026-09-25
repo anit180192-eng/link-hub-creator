@@ -15,14 +15,16 @@ import {
 
 const DEFAULT_TAGLINE = "Personal links, projects, and creative work.";
 
-function LinkCard({ link, tall = true }: { link: StartPageLink; tall?: boolean }) {
+function LinkCard({ link, tall = true, archived = false }: { link: StartPageLink; tall?: boolean; archived?: boolean }) {
   const icon = faviconFor(link.url);
   const title = linkTitle(link);
   return (
     <a
-      href={normalizeUrl(link.url)}
-      target="_blank"
+      href={archived ? undefined : normalizeUrl(link.url)}
+      target={archived ? undefined : "_blank"}
       rel="noopener noreferrer"
+      aria-disabled={archived || undefined}
+      title={archived ? "Archived — renew Premium to open this link" : undefined}
       className={cn(
         "group grid cursor-pointer grid-cols-[28px_minmax(0,1fr)_18px] items-center gap-3 rounded-md border border-hub-border bg-hub-background px-3 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-hub-accent hover:shadow-[0_0_14px_color-mix(in_oklab,var(--hub-accent)_14%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent active:translate-y-0",
         tall ? "h-16" : "h-14",
@@ -47,7 +49,7 @@ function LinkCard({ link, tall = true }: { link: StartPageLink; tall?: boolean }
   );
 }
 
-function QuickTiles({ links, label, className }: { links: StartPageLink[]; label: string; className?: string }) {
+function QuickTiles({ links, label, className, archived = false }: { links: StartPageLink[]; label: string; className?: string; archived?: boolean }) {
   if (!links.length) return null;
   return (
     <div className={cn("flex flex-wrap gap-2", className)} aria-label={`${label} quick links`}>
@@ -57,11 +59,12 @@ function QuickTiles({ links, label, className }: { links: StartPageLink[]; label
         return (
           <a
             key={link.id}
-            href={normalizeUrl(link.url)}
-            target="_blank"
+            href={archived ? undefined : normalizeUrl(link.url)}
+            target={archived ? undefined : "_blank"}
             rel="noopener noreferrer"
-            title={title}
+            title={archived ? "Archived — renew Premium to open this link" : title}
             aria-label={title}
+            aria-disabled={archived || undefined}
             className="group flex size-14 shrink-0 cursor-pointer items-center justify-center rounded-md border border-hub-border bg-hub-background transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-hub-accent hover:shadow-[0_0_16px_color-mix(in_oklab,var(--hub-accent)_18%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent active:scale-95"
           >
             {icon ? (
@@ -115,9 +118,11 @@ function Avatar({ url, initials, size }: { url: string | null; initials: string;
 export function StartPageView({
   profile,
   links,
+  archived = false,
 }: {
   profile: StartPageProfile;
   links: StartPageLink[];
+  archived?: boolean;
   adSlot?: React.ReactNode;
 }) {
   const safe = links.filter((l) => isSafeUrl(l.url));
@@ -152,6 +157,7 @@ export function StartPageView({
       <div className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
         <main className="mx-auto w-full max-w-[560px] px-4 py-6 sm:py-10">
           <BrandLink className="mb-6" />
+          {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}
           <header className="flex flex-col items-center text-center">
             <Avatar url={profile.avatar_url} initials={initials} size="lg" />
             <h1 className="mt-4 font-display text-2xl font-semibold leading-tight">{name}</h1>
@@ -184,11 +190,12 @@ export function StartPageView({
                     {fullLinks.length ? (
                       <div className="grid gap-2">
                         {fullLinks.map((link) => (
-                          <LinkCard key={link.id} link={link} tall={false} />
+                          <LinkCard key={link.id} link={link} tall={false} archived={archived} />
                         ))}
                       </div>
                     ) : null}
                     <QuickTiles
+                      archived={archived}
                       links={logoLinks}
                       label={label}
                       className={cn("justify-center", fullLinks.length ? "mt-2" : "")}
@@ -208,6 +215,7 @@ export function StartPageView({
     <div className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
       <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
         <BrandLink className="mb-4" />
+        {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}
         <div className="grid items-start gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
           <aside className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
             <header className="rounded-lg border border-hub-border bg-hub-surface p-5">
@@ -248,11 +256,11 @@ export function StartPageView({
                       {fullLinks.length ? (
                         <div className={cn("grid grid-cols-1 gap-2", featured && "sm:grid-cols-2")}>
                           {fullLinks.map((link) => (
-                            <LinkCard key={link.id} link={link} />
+                            <LinkCard key={link.id} link={link} archived={archived} />
                           ))}
                         </div>
                       ) : null}
-                      <QuickTiles links={logoLinks} label={label} className={fullLinks.length ? "mt-2" : ""} />
+                      <QuickTiles links={logoLinks} label={label} className={fullLinks.length ? "mt-2" : ""} archived={archived} />
                     </section>
                   );
                 })

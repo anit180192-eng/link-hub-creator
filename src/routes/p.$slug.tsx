@@ -69,5 +69,5 @@ function PublicStartPage() {
   const page = Route.useLoaderData();
   const { slug } = Route.useParams();
   if (page.locked) return <PinGate slug={slug} />;
-  return <PublishedTabs profile={page.profile} links={page.links} tabs={page.tabs ?? []} />;
+  return <PublishedTabs profile={page.profile} links={page.links} tabs={page.tabs ?? []} archivedProfile={page.archivedProfile} />;
 }

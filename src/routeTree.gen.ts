@@ -17,6 +17,7 @@ import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as WorkspacePreviewRouteImport } from './routes/workspace-preview'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedMembershipRouteImport } from './routes/_authenticated/membership'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as ApiPublicPaddleWebhookRouteImport } from './routes/api/public/paddle-webhook'
 
@@ -59,6 +60,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMembershipRoute = AuthenticatedMembershipRouteImport.update({
+  id: '/membership',
+  path: '/membership',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const PSlugRoute = PSlugRouteImport.update({
   id: '/p/$slug',
   path: '/p/$slug',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/workspace-preview': typeof WorkspacePreviewRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/membership': typeof AuthenticatedMembershipRoute
   '/p/$slug': typeof PSlugRoute
   '/api/public/paddle-webhook': typeof ApiPublicPaddleWebhookRoute
 }
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/workspace-preview': typeof WorkspacePreviewRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/membership': typeof AuthenticatedMembershipRoute
   '/p/$slug': typeof PSlugRoute
   '/api/public/paddle-webhook': typeof ApiPublicPaddleWebhookRoute
 }
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/workspace-preview': typeof WorkspacePreviewRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/membership': typeof AuthenticatedMembershipRoute
   '/p/$slug': typeof PSlugRoute
   '/api/public/paddle-webhook': typeof ApiPublicPaddleWebhookRoute
 }
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/workspace-preview'
     | '/dashboard'
+    | '/membership'
     | '/p/$slug'
     | '/api/public/paddle-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/workspace-preview'
     | '/dashboard'
+    | '/membership'
     | '/p/$slug'
     | '/api/public/paddle-webhook'
   id:
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/workspace-preview'
     | '/_authenticated/dashboard'
+    | '/_authenticated/membership'
     | '/p/$slug'
     | '/api/public/paddle-webhook'
   fileRoutesById: FileRoutesById
@@ -212,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/membership': {
+      id: '/_authenticated/membership'
+      path: '/membership'
+      fullPath: '/membership'
+      preLoaderRoute: typeof AuthenticatedMembershipRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/p/$slug': {
       id: '/p/$slug'
       path: '/p/$slug'
@@ -231,10 +250,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMembershipRoute: typeof AuthenticatedMembershipRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMembershipRoute: AuthenticatedMembershipRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

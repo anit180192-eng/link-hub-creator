@@ -32,15 +32,17 @@ export type EntitlementUpdate = {
   plan: "free" | "premium";
   status: "active" | "past_due" | "canceled";
   current_period_end: string | null;
+  scheduled_cancel_at: string | null;
   paddle_customer_id: string | null;
   paddle_subscription_id: string;
+  billing_environment: "sandbox" | "production";
   last_event_at: string;
 };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Maps a subscription.* event for our Premium price to an entitlement row, or null to ignore. */
-export function mapSubscriptionEvent(event: any, premiumPriceId: string): EntitlementUpdate | null {
+export function mapSubscriptionEvent(event: any, premiumPriceId: string, environment: "sandbox" | "production" = "sandbox"): EntitlementUpdate | null {
   if (!event || typeof event.event_type !== "string" || !event.event_type.startsWith("subscription.")) return null;
   const d = event.data;
   if (!d?.id) return null;
@@ -49,6 +51,7 @@ export function mapSubscriptionEvent(event: any, premiumPriceId: string): Entitl
   const userId = d.custom_data?.user_id;
   if (typeof userId !== "string" || !UUID.test(userId)) return null;
   const end = d.current_billing_period?.ends_at ?? d.scheduled_change?.effective_at ?? null;
+  const scheduledCancelAt = d.scheduled_change?.action === "cancel" ? d.scheduled_change.effective_at ?? null : null;
   const s = d.status;
   const status = s === "active" || s === "trialing" ? "active" : s === "past_due" ? "past_due" : "canceled";
   return {
@@ -56,8 +59,10 @@ export function mapSubscriptionEvent(event: any, premiumPriceId: string): Entitl
     plan: "premium", // effective access for canceled/past_due is decided by current_period_end
     status,
     current_period_end: end,
+    scheduled_cancel_at: scheduledCancelAt,
     paddle_customer_id: d.customer_id ?? null,
     paddle_subscription_id: d.id,
+    billing_environment: environment,
     last_event_at: event.occurred_at ?? new Date().toISOString(),
   };
 }
