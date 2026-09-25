@@ -8,7 +8,12 @@ describe("plans", () => {
     expect(limitsFor("free")).toEqual({ profiles: 2, tabsPerProfile: 5 });
   });
   it("premium limits are 10 profiles / 50 tabs", () => expect(limitsFor("premium")).toEqual({ profiles: 10, tabsPerProfile: 50 }));
-  it("active premium is premium", () => expect(effectivePlan({ plan: "premium", status: "active", current_period_end: null }, now)).toBe("premium"));
+  it("active premium is premium only while paid-through (+24h grace)", () => {
+    expect(effectivePlan({ plan: "premium", status: "active", current_period_end: "2026-10-25T00:00:00Z" }, now)).toBe("premium");
+    expect(effectivePlan({ plan: "premium", status: "active", current_period_end: "2026-09-25T00:00:00Z" }, now)).toBe("premium");
+    expect(effectivePlan({ plan: "premium", status: "active", current_period_end: "2026-09-24T11:00:00Z" }, now)).toBe("free");
+    expect(effectivePlan({ plan: "premium", status: "active", current_period_end: null }, now)).toBe("free");
+  });
   it("canceled premium keeps access until period end", () => {
     expect(effectivePlan({ plan: "premium", status: "canceled", current_period_end: "2026-10-01T00:00:00Z" }, now)).toBe("premium");
     expect(effectivePlan({ plan: "premium", status: "canceled", current_period_end: "2026-09-01T00:00:00Z" }, now)).toBe("free");
