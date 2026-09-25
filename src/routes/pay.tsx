@@ -6,7 +6,7 @@ import { loadPaddle } from "@/lib/paddleClient";
 
 export const Route = createFileRoute("/pay")({
   staticData: { sitemap: false },
-  validateSearch: (s: Record<string, unknown>) => ({ _ptxn: typeof s._ptxn === "string" ? s._ptxn : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({ _ptxn: typeof s["_ptxn"] === "string" ? s["_ptxn"] : undefined }),
   loader: () => getPublicPaddleConfig(),
   head: () => ({
     meta: [
