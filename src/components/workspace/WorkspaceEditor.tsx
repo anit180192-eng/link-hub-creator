@@ -18,6 +18,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SaveCurrentPageDialog } from "@/components/workspace/SaveCurrentPageDialog";
 import { LandingPageSetupGuide } from "@/components/LandingPageSetupGuide";
 import { MAX_CLOCKS, TIMEZONES, faviconFor, hostOf, isSafeUrl, normalizeUrl, openAllLinks, parseClocks, renderStartPageHtml, slugify, timezoneLabel, type StartPageClock, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 
@@ -109,6 +110,7 @@ useEffect(()=>{const on=(e:MessageEvent)=>{if(e.origin!==window.location.origin)
       <AlertDialogAction className="bg-hub-accent text-hub-background">Got it</AlertDialogAction>
     </AlertDialogContent>
   </AlertDialog>
+  <SaveCurrentPageDialog ready={!!page&&tabsQ.isSuccess&&linksQ.isSuccess} currentPageId={page?.id} currentTabId={tab?.id} onSaved={async(pid,tid)=>{await Promise.all([qc.invalidateQueries({queryKey:["links"]}),qc.invalidateQueries({queryKey:["folders"]})]);setPageId(pid);setTabId(tid)}}/>
   <GuidedTour open={tourOpen&&!drawer&&!importOpen} steps={TOUR_STEPS} onComplete={completeTour}/>
   </div>
 }
