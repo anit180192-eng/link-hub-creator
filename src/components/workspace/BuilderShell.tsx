@@ -1,4 +1,7 @@
-import { useState, type ReactNode } from "react";
+import { applyTheme } from "@/lib/theme";
+import { ColourModeToggle, useSavedMode } from "@/components/ColourControls";
+import { themeStyle } from "@/lib/page-themes";
+import { useEffect, useState, type ReactNode } from "react";
 import { Check, Eye, Menu, Pencil, ExternalLink, PanelLeft } from "lucide-react";
 import { Brand } from "@/components/Brand";
 import { Button } from "@/components/ui/button";
@@ -40,10 +43,18 @@ export function BuilderShell({
   published,
   publicUrl,
 }: Props) {
+  const [colourMode, setColourMode] = useSavedMode("lpb-dashboard-theme");
+  useEffect(() => {
+    const update = () => applyTheme(colourMode);
+    update();
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    media.addEventListener("change", update);
+    return () => { media.removeEventListener("change", update); applyTheme(); };
+  }, [colourMode]);
   const [navigationOpen, setNavigationOpen] = useState(false);
   const navigation = (
     <>
-      <div className="border-b border-white/10 px-5 py-6">
+      <div className="border-b border-hub-border px-5 py-6">
         <Brand className="text-sm" />
         <p className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-hub-muted">
           <PanelLeft className="size-3" /> Builder dashboard
@@ -57,22 +68,22 @@ export function BuilderShell({
       >
         {tools}
       </div>
-      <div className="border-t border-white/10 p-3">{account}</div>
+      <div className="border-t border-hub-border p-3">{account}</div>
     </>
   );
 
   return (
-    <div className="flex min-h-screen bg-[#0b151d] text-hub-foreground">
+    <div className="theme-scope flex min-h-screen bg-hub-background text-hub-foreground" data-colour-mode={colourMode} style={themeStyle("cobalt")}>
       <aside
         aria-label="Builder tools"
-        className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-white/10 bg-[#101f29] md:flex"
+        className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-hub-border bg-hub-surface md:flex"
       >
         {navigation}
       </aside>
       <Sheet open={navigationOpen} onOpenChange={setNavigationOpen}>
         <SheetContent
           side="left"
-          className="dark flex w-72 flex-col gap-0 border-hub-border bg-[#101f29] p-0 text-hub-foreground"
+          data-colour-mode={colourMode} style={themeStyle("cobalt")} className="theme-scope flex w-72 flex-col gap-0 border-hub-border bg-hub-surface p-0 text-hub-foreground"
         >
           <SheetHeader className="sr-only">
             <SheetTitle>Builder tools</SheetTitle>
@@ -82,7 +93,7 @@ export function BuilderShell({
         </SheetContent>
       </Sheet>
       <div className="min-w-0 flex-1">
-        <header className="flex min-h-20 flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-4 sm:px-7 lg:px-9">
+        <header className="flex min-h-20 flex-wrap items-center justify-between gap-3 border-b border-hub-border px-4 py-4 sm:px-7 lg:px-9">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -100,9 +111,10 @@ export function BuilderShell({
               <h1 className="mt-1 font-display text-lg font-semibold">Page builder</h1>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <ColourModeToggle value={colourMode} onChange={setColourMode} label="Dashboard colour mode" />
             <div
-              className="flex rounded-xl border border-white/10 bg-white/[0.04] p-1"
+              className="flex rounded-xl border border-hub-border bg-hub-surface p-1"
               role="group"
               aria-label="Page mode"
             >
@@ -144,7 +156,7 @@ export function BuilderShell({
             </div>
             <div className="flex items-center gap-3 text-xs">
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${published ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300" : "border-white/10 text-hub-muted"}`}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${published ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300" : "border-hub-border text-hub-muted"}`}
               >
                 <span
                   className={`size-1.5 rounded-full ${published ? "bg-emerald-400" : "bg-hub-muted"}`}
