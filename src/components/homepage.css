@@ -3,7 +3,15 @@
   --lp-muted: #566378;
   --lp-blue: #284be0;
   --lp-line: #e1e5eb;
-  background: #fcfbf8;
+  --lp-bg: #fcfbf8;
+  --lp-surface: #fff;
+  --lp-soft: #f4f6fb;
+  --lp-tint: #eef2ff;
+  --lp-action: #284be0;
+  --lp-action-text: #fff;
+  --lp-hover: #1c39b4;
+  --lp-success: #27725b;
+  background: var(--lp-bg);
   color: var(--lp-ink);
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   line-height: 1.6;
@@ -22,7 +30,7 @@
   cursor: pointer;
 }
 .lp-home :is(a, button, summary):focus-visible {
-  outline: 3px solid #284be0;
+  outline: 3px solid var(--lp-blue);
   outline-offset: 4px;
 }
 .lp-home h1,
@@ -156,15 +164,15 @@
   transition: background 0.15s;
 }
 .lp-home .lp-primary {
-  background: var(--lp-blue);
-  color: #fff;
+  background: var(--lp-action);
+  color: var(--lp-action-text);
   box-shadow: 0 4px 10px #284be014;
 }
 .lp-home .lp-primary:hover {
-  background: #1c39b4;
+  background: var(--lp-hover);
 }
 .lp-home .lp-secondary {
-  background: white;
+  background: var(--lp-surface);
   border-color: var(--lp-line);
 }
 .lp-text-link {
@@ -183,14 +191,14 @@
   margin-top: 16px !important;
 }
 .lp-reassurance svg {
-  color: #27725b;
+  color: var(--lp-success);
 }
 .lp-reassurance > span {
   color: #a1aab7;
 }
 .lp-example {
-  background: white;
-  border: 1px solid #dbe1ed;
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-line);
   border-radius: 16px;
   box-shadow: 0 24px 60px -20px #243c6838;
   overflow: hidden;
@@ -200,7 +208,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  background: #f4f6fb;
+  background: var(--lp-soft);
   border-bottom: 1px solid var(--lp-line);
   padding: 14px 17px;
   font-size: 9px;
@@ -218,8 +226,8 @@
   background: #c7cfdd;
 }
 .lp-example-badge {
-  border: 1px solid #d9e0f1;
-  background: #fff;
+  border: 1px solid var(--lp-line);
+  background: var(--lp-surface);
   border-radius: 4px;
   padding: 2px 5px;
 }
@@ -280,9 +288,9 @@
   color: var(--lp-muted);
 }
 .lp-demo-tabs button[aria-selected="true"] {
-  background: #eef2ff;
-  color: #2443c3;
-  border-color: #dce3ff;
+  background: var(--lp-tint);
+  color: var(--lp-blue);
+  border-color: var(--lp-line);
 }
 .lp-demo-folders {
   display: grid;
@@ -304,20 +312,20 @@
   gap: 6px;
   font-size: 9px;
   font-weight: 650;
-  background: #fafbfe;
+  background: var(--lp-soft);
   border-bottom: 1px solid var(--lp-line);
 }
 .lp-demo-folder h3 > span {
   margin-left: auto;
   font-size: 8px;
-  color: #69778c;
+  color: var(--lp-muted);
 }
 .lp-demo-link {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 11px 10px;
-  border-bottom: 1px solid #f0f2f6;
+  border-bottom: 1px solid var(--lp-line);
 }
 .lp-demo-link:last-child {
   border-bottom: 0;
@@ -405,13 +413,13 @@
   font-size: 11px;
   font-weight: 650;
   color: var(--lp-blue);
-  border: 1px solid #d3ddff;
+  border: 1px solid var(--lp-line);
   border-radius: 50%;
   width: 33px;
   height: 33px;
   display: grid;
   place-items: center;
-  background: #f1f4ff;
+  background: var(--lp-tint);
 }
 .lp-steps h3 {
   font-size: 17px;
@@ -426,8 +434,8 @@
   margin-top: 9px;
 }
 .lp-proof {
-  background: #f0f3f8;
-  border-block: 1px solid #e5e9f1;
+  background: var(--lp-soft);
+  border-block: 1px solid var(--lp-line);
   padding-block: 70px;
 }
 .lp-proof-grid {
@@ -482,8 +490,8 @@
   border: 1px solid transparent;
 }
 .lp-shot-tabs button[aria-pressed="true"] {
-  background: white;
-  border-color: #d8dfec;
+  background: var(--lp-surface);
+  border-color: var(--lp-line);
   color: var(--lp-ink);
 }
 .lp-shot img {
@@ -514,7 +522,7 @@
   max-width: 340px;
 }
 .lp-free-card {
-  background: white;
+  background: var(--lp-surface);
   border: 1px solid var(--lp-line);
   border-radius: 13px;
   padding: 28px 32px;
@@ -550,7 +558,7 @@
 }
 .lp-free-card li svg {
   width: 14px;
-  color: #26735e;
+  color: var(--lp-success);
 }
 .lp-free-card .lp-button {
   display: flex;
@@ -585,15 +593,15 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  border: 1px solid #dce3f3;
-  background: #f4f6ff;
+  border: 1px solid var(--lp-line);
+  background: var(--lp-tint);
   border-radius: 13px;
   padding: 25px 30px;
 }
 .lp-extension-icon {
   width: 42px;
   height: 42px;
-  background: #e4eafe;
+  background: var(--lp-tint);
   color: var(--lp-blue);
   display: grid;
   place-items: center;
@@ -670,8 +678,8 @@
 .lp-last {
   padding: 45px 25px 48px;
   text-align: center;
-  background: #eaf0ff;
-  border: 1px solid #dde5fc;
+  background: var(--lp-tint);
+  border: 1px solid var(--lp-line);
   border-radius: 17px;
 }
 .lp-last .lp-eyebrow {
@@ -724,7 +732,7 @@
   top: -100px;
   left: 20px;
   padding: 12px;
-  background: white;
+  background: var(--lp-surface);
   z-index: 50;
 }
 .lp-skip:focus {
@@ -991,4 +999,48 @@
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Homepage-only palette; system mode responds immediately to device changes. */
+.lp-home[data-theme="dark"] {
+  --lp-ink: #edf2fc;
+  --lp-muted: #afbdd3;
+  --lp-blue: #9fb5ff;
+  --lp-line: #33415a;
+  --lp-bg: #101725;
+  --lp-surface: #192337;
+  --lp-soft: #151e2f;
+  --lp-tint: #222f4c;
+  --lp-action: #a9bdff;
+  --lp-action-text: #111c38;
+  --lp-hover: #c2cfff;
+  --lp-success: #83d7b6;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  .lp-home[data-theme="system"] {
+  --lp-ink: #edf2fc;
+  --lp-muted: #afbdd3;
+  --lp-blue: #9fb5ff;
+  --lp-line: #33415a;
+  --lp-bg: #101725;
+  --lp-surface: #192337;
+  --lp-soft: #151e2f;
+  --lp-tint: #222f4c;
+  --lp-action: #a9bdff;
+  --lp-action-text: #111c38;
+  --lp-hover: #c2cfff;
+  --lp-success: #83d7b6;
+  color-scheme: dark;
+  }
+}
+.lp-header-actions { display: flex; align-items: center; gap: 20px; }
+.lp-theme-control { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--lp-muted); }
+.lp-theme-control select { font: inherit; color: var(--lp-ink); background: var(--lp-surface); border: 1px solid var(--lp-line); border-radius: 8px; padding: 9px 6px; min-height: 40px; cursor: pointer; }
+.lp-theme-control select:focus-visible { outline: 3px solid var(--lp-blue); outline-offset: 3px; }
+@media (max-width: 800px) { .lp-header nav { display: none; } }
+@media (max-width: 640px) {
+  .lp-header { flex-wrap: wrap; padding-block: 16px; }
+  .lp-header-actions { margin-left: auto; gap: 12px; }
+  .lp-theme-control > span { display: none; }
 }
