@@ -1,4 +1,8 @@
-import { ColourModeToggle, ThemePresets, useSavedMode } from "@/components/ColourControls";
+import {
+  ColourModeToggle,
+  ThemePresets,
+  useSavedMode,
+} from "@/components/ColourControls";
 import { readPageTheme, writePageTheme, themeStyle } from "@/lib/page-themes";
 import { ExtensionImportDialog } from "./ExtensionImportDialog";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -33,6 +37,7 @@ import type { Json } from "@/integrations/supabase/types";
 import { BuilderShell } from "./BuilderShell";
 import { BuilderTabs } from "./BuilderTabs";
 import { PublishedTabs } from "@/components/PublishedTabs";
+import { WIDGETS, parseWidgets, type HomeWidget } from "@/lib/home-widgets";
 import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { GuidedTour, type TourStep } from "@/components/workspace/GuidedTour";
 import { PinSecurityPanel } from "@/components/PinSecurityPanel";
@@ -103,8 +108,15 @@ type PageRow = Omit<StartPageProfile, "clocks"> & {
   pin_protected: boolean;
   weather_city: string;
   clocks: Json;
+  home_widgets: Json | null;
 };
-type TabRow = { id: string; page_id: string; user_id: string; name: string; position: number };
+type TabRow = {
+  id: string;
+  page_id: string;
+  user_id: string;
+  name: string;
+  position: number;
+};
 type FolderRow = {
   id: string;
   page_id: string;
@@ -115,7 +127,16 @@ type FolderRow = {
 };
 type LinkRow = StartPageLink & { favourite: boolean; tab_id: string | null };
 type Drawer =
-  "identity" | "appearance" | "security" | "clocks" | "link" | "folder" | "tab" | "publish" | null;
+  | "identity"
+  | "appearance"
+  | "security"
+  | "widgets"
+  | "clocks"
+  | "link"
+  | "folder"
+  | "tab"
+  | "publish"
+  | null;
 import { PremiumDialog } from "./PremiumDialog";
 import { getBillingConfig } from "@/lib/billing.functions";
 import {
@@ -161,7 +182,8 @@ const TOUR_STEPS: TourStep[] = [
   {
     selector: '[data-tour="security"]',
     title: "Optional PIN protection",
-    description: "Protect this profile with a six-digit PIN and manage browsers you trust.",
+    description:
+      "Protect this profile with a six-digit PIN and manage browsers you trust.",
   },
   {
     selector: '[data-tour="preview"]',
@@ -172,7 +194,8 @@ const TOUR_STEPS: TourStep[] = [
   {
     selector: '[data-tour="publish"]',
     title: "Publish your page",
-    description: "When at least one link is ready, publish it and open or copy its public address.",
+    description:
+      "When at least one link is ready, publish it and open or copy its public address.",
   },
 ];
 const uidSuffix = () => Math.random().toString(36).slice(2, 6);
@@ -229,7 +252,9 @@ function LinkItem({
           {link.label || link.platform}
           {archived ? " · Archived" : ""}
         </span>
-        <span className="block truncate text-[10px] text-hub-muted">{hostOf(link.url)}</span>
+        <span className="block truncate text-[10px] text-hub-muted">
+          {hostOf(link.url)}
+        </span>
       </a>
       {editing ? (
         <div className="flex">
@@ -277,9 +302,12 @@ export function WorkspaceEditor() {
   const [extOpen, setExtOpen] = useState(false);
   const [canUseChromeStore, setCanUseChromeStore] = useState(false);
   useEffect(() => {
-    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    const mobile =
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    setCanUseChromeStore(!mobile && /Chrome|Chromium|Edg\//.test(navigator.userAgent));
+    setCanUseChromeStore(
+      !mobile && /Chrome|Chromium|Edg\//.test(navigator.userAgent),
+    );
   }, []);
   const defaultFolderPending = useRef(false);
   const qc = useQueryClient();
@@ -289,11 +317,21 @@ export function WorkspaceEditor() {
   const [preview, setPreview] = useState(false);
   const [query, setQuery] = useState("");
   const [drawer, setDrawer] = useState<Drawer>(null);
-  const [publishWarningPage, setPublishWarningPage] = useState<string | null>(null);
+  const [publishWarningPage, setPublishWarningPage] = useState<string | null>(
+    null,
+  );
   const [skipPublishWarning, setSkipPublishWarning] = useState(false);
-  const [identity, setIdentity] = useState({ name: "", display_name: "", tagline: "", slug: "" });
+  const [identity, setIdentity] = useState({
+    name: "",
+    display_name: "",
+    tagline: "",
+    slug: "",
+  });
   const [dashboardMode] = useSavedMode("lpb-dashboard-theme");
-  const [appearance, setAppearance] = useState({ theme: "v1:grid:cobalt:system", dark_mode: true });
+  const [appearance, setAppearance] = useState({
+    theme: "v1:grid:cobalt:system",
+    dark_mode: true,
+  });
   const [linkDraft, setLinkDraft] = useState({
     id: "",
     label: "",
@@ -302,7 +340,11 @@ export function WorkspaceEditor() {
     icon_only: false,
     favourite: false,
   });
-  const [folderDraft, setFolderDraft] = useState({ id: "", from: "", name: "" });
+  const [folderDraft, setFolderDraft] = useState({
+    id: "",
+    from: "",
+    name: "",
+  });
   const [tabDraft, setTabDraft] = useState({ id: "", name: "" });
   const [clockDraft, setClockDraft] = useState({ label: "", tz: "" });
   const [photoError, setPhotoError] = useState("");
@@ -310,7 +352,9 @@ export function WorkspaceEditor() {
   const [tourOpen, setTourOpen] = useState(false);
   const [onboarding, setOnboarding] = useState<boolean | null>(null);
   const [guideDismissed, setGuideDismissed] = useState(false);
-  const [notice, setNotice] = useState<{ title: string; body: string } | null>(null);
+  const [notice, setNotice] = useState<{ title: string; body: string } | null>(
+    null,
+  );
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setEmail(data.user?.email ?? "");
@@ -324,7 +368,11 @@ export function WorkspaceEditor() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw Error("Please sign in again");
-      const q = await supabase.from("pages").select("*").eq("user_id", user.id).order("created_at");
+      const q = await supabase
+        .from("pages")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at");
       if (q.error) throw q.error;
       if (q.data.length) return q.data as PageRow[];
       const base = slugify(user.email?.split("@")[0] || "me") || "me";
@@ -342,7 +390,12 @@ export function WorkspaceEditor() {
       if (c.error) throw c.error;
       const t = await supabase
         .from("page_tabs")
-        .insert({ page_id: c.data.id, user_id: user.id, name: "Links", position: 0 })
+        .insert({
+          page_id: c.data.id,
+          user_id: user.id,
+          name: "Links",
+          position: 0,
+        })
         .select("id")
         .single();
       if (t.error) throw t.error;
@@ -387,7 +440,12 @@ export function WorkspaceEditor() {
       if (!page) return [];
       const t = await supabase
         .from("page_tabs")
-        .insert({ page_id: page.id, user_id: page.user_id, name: "Links", position: 0 })
+        .insert({
+          page_id: page.id,
+          user_id: page.user_id,
+          name: "Links",
+          position: 0,
+        })
         .select("*")
         .single();
       if (t.error) throw t.error;
@@ -421,7 +479,9 @@ export function WorkspaceEditor() {
     queryFn: async (): Promise<LinkRow[]> => {
       const q = await supabase
         .from("links")
-        .select("id,platform,label,url,group_name,position,icon_only,favourite,tab_id")
+        .select(
+          "id,platform,label,url,group_name,position,icon_only,favourite,tab_id",
+        )
         .eq("page_id", page?.id || "")
         .order("position");
       if (q.error) throw q.error;
@@ -429,7 +489,8 @@ export function WorkspaceEditor() {
     },
   });
   useEffect(() => {
-    if (linksQ.isSuccess && onboarding === null) setOnboarding((linksQ.data?.length ?? 0) === 0);
+    if (linksQ.isSuccess && onboarding === null)
+      setOnboarding((linksQ.data?.length ?? 0) === 0);
   }, [linksQ.isSuccess, linksQ.data, onboarding]);
   useEffect(() => {
     const first = tabsQ.data?.[0];
@@ -475,7 +536,9 @@ export function WorkspaceEditor() {
   }, [tabs, tabId]);
   const tab = tabs.find((t) => t.id === tabId) || tabs[0];
   const links = linksQ.data || [];
-  const tabLinks = links.filter((l) => l.tab_id === tab?.id || (!l.tab_id && tab === tabs[0]));
+  const tabLinks = links.filter(
+    (l) => l.tab_id === tab?.id || (!l.tab_id && tab === tabs[0]),
+  );
   const archivedPage = isProfileArchived(
     pages.findIndex((p) => p.id === page?.id),
     plan,
@@ -485,15 +548,18 @@ export function WorkspaceEditor() {
     plan,
     archivedPage,
   );
-  const activeTabIds = new Set((archivedPage ? [] : tabs.slice(0, MAX_TABS)).map((t) => t.id));
+  const activeTabIds = new Set(
+    (archivedPage ? [] : tabs.slice(0, MAX_TABS)).map((t) => t.id),
+  );
   const folderRows = (foldersQ.data || []).filter((f) => f.tab_id === tab?.id);
   const folders = useMemo(
     () =>
       Array.from(
         new Set(
-          [...folderRows.map((f) => f.name), ...tabLinks.map((l) => l.group_name.trim())].filter(
-            Boolean,
-          ),
+          [
+            ...folderRows.map((f) => f.name),
+            ...tabLinks.map((l) => l.group_name.trim()),
+          ].filter(Boolean),
         ),
       ),
     [folderRows, tabLinks],
@@ -501,7 +567,9 @@ export function WorkspaceEditor() {
   const clocks = parseClocks(page?.clocks);
   const openAll = (urls: string[]) => {
     if (openAllLinks(urls))
-      toast.error("Your browser blocked some tabs. Allow pop-ups for this site, then try again.");
+      toast.error(
+        "Your browser blocked some tabs. Allow pop-ups for this site, then try again.",
+      );
   };
   const refresh = async () => {
     await Promise.all([
@@ -530,7 +598,8 @@ export function WorkspaceEditor() {
   });
   const createPage = useMutation({
     mutationFn: async () => {
-      if (!page || pages.length >= MAX_PAGES) throw Error(limitMessage("profiles", plan));
+      if (!page || pages.length >= MAX_PAGES)
+        throw Error(limitMessage("profiles", plan));
       const c = await supabase
         .from("pages")
         .insert({
@@ -547,7 +616,12 @@ export function WorkspaceEditor() {
       if (c.error) throw c.error;
       const t = await supabase
         .from("page_tabs")
-        .insert({ page_id: c.data.id, user_id: page.user_id, name: "Links", position: 0 })
+        .insert({
+          page_id: c.data.id,
+          user_id: page.user_id,
+          name: "Links",
+          position: 0,
+        })
         .select("id")
         .single();
       if (t.error) throw t.error;
@@ -571,7 +645,8 @@ export function WorkspaceEditor() {
   });
   const deletePage = useMutation({
     mutationFn: async () => {
-      if (!page || pages.length <= 1) throw Error("You need at least one profile");
+      if (!page || pages.length <= 1)
+        throw Error("You need at least one profile");
       const q = await supabase.from("pages").delete().eq("id", page.id);
       if (q.error) throw q.error;
     },
@@ -591,7 +666,12 @@ export function WorkspaceEditor() {
       if (tabs.length >= MAX_TABS) throw Error(limitMessage("tabs", plan));
       const q = await supabase
         .from("page_tabs")
-        .insert({ page_id: page.id, user_id: page.user_id, name, position: tabs.length })
+        .insert({
+          page_id: page.id,
+          user_id: page.user_id,
+          name,
+          position: tabs.length,
+        })
         .select("id")
         .single();
       if (q.error) throw q.error;
@@ -604,13 +684,18 @@ export function WorkspaceEditor() {
       toast.success("Tab added");
     },
     onError: (e: Error) =>
-      toast.error(e.message.includes("duplicate") ? "That tab already exists" : limErr(e)),
+      toast.error(
+        e.message.includes("duplicate") ? "That tab already exists" : limErr(e),
+      ),
   });
   const updateTab = useMutation({
     mutationFn: async () => {
       const name = tabDraft.name.trim().slice(0, 30);
       if (!name) throw Error("Enter a tab name");
-      const q = await supabase.from("page_tabs").update({ name }).eq("id", tabDraft.id);
+      const q = await supabase
+        .from("page_tabs")
+        .update({ name })
+        .eq("id", tabDraft.id);
       if (q.error) throw q.error;
     },
     onSuccess: async () => {
@@ -625,7 +710,10 @@ export function WorkspaceEditor() {
       if (tabs.length <= 1) throw Error("Keep at least one tab");
       const target = tabs.find((t) => t.id !== tab?.id);
       if (!target || !tab) return;
-      const move = await supabase.from("links").update({ tab_id: target.id }).eq("tab_id", tab.id);
+      const move = await supabase
+        .from("links")
+        .update({ tab_id: target.id })
+        .eq("tab_id", tab.id);
       if (move.error) throw move.error;
       const q = await supabase.from("page_tabs").delete().eq("id", tab.id);
       if (q.error) throw q.error;
@@ -641,10 +729,13 @@ export function WorkspaceEditor() {
   });
   const saveLink = useMutation({
     mutationFn: async () => {
-      if (!page || !tab || !isSafeUrl(linkDraft.url)) throw Error("Enter a valid web address");
+      if (!page || !tab || !isSafeUrl(linkDraft.url))
+        throw Error("Enter a valid web address");
       const url = normalizeUrl(linkDraft.url).slice(0, 500);
       const payload = {
-        label: (linkDraft.label.trim() || hostOf(url).replace(/^www\./, "")).slice(0, 60),
+        label: (
+          linkDraft.label.trim() || hostOf(url).replace(/^www\./, "")
+        ).slice(0, 60),
         url,
         group_name: linkDraft.group_name.trim().slice(0, 40),
         icon_only: linkDraft.icon_only,
@@ -722,7 +813,9 @@ export function WorkspaceEditor() {
     },
     onError: (e: Error) =>
       toast.error(
-        e.message.includes("duplicate") ? "That folder already exists in this tab" : e.message,
+        e.message.includes("duplicate")
+          ? "That folder already exists in this tab"
+          : e.message,
       ),
   });
   const importBookmarks = async (file: File) => importHtml(await file.text());
@@ -730,7 +823,9 @@ export function WorkspaceEditor() {
     if (!page)
       return "Your profile is still loading. Wait a moment, reload the dashboard and try again.";
     if (tabs.length >= MAX_TABS) {
-      toast.error(`You already have ${MAX_TABS} tabs. Delete one to import bookmarks.`);
+      toast.error(
+        `You already have ${MAX_TABS} tabs. Delete one to import bookmarks.`,
+      );
       return `You already have ${MAX_TABS} tabs. Delete one in the builder, then try again.`;
     }
     try {
@@ -817,9 +912,16 @@ export function WorkspaceEditor() {
         window.postMessage({ type: "LPB_PONG" }, window.location.origin);
         return;
       }
-      if (d?.type === "LPB_BOOKMARKS" && typeof d.html === "string" && d.html.length < 20_000_000)
+      if (
+        d?.type === "LPB_BOOKMARKS" &&
+        typeof d.html === "string" &&
+        d.html.length < 20_000_000
+      )
         void importHtml(d.html).then((msg) =>
-          window.postMessage({ type: "LPB_BOOKMARKS_RESULT", msg }, window.location.origin),
+          window.postMessage(
+            { type: "LPB_BOOKMARKS_RESULT", msg },
+            window.location.origin,
+          ),
         );
     };
     window.addEventListener("message", on);
@@ -836,7 +938,10 @@ export function WorkspaceEditor() {
     }
   };
   const toggleFavourite = async (link: LinkRow) => {
-    const q = await supabase.from("links").update({ favourite: !link.favourite }).eq("id", link.id);
+    const q = await supabase
+      .from("links")
+      .update({ favourite: !link.favourite })
+      .eq("id", link.id);
     if (q.error) toast.error("Couldn't update favourite");
     else qc.invalidateQueries({ queryKey: ["links", page?.id] });
   };
@@ -891,7 +996,9 @@ export function WorkspaceEditor() {
     setOnboarding(false);
     setDrawer("publish");
   };
-  const publishWarningKey = page ? `lpb-public-warning:${page.user_id}:${page.id}` : "";
+  const publishWarningKey = page
+    ? `lpb-public-warning:${page.user_id}:${page.id}`
+    : "";
   const finishPublishRequest = async () => {
     if (page?.published) setDrawer("publish");
     else await completePublish();
@@ -899,7 +1006,11 @@ export function WorkspaceEditor() {
   const publish = async () => {
     if (!page) return;
     let dismissed = false;
-    try { dismissed = localStorage.getItem(publishWarningKey) === "dismissed"; } catch { /* Keep warning available if storage is blocked. */ }
+    try {
+      dismissed = localStorage.getItem(publishWarningKey) === "dismissed";
+    } catch {
+      /* Keep warning available if storage is blocked. */
+    }
     if (!page.pin_protected && !dismissed) {
       setSkipPublishWarning(false);
       setPublishWarningPage(page.id);
@@ -908,16 +1019,22 @@ export function WorkspaceEditor() {
     await finishPublishRequest();
   };
   const saveClocks = async (next: StartPageClock[]) => {
-    await savePage.mutateAsync({ clocks: next.slice(0, MAX_CLOCKS) } as Partial<PageRow>);
+    await savePage.mutateAsync({
+      clocks: next.slice(0, MAX_CLOCKS),
+    } as Partial<PageRow>);
   };
   const download = () => {
     if (!page) return;
     const exportLinks = links.filter(
       (l) =>
         !archivedPage &&
-        (activeTabIds.has(l.tab_id ?? "") || (!l.tab_id && activeTabIds.has(tabs[0]?.id ?? ""))),
+        (activeTabIds.has(l.tab_id ?? "") ||
+          (!l.tab_id && activeTabIds.has(tabs[0]?.id ?? ""))),
     );
-    const html = renderStartPageHtml({ ...page, clocks: parseClocks(page.clocks) }, exportLinks);
+    const html = renderStartPageHtml(
+      { ...page, clocks: parseClocks(page.clocks) },
+      exportLinks,
+    );
     const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
     const a = document.createElement("a");
     a.href = url;
@@ -934,12 +1051,19 @@ export function WorkspaceEditor() {
   };
   const completeTour = async () => {
     setTourOpen(false);
-    const { error } = await supabase.auth.updateUser({ data: { builder_tour_v1: true } });
-    if (error) toast.error("The tour was closed, but we couldn't save that preference");
+    const { error } = await supabase.auth.updateUser({
+      data: { builder_tour_v1: true },
+    });
+    if (error)
+      toast.error("The tour was closed, but we couldn't save that preference");
   };
   if (pagesQ.isLoading || !page)
     return (
-      <div data-colour-mode={dashboardMode} style={themeStyle("cobalt")} className="theme-scope grid min-h-screen place-items-center bg-hub-background text-hub-muted">
+      <div
+        data-colour-mode={dashboardMode}
+        style={themeStyle("cobalt")}
+        className="theme-scope grid min-h-screen place-items-center bg-hub-background text-hub-muted"
+      >
         Loading your workspace…
       </div>
     );
@@ -951,7 +1075,9 @@ export function WorkspaceEditor() {
     );
   const currentFolders = folders.length ? folders : [""];
   const publicUrl =
-    typeof window === "undefined" ? `/p/${page.slug}` : `${window.location.origin}/p/${page.slug}`;
+    typeof window === "undefined"
+      ? `/p/${page.slug}`
+      : `${window.location.origin}/p/${page.slug}`;
   const firstRun = onboarding === true && !guideDismissed;
   return (
     <div>
@@ -981,7 +1107,9 @@ export function WorkspaceEditor() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-hub-muted">
                 Profile settings
               </p>
-              <p className="mt-1 truncate text-xs text-hub-foreground">{page.name}</p>
+              <p className="mt-1 truncate text-xs text-hub-foreground">
+                {page.name}
+              </p>
             </div>
             <Button
               variant="ghost"
@@ -1042,13 +1170,17 @@ export function WorkspaceEditor() {
               type="button"
               className="min-w-0 rounded-lg px-2 py-1.5 text-left hover:bg-hub-elevated"
               onClick={() =>
-                plan === "premium" ? window.location.assign("/membership") : setPremiumOpen(true)
+                plan === "premium"
+                  ? window.location.assign("/membership")
+                  : setPremiumOpen(true)
               }
             >
               <span className="block truncate text-xs font-medium">
                 {plan === "premium" ? "Premium active" : "Free plan"}
               </span>
-              <span className="block text-[10px] text-hub-muted">Account & membership</span>
+              <span className="block text-[10px] text-hub-muted">
+                Account & membership
+              </span>
             </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -1063,8 +1195,12 @@ export function WorkspaceEditor() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <div className="max-w-[240px] px-2 py-1.5">
-                  <p className="text-[10px] uppercase text-muted-foreground">Signed in as</p>
-                  <p className="truncate text-sm font-medium">{email || "Your account"}</p>
+                  <p className="text-[10px] uppercase text-muted-foreground">
+                    Signed in as
+                  </p>
+                  <p className="truncate text-sm font-medium">
+                    {email || "Your account"}
+                  </p>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={openIdentity}>
@@ -1157,7 +1293,10 @@ export function WorkspaceEditor() {
         }
         tabs={
           <BuilderTabs
-            tabs={tabs.map((t, index) => ({ ...t, archived: archivedPage || index >= MAX_TABS }))}
+            tabs={tabs.map((t, index) => ({
+              ...t,
+              archived: archivedPage || index >= MAX_TABS,
+            }))}
             activeId={tabId === "__home" ? "__home" : (tab?.id ?? "__home")}
             onSelect={(id) => {
               setTabId(id);
@@ -1182,7 +1321,9 @@ export function WorkspaceEditor() {
             <section className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-hub-accent/25 bg-hub-accent/5 px-4 py-3">
               <div className="min-w-0">
                 <h2 className="text-sm font-semibold">
-                  {links.length ? "Your first link is ready" : "Start with one link"}
+                  {links.length
+                    ? "Your first link is ready"
+                    : "Start with one link"}
                 </h2>
                 <p className="mt-1 text-xs text-hub-muted">
                   Add a website → organise your tabs → preview and publish.
@@ -1233,7 +1374,10 @@ export function WorkspaceEditor() {
             key={page.id + ":" + tabId}
             profile={{ ...page, clocks }}
             links={links}
-            tabs={tabs.map((t, index) => ({ ...t, archived: archivedPage || index >= MAX_TABS }))}
+            tabs={tabs.map((t, index) => ({
+              ...t,
+              archived: archivedPage || index >= MAX_TABS,
+            }))}
             archivedProfile={archivedPage}
             initialTabId={tabId}
             embedded
@@ -1243,14 +1387,17 @@ export function WorkspaceEditor() {
             id="builder-tab-panel"
             role="tabpanel"
             aria-labelledby={
-              "builder-tab-" + (tabId === "__home" ? "__home" : (tab?.id ?? "__home"))
+              "builder-tab-" +
+              (tabId === "__home" ? "__home" : (tab?.id ?? "__home"))
             }
-            data-colour-mode={readPageTheme(page.theme, page.dark_mode).mode} style={themeStyle(readPageTheme(page.theme).preset)} className="theme-scope min-w-0 bg-hub-background px-4 py-5 text-hub-foreground sm:p-6"
+            data-colour-mode={readPageTheme(page.theme, page.dark_mode).mode}
+            style={themeStyle(readPageTheme(page.theme).preset)}
+            className="theme-scope min-w-0 bg-hub-background px-4 py-5 text-hub-foreground sm:p-6"
           >
             {archivedPage || archivedTab ? (
               <div className="mb-4 rounded-md border border-hub-accent/40 bg-hub-surface p-3 text-sm">
-                Archived on the Free plan. Your saved links remain visible, but cannot be opened
-                until Premium is renewed.
+                Archived on the Free plan. Your saved links remain visible, but
+                cannot be opened until Premium is renewed.
               </div>
             ) : null}
             {tabId === "__home" ? (
@@ -1275,6 +1422,12 @@ export function WorkspaceEditor() {
                     url: l.url,
                     favourite: l.favourite,
                   }))}
+                widgets={page.home_widgets}
+                saving={savePage.isPending}
+                onAddWidget={() => setDrawer("widgets")}
+                onWidgetsChange={(widgets) =>
+                  savePage.mutate({ home_widgets: widgets })
+                }
                 clocks={clocks}
                 editing={!preview}
                 onEditIdentity={openIdentity}
@@ -1297,9 +1450,12 @@ export function WorkspaceEditor() {
                       </span>
                     )}
                     <div className="min-w-0">
-                      <h1 className="truncate font-display text-xl font-semibold">{tab?.name}</h1>
+                      <h1 className="truncate font-display text-xl font-semibold">
+                        {tab?.name}
+                      </h1>
                       <p className="truncate text-xs text-hub-muted">
-                        {page.name} profile · {folders.length} folders · {tabLinks.length} links
+                        {page.name} profile · {folders.length} folders ·{" "}
+                        {tabLinks.length} links
                       </p>
                     </div>
                   </div>
@@ -1313,7 +1469,9 @@ export function WorkspaceEditor() {
                           aria-label="Tab settings"
                         >
                           <Ellipsis />
-                          <span className="sr-only sm:not-sr-only">Tab settings</span>
+                          <span className="sr-only sm:not-sr-only">
+                            Tab settings
+                          </span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -1374,7 +1532,9 @@ export function WorkspaceEditor() {
                     const items = tabLinks.filter(
                       (l) =>
                         l.group_name === folder &&
-                        `${l.label} ${hostOf(l.url)}`.toLowerCase().includes(query.toLowerCase()),
+                        `${l.label} ${hostOf(l.url)}`
+                          .toLowerCase()
+                          .includes(query.toLowerCase()),
                     );
                     const row = folderRows.find((item) => item.name === folder);
                     return (
@@ -1395,7 +1555,9 @@ export function WorkspaceEditor() {
                           <h2 className="min-w-0 flex-1 truncate font-display text-xs font-semibold">
                             {folder || "Unfiled links"}
                           </h2>
-                          <span className="text-[10px] text-hub-muted">{items.length}</span>
+                          <span className="text-[10px] text-hub-muted">
+                            {items.length}
+                          </span>
                           {items.length ? (
                             <Button
                               variant="ghost"
@@ -1413,7 +1575,11 @@ export function WorkspaceEditor() {
                               size="icon"
                               className="size-7 text-hub-muted"
                               onClick={() => {
-                                setFolderDraft({ id: row?.id || "", from: folder, name: folder });
+                                setFolderDraft({
+                                  id: row?.id || "",
+                                  from: folder,
+                                  name: folder,
+                                });
                                 setDrawer("folder");
                               }}
                             >
@@ -1429,7 +1595,11 @@ export function WorkspaceEditor() {
                               e.dataTransfer.setData("text/link-id", l.id);
                               e.dataTransfer.effectAllowed = "move";
                             }}
-                            className={!preview ? "cursor-grab active:cursor-grabbing" : ""}
+                            className={
+                              !preview
+                                ? "cursor-grab active:cursor-grabbing"
+                                : ""
+                            }
                           >
                             <LinkItem
                               link={l}
@@ -1448,7 +1618,11 @@ export function WorkspaceEditor() {
                                 setDrawer("link");
                               }}
                               onDelete={() => {
-                                if (confirm(`Delete the ${l.label || l.platform} link?`))
+                                if (
+                                  confirm(
+                                    `Delete the ${l.label || l.platform} link?`,
+                                  )
+                                )
                                   removeLink.mutate(l.id);
                               }}
                             />
@@ -1511,24 +1685,35 @@ export function WorkspaceEditor() {
           <Button onClick={() => setImportNotice("")}>Got it</Button>
         </DialogContent>
       </Dialog>
-      <ExtensionImportDialog open={extOpen} onOpenChange={setExtOpen} canUseChromeStore={canUseChromeStore} canImport={tabs.length < MAX_TABS} onImport={() => { setExtOpen(false); setImportOpen(true); }} />
+      <ExtensionImportDialog
+        open={extOpen}
+        onOpenChange={setExtOpen}
+        canUseChromeStore={canUseChromeStore}
+        canImport={tabs.length < MAX_TABS}
+        onImport={() => {
+          setExtOpen(false);
+          setImportOpen(true);
+        }}
+      />
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Import bookmarks from this browser</DialogTitle>
             <DialogDescription>
-              Each top bookmark folder becomes its own tab (up to {MAX_TABS} tabs), folders inside
-              it become folders, and loose bookmarks go into "Ungrouped". Using our browser
-              extension? Just click its button — no file needed.
+              Each top bookmark folder becomes its own tab (up to {MAX_TABS}{" "}
+              tabs), folders inside it become folders, and loose bookmarks go
+              into "Ungrouped". Using our browser extension? Just click its
+              button — no file needed.
             </DialogDescription>
           </DialogHeader>
           <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
             <li>
-              <b>Chrome / Edge / Brave:</b> press Ctrl+Shift+O (Cmd+Shift+O on Mac) → ⋮ menu →
-              Export bookmarks.
+              <b>Chrome / Edge / Brave:</b> press Ctrl+Shift+O (Cmd+Shift+O on
+              Mac) → ⋮ menu → Export bookmarks.
             </li>
             <li>
-              <b>Firefox:</b> Ctrl+Shift+O → Import and Backup → Export Bookmarks to HTML.
+              <b>Firefox:</b> Ctrl+Shift+O → Import and Backup → Export
+              Bookmarks to HTML.
             </li>
             <li>
               <b>Safari:</b> File → Export → Bookmarks.
@@ -1536,8 +1721,9 @@ export function WorkspaceEditor() {
             <li>Choose the saved file below.</li>
           </ol>
           <p className="text-xs text-muted-foreground">
-            For privacy, browsers don't let websites read bookmarks directly, so a quick export is
-            needed. Repeat on any other browser to import its bookmarks too.
+            For privacy, browsers don't let websites read bookmarks directly, so
+            a quick export is needed. Repeat on any other browser to import its
+            bookmarks too.
           </p>
           <Input
             type="file"
@@ -1557,7 +1743,9 @@ export function WorkspaceEditor() {
         }}
       >
         <SheetContent
-          data-colour-mode={dashboardMode} style={themeStyle("cobalt")} className={`theme-scope w-full overflow-y-auto border-hub-border bg-hub-surface text-hub-foreground ${drawer === "security" ? "sm:max-w-[50vw] lg:w-1/2" : "sm:max-w-md"}`}
+          data-colour-mode={dashboardMode}
+          style={themeStyle("cobalt")}
+          className={`theme-scope w-full overflow-y-auto border-hub-border bg-hub-surface text-hub-foreground ${drawer === "security" ? "sm:max-w-[50vw] lg:w-1/2" : "sm:max-w-md"}`}
         >
           <SheetHeader>
             <SheetTitle className="font-display text-hub-foreground">
@@ -1567,28 +1755,34 @@ export function WorkspaceEditor() {
                   ? "Themes & appearance"
                   : drawer === "security"
                     ? "PIN & trusted browsers"
-                    : drawer === "clocks"
-                      ? "World clocks"
-                      : drawer === "link"
-                        ? linkDraft.id
-                          ? "Edit link"
-                          : "Add link"
-                        : drawer === "folder"
-                          ? "Folder"
-                          : drawer === "tab"
-                            ? "Tab settings"
-                            : "Publish profile"}
+                    : drawer === "widgets"
+                      ? "Add Home widgets"
+                      : drawer === "clocks"
+                        ? "World clocks"
+                        : drawer === "link"
+                          ? linkDraft.id
+                            ? "Edit link"
+                            : "Add link"
+                          : drawer === "folder"
+                            ? "Folder"
+                            : drawer === "tab"
+                              ? "Tab settings"
+                              : "Publish profile"}
             </SheetTitle>
             <SheetDescription className="text-hub-muted">
-              Changes belong only to the {page.name} profile and follow your account to other
-              browsers.
+              Changes belong only to the {page.name} profile and follow your
+              account to other browsers.
             </SheetDescription>
           </SheetHeader>
           {drawer === "identity" ? (
             <div className="mt-6 space-y-5">
               <div className="flex items-center gap-4 rounded-md border border-hub-border bg-hub-background p-4">
                 {page.avatar_url ? (
-                  <img src={page.avatar_url} alt="" className="size-16 rounded-md object-cover" />
+                  <img
+                    src={page.avatar_url}
+                    alt=""
+                    className="size-16 rounded-md object-cover"
+                  />
                 ) : (
                   <span className="grid size-16 place-items-center rounded-md border border-hub-border bg-hub-elevated text-xl font-semibold text-hub-accent">
                     {initials(page.display_name)}
@@ -1627,14 +1821,18 @@ export function WorkspaceEditor() {
                   </p>
                 </div>
               </div>
-              {photoError ? <p className="text-xs text-destructive">{photoError}</p> : null}
+              {photoError ? (
+                <p className="text-xs text-destructive">{photoError}</p>
+              ) : null}
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="page-name">Private profile name</Label>
                   <Input
                     id="page-name"
                     value={identity.name}
-                    onChange={(e) => setIdentity({ ...identity, name: e.target.value })}
+                    onChange={(e) =>
+                      setIdentity({ ...identity, name: e.target.value })
+                    }
                     className="mt-1 bg-hub-background"
                   />
                 </div>
@@ -1643,7 +1841,9 @@ export function WorkspaceEditor() {
                   <Input
                     id="display-name"
                     value={identity.display_name}
-                    onChange={(e) => setIdentity({ ...identity, display_name: e.target.value })}
+                    onChange={(e) =>
+                      setIdentity({ ...identity, display_name: e.target.value })
+                    }
                     className="mt-1 bg-hub-background"
                   />
                 </div>
@@ -1652,7 +1852,9 @@ export function WorkspaceEditor() {
                   <Input
                     id="tagline"
                     value={identity.tagline}
-                    onChange={(e) => setIdentity({ ...identity, tagline: e.target.value })}
+                    onChange={(e) =>
+                      setIdentity({ ...identity, tagline: e.target.value })
+                    }
                     className="mt-1 bg-hub-background"
                   />
                 </div>
@@ -1661,7 +1863,12 @@ export function WorkspaceEditor() {
                   <Input
                     id="slug"
                     value={identity.slug}
-                    onChange={(e) => setIdentity({ ...identity, slug: slugify(e.target.value) })}
+                    onChange={(e) =>
+                      setIdentity({
+                        ...identity,
+                        slug: slugify(e.target.value),
+                      })
+                    }
                     className="mt-1 bg-hub-background"
                   />
                   <p className="mt-1 text-xs text-hub-muted">
@@ -1669,7 +1876,9 @@ export function WorkspaceEditor() {
                   </p>
                 </div>
                 <Button
-                  disabled={!identity.name.trim() || !identity.display_name.trim()}
+                  disabled={
+                    !identity.name.trim() || !identity.display_name.trim()
+                  }
                   onClick={async () => {
                     await savePage.mutateAsync({
                       ...identity,
@@ -1689,7 +1898,11 @@ export function WorkspaceEditor() {
                   variant="destructive"
                   disabled={pages.length <= 1 || deletePage.isPending}
                   onClick={() => {
-                    if (confirm(`Delete the ${page.name} profile and all its links?`))
+                    if (
+                      confirm(
+                        `Delete the ${page.name} profile and all its links?`,
+                      )
+                    )
                       deletePage.mutate();
                   }}
                 >
@@ -1705,7 +1918,18 @@ export function WorkspaceEditor() {
                 <Label htmlFor="layout">Page layout</Label>
                 <Select
                   value={readPageTheme(appearance.theme).layout}
-                  onValueChange={(layout) => setAppearance({ ...appearance, theme: writePageTheme({ ...readPageTheme(appearance.theme, appearance.dark_mode), layout }) })}
+                  onValueChange={(layout) =>
+                    setAppearance({
+                      ...appearance,
+                      theme: writePageTheme({
+                        ...readPageTheme(
+                          appearance.theme,
+                          appearance.dark_mode,
+                        ),
+                        layout,
+                      }),
+                    })
+                  }
                 >
                   <SelectTrigger id="layout" className="mt-2 bg-hub-surface">
                     <SelectValue />
@@ -1718,13 +1942,58 @@ export function WorkspaceEditor() {
               </div>
               <div className="space-y-3">
                 <Label>Published page mode</Label>
-                <ColourModeToggle value={readPageTheme(appearance.theme, appearance.dark_mode).mode} onChange={(mode) => setAppearance({ ...appearance, dark_mode: mode !== "light", theme: writePageTheme({ ...readPageTheme(appearance.theme, appearance.dark_mode), mode }) })} />
-                <p className="text-xs text-hub-muted">System follows the visitor’s device. This applies only to this profile.</p>
+                <ColourModeToggle
+                  value={
+                    readPageTheme(appearance.theme, appearance.dark_mode).mode
+                  }
+                  onChange={(mode) =>
+                    setAppearance({
+                      ...appearance,
+                      dark_mode: mode !== "light",
+                      theme: writePageTheme({
+                        ...readPageTheme(
+                          appearance.theme,
+                          appearance.dark_mode,
+                        ),
+                        mode,
+                      }),
+                    })
+                  }
+                />
+                <p className="text-xs text-hub-muted">
+                  System follows the visitor’s device. This applies only to this
+                  profile.
+                </p>
                 <Label>Choose a theme · 20 colour combinations</Label>
-                <ThemePresets value={readPageTheme(appearance.theme).preset} onChange={(preset) => setAppearance({ ...appearance, theme: writePageTheme({ ...readPageTheme(appearance.theme, appearance.dark_mode), preset }) })} />
-                <div className="theme-scope rounded-lg border border-hub-border bg-hub-background p-4 text-hub-foreground" data-colour-mode={readPageTheme(appearance.theme, appearance.dark_mode).mode} style={themeStyle(readPageTheme(appearance.theme).preset)}>
+                <ThemePresets
+                  value={readPageTheme(appearance.theme).preset}
+                  onChange={(preset) =>
+                    setAppearance({
+                      ...appearance,
+                      theme: writePageTheme({
+                        ...readPageTheme(
+                          appearance.theme,
+                          appearance.dark_mode,
+                        ),
+                        preset,
+                      }),
+                    })
+                  }
+                />
+                <div
+                  className="theme-scope rounded-lg border border-hub-border bg-hub-background p-4 text-hub-foreground"
+                  data-colour-mode={
+                    readPageTheme(appearance.theme, appearance.dark_mode).mode
+                  }
+                  style={themeStyle(readPageTheme(appearance.theme).preset)}
+                >
                   <p className="font-semibold">Your page preview</p>
-                  <div className="mt-3 rounded border border-hub-border bg-hub-surface p-3"><span className="text-hub-accent">★ Favourite links</span><p className="text-xs text-hub-muted">Your websites, in your colours.</p></div>
+                  <div className="mt-3 rounded border border-hub-border bg-hub-surface p-3">
+                    <span className="text-hub-accent">★ Favourite links</span>
+                    <p className="text-xs text-hub-muted">
+                      Your websites, in your colours.
+                    </p>
+                  </div>
                 </div>
               </div>
               <Button
@@ -1747,6 +2016,42 @@ export function WorkspaceEditor() {
                 toggling={savePage.isPending}
                 onToggle={(pin_protected) => savePage.mutate({ pin_protected })}
               />
+            </div>
+          ) : null}
+          {drawer === "widgets" ? (
+            <div className="mt-6 space-y-3">
+              <p className="text-sm text-hub-muted">
+                Choose what appears on this profile’s Home tab. Move, resize or
+                remove widgets on the canvas.
+              </p>
+              {WIDGETS.map((widget) => {
+                const current = parseWidgets(page.home_widgets);
+                const added = current.some((w) => w.id === widget.id);
+                return (
+                  <div
+                    key={widget.id}
+                    className="rounded-md border border-hub-border p-4"
+                  >
+                    <h3 className="font-semibold">{widget.name}</h3>
+                    <p className="my-2 text-sm text-hub-muted">
+                      {widget.description}
+                    </p>
+                    <Button
+                      disabled={added || savePage.isPending}
+                      onClick={() =>
+                        savePage.mutate({
+                          home_widgets: [
+                            ...current,
+                            { id: widget.id, size: "wide" },
+                          ],
+                        })
+                      }
+                    >
+                      {added ? "Added" : "Add widget"}
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           ) : null}
           {drawer === "clocks" ? (
@@ -1775,7 +2080,9 @@ export function WorkspaceEditor() {
                   <Input
                     placeholder="City label"
                     value={clockDraft.label}
-                    onChange={(e) => setClockDraft({ ...clockDraft, label: e.target.value })}
+                    onChange={(e) =>
+                      setClockDraft({ ...clockDraft, label: e.target.value })
+                    }
                   />
                   <Select
                     value={clockDraft.tz}
@@ -1805,7 +2112,8 @@ export function WorkspaceEditor() {
                         ...clocks,
                         {
                           tz: clockDraft.tz,
-                          label: clockDraft.label || timezoneLabel(clockDraft.tz),
+                          label:
+                            clockDraft.label || timezoneLabel(clockDraft.tz),
                         },
                       ]);
                       setClockDraft({ label: "", tz: "" });
@@ -1831,7 +2139,9 @@ export function WorkspaceEditor() {
                 <Input
                   id="url"
                   value={linkDraft.url}
-                  onChange={(e) => setLinkDraft({ ...linkDraft, url: e.target.value })}
+                  onChange={(e) =>
+                    setLinkDraft({ ...linkDraft, url: e.target.value })
+                  }
                   placeholder="https://example.com"
                   className="mt-1 bg-hub-background"
                 />
@@ -1841,7 +2151,9 @@ export function WorkspaceEditor() {
                 <Input
                   id="label"
                   value={linkDraft.label}
-                  onChange={(e) => setLinkDraft({ ...linkDraft, label: e.target.value })}
+                  onChange={(e) =>
+                    setLinkDraft({ ...linkDraft, label: e.target.value })
+                  }
                   placeholder="Website name"
                   className="mt-1 bg-hub-background"
                 />
@@ -1851,7 +2163,10 @@ export function WorkspaceEditor() {
                 <Select
                   value={linkDraft.group_name || "__none"}
                   onValueChange={(v) =>
-                    setLinkDraft({ ...linkDraft, group_name: v === "__none" ? "" : v })
+                    setLinkDraft({
+                      ...linkDraft,
+                      group_name: v === "__none" ? "" : v,
+                    })
                   }
                 >
                   <SelectTrigger id="folder" className="mt-1">
@@ -1872,7 +2187,9 @@ export function WorkspaceEditor() {
                 <Switch
                   id="logo-only"
                   checked={linkDraft.icon_only}
-                  onCheckedChange={(icon_only) => setLinkDraft({ ...linkDraft, icon_only })}
+                  onCheckedChange={(icon_only) =>
+                    setLinkDraft({ ...linkDraft, icon_only })
+                  }
                 />
               </div>
               <div className="flex items-center justify-between rounded-md border border-hub-border bg-hub-background p-3">
@@ -1880,7 +2197,9 @@ export function WorkspaceEditor() {
                 <Switch
                   id="favourite"
                   checked={linkDraft.favourite}
-                  onCheckedChange={(favourite) => setLinkDraft({ ...linkDraft, favourite })}
+                  onCheckedChange={(favourite) =>
+                    setLinkDraft({ ...linkDraft, favourite })
+                  }
                 />
               </div>
               <div className="flex gap-2">
@@ -1906,10 +2225,15 @@ export function WorkspaceEditor() {
               <Input
                 id="folder-name"
                 value={folderDraft.name}
-                onChange={(e) => setFolderDraft({ ...folderDraft, name: e.target.value })}
+                onChange={(e) =>
+                  setFolderDraft({ ...folderDraft, name: e.target.value })
+                }
                 className="bg-hub-background"
               />
-              <Button onClick={() => saveFolder.mutate()} disabled={saveFolder.isPending}>
+              <Button
+                onClick={() => saveFolder.mutate()}
+                disabled={saveFolder.isPending}
+              >
                 {folderDraft.from ? "Rename folder" : "Create empty folder"}
               </Button>
               {folderDraft.from ? (
@@ -1957,12 +2281,16 @@ export function WorkspaceEditor() {
               <Input
                 id="tab-name"
                 value={tabDraft.name}
-                onChange={(e) => setTabDraft({ ...tabDraft, name: e.target.value })}
+                onChange={(e) =>
+                  setTabDraft({ ...tabDraft, name: e.target.value })
+                }
                 placeholder="Creative"
                 className="bg-hub-background"
               />
               <Button
-                onClick={() => (tabDraft.id ? updateTab.mutate() : createTab.mutate())}
+                onClick={() =>
+                  tabDraft.id ? updateTab.mutate() : createTab.mutate()
+                }
                 disabled={!tabDraft.id && tabs.length >= MAX_TABS}
               >
                 {tabDraft.id ? "Rename tab" : "Add tab"}
@@ -1978,9 +2306,12 @@ export function WorkspaceEditor() {
                 </Button>
               ) : (
                 <div className="border-t border-hub-border pt-4">
-                  <p className="text-sm font-medium">Or start from browser bookmarks</p>
+                  <p className="text-sm font-medium">
+                    Or start from browser bookmarks
+                  </p>
                   <p className="mt-1 text-xs leading-5 text-hub-muted">
-                    Importing creates a new tab and keeps your bookmark folders together.
+                    Importing creates a new tab and keeps your bookmark folders
+                    together.
                   </p>
                   <Button
                     variant="outline"
@@ -2005,7 +2336,9 @@ export function WorkspaceEditor() {
                   <Check className="size-4" />
                   Your page is live
                 </p>
-                <p className="mt-2 break-all font-mono text-xs text-hub-muted">{publicUrl}</p>
+                <p className="mt-2 break-all font-mono text-xs text-hub-muted">
+                  {publicUrl}
+                </p>
               </div>
               <div className="grid gap-2">
                 <Button asChild>
@@ -2034,7 +2367,10 @@ export function WorkspaceEditor() {
                   <Download />
                   Download HTML
                 </Button>
-                <Button variant="ghost" onClick={() => savePage.mutate({ published: false })}>
+                <Button
+                  variant="ghost"
+                  onClick={() => savePage.mutate({ published: false })}
+                >
                   Unpublish
                 </Button>
               </div>
@@ -2042,39 +2378,70 @@ export function WorkspaceEditor() {
           ) : null}
         </SheetContent>
       </Sheet>
-      <Dialog open={publishWarningPage === page.id} onOpenChange={(open) => {
-        if (!open) setPublishWarningPage(null);
-      }}>
+      <Dialog
+        open={publishWarningPage === page.id}
+        onOpenChange={(open) => {
+          if (!open) setPublishWarningPage(null);
+        }}
+      >
         <DialogContent className="border-hub-border bg-hub-surface text-hub-foreground">
           <DialogHeader>
             <DialogTitle>Secure your page before publishing?</DialogTitle>
             <DialogDescription>
-              PIN protection is not enabled for “{page.name}”. This page has a public URL:
-              anyone with the link can view its content. Would you like to secure this profile with a PIN?
-              {page.published ? " Your page is already live and changes save automatically." : ""}
+              PIN protection is not enabled for “{page.name}”. This page has a
+              public URL: anyone with the link can view its content. Would you
+              like to secure this profile with a PIN?
+              {page.published
+                ? " Your page is already live and changes save automatically."
+                : ""}
             </DialogDescription>
           </DialogHeader>
           <label className="flex items-start gap-3 text-sm">
-            <input type="checkbox" className="mt-1" checked={skipPublishWarning}
-              onChange={(event) => setSkipPublishWarning(event.target.checked)} />
-            <span>Don’t show this message again for this profile on this browser.</span>
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={skipPublishWarning}
+              onChange={(event) => setSkipPublishWarning(event.target.checked)}
+            />
+            <span>
+              Don’t show this message again for this profile on this browser.
+            </span>
           </label>
           <div className="flex flex-wrap justify-end gap-2">
-            <Button variant="ghost" onClick={() => setPublishWarningPage(null)}>Cancel</Button>
-            <Button variant="outline" disabled={savePage.isPending} onClick={async () => {
-              try {
-                await finishPublishRequest();
-                if (skipPublishWarning) {
-                  try { localStorage.setItem(publishWarningKey, "dismissed"); }
-                  catch { toast.info("Your browser could not save this preference."); }
+            <Button variant="ghost" onClick={() => setPublishWarningPage(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="outline"
+              disabled={savePage.isPending}
+              onClick={async () => {
+                try {
+                  await finishPublishRequest();
+                  if (skipPublishWarning) {
+                    try {
+                      localStorage.setItem(publishWarningKey, "dismissed");
+                    } catch {
+                      toast.info(
+                        "Your browser could not save this preference.",
+                      );
+                    }
+                  }
+                  setPublishWarningPage(null);
+                } catch {
+                  /* Existing mutation displays the save error; keep dialog open. */
                 }
+              }}
+            >
+              {page.published ? "Continue without PIN" : "Publish without PIN"}
+            </Button>
+            <Button
+              onClick={() => {
                 setPublishWarningPage(null);
-              } catch { /* Existing mutation displays the save error; keep dialog open. */ }
-            }}>{page.published ? "Continue without PIN" : "Publish without PIN"}</Button>
-            <Button onClick={() => {
-              setPublishWarningPage(null);
-              setDrawer("security");
-            }}>Set a PIN</Button>
+                setDrawer("security");
+              }}
+            >
+              Set a PIN
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -2087,7 +2454,9 @@ export function WorkspaceEditor() {
       >
         <AlertDialogContent className="border-hub-border bg-hub-surface text-hub-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-display">{notice?.title}</AlertDialogTitle>
+            <AlertDialogTitle className="font-display">
+              {notice?.title}
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-hub-muted">
               {notice?.body}
             </AlertDialogDescription>
