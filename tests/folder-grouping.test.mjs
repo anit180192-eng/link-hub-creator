@@ -5,7 +5,7 @@ import ts from 'typescript';
 // Load the actual TypeScript helpers without adding a test-runner dependency.
 function load(file) {
   const module = { exports: {} };
-  const compiled = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  const compiled = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   new Function('require', 'module', 'exports', compiled)((name) => load(path.resolve(path.dirname(file), name + '.ts')), module, module.exports);
   return module.exports;
 }
