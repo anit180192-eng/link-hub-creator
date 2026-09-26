@@ -53,7 +53,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
 
     const { data: page, error } = await admin
       .from("pages")
-      .select("id, user_id, slug, display_name, tagline, avatar_url, theme, dark_mode, clocks, pin_protected")
+      .select("id, user_id, slug, display_name, tagline, avatar_url, theme, dark_mode, clocks, home_widgets, pin_protected")
       .eq("slug", slug)
       .eq("published", true)
       .maybeSingle();
@@ -74,6 +74,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
       theme: page.theme,
       dark_mode: page.dark_mode,
       clocks: parseClocks(page.clocks),
+      home_widgets: page.home_widgets,
     };
 
     const [{ data: tabRows, error: tabsError }, { data: ownersPages, error: pagesError }, { data: effective, error: planError }] = await Promise.all([
