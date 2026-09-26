@@ -31,7 +31,7 @@ export function PublishedTabs({ profile, links, tabs, archivedProfile = false, i
   );
   return (
     <div data-colour-mode={mode} style={themeStyle(appearance.preset)} className={cn(palette, embedded ? "min-h-[520px]" : "min-h-screen", "bg-hub-background text-hub-foreground")}>
-      <div className="mx-auto flex max-w-[1120px] justify-end px-4 pt-3"><ColourModeToggle value={mode} onChange={setMode} label="Published page colour mode" /></div>
+      {!embedded ? <div className="mx-auto flex max-w-[1120px] justify-end px-4 pt-3"><ColourModeToggle value={mode} onChange={setMode} label="Published page colour mode" /></div> : null}
       <nav className={cn(!embedded && "sticky top-0", "z-10 border-b border-hub-border bg-hub-background/95 backdrop-blur")} aria-label="Tabs">
         <div className="mx-auto flex max-w-[1120px] gap-1 overflow-x-auto px-4 py-2 sm:px-6">
           {btn("__home", "Home")}

@@ -8,7 +8,7 @@ export const PAGE_THEMES = [
   ["ocean", "Ocean", "#0369a1", "#7dd3fc", 205],
   ["teal", "Teal", "#0f766e", "#5eead4", 175],
   ["forest", "Forest", "#166534", "#86efac", 145],
-  ["sage", "Sage", "#466334", "#bed69c", 95],
+  ["sage", "Eucalyptus", "#42685b", "#9ed6bd", 95],
   ["mint", "Mint", "#047857", "#6ee7b7", 160],
   ["violet", "Violet", "#6d28d9", "#c4b5fd", 265],
   ["lavender", "Lavender", "#7e22ce", "#d8b4fe", 280],
@@ -16,11 +16,11 @@ export const PAGE_THEMES = [
   ["rose", "Rose", "#be123c", "#fda4af", 345],
   ["coral", "Coral", "#b93825", "#ffb4a2", 15],
   ["ruby", "Ruby", "#b91c1c", "#fca5a5", 0],
-  ["amber", "Amber", "#92400e", "#fcd34d", 40],
-  ["sunflower", "Sunflower", "#854d0e", "#fde047", 50],
-  ["terracotta", "Terracotta", "#9a3412", "#fdba74", 25],
-  ["coffee", "Coffee", "#714b35", "#dfbea6", 28],
-  ["sand", "Sand", "#735b23", "#e3ce97", 45],
+  ["amber", "Tangerine", "#a84415", "#ffb28c", 40],
+  ["sunflower", "Sky", "#0369a1", "#8ed8fa", 50],
+  ["terracotta", "Peach", "#a74243", "#ffc0b5", 25],
+  ["coffee", "Ink", "#434b65", "#b6c1e1", 28],
+  ["sand", "Pearl", "#53617e", "#bdc9e6", 45],
   ["slate", "Slate", "#475569", "#cbd5e1", 215],
   ["graphite", "Graphite", "#374151", "#d1d5db", 220],
   ["ice", "Ice", "#155e75", "#a5f3fc", 190],
@@ -41,12 +41,12 @@ export function writePageTheme(value: ReturnType<typeof readPageTheme>) {
 export function themeColours(preset: string, dark: boolean) {
   const t = PAGE_THEMES.find(t => t[0] === preset) ?? PAGE_THEMES[0];
   return {
-    background: dark ? `hsl(${t[4]} 32% 10%)` : `hsl(${t[4]} 30% 98%)`,
-    surface: dark ? `hsl(${t[4]} 29% 15%)` : "#ffffff",
-    elevated: dark ? `hsl(${t[4]} 27% 21%)` : `hsl(${t[4]} 35% 94%)`,
+    background: dark ? "#10141d" : "#f8fafc",
+    surface: dark ? `color-mix(in srgb, ${t[3]} 4%, #191e28)` : "#ffffff",
+    elevated: dark ? `color-mix(in srgb, ${t[3]} 10%, #202632)` : `color-mix(in srgb, ${t[2]} 7%, #ffffff)`,
     foreground: dark ? "#edf2fc" : "#17243b",
     muted: dark ? "#afbdd3" : "#566378",
-    border: dark ? `hsl(${t[4]} 20% 29%)` : `hsl(${t[4]} 20% 86%)`,
+    border: dark ? "#364050" : "#dce2ea",
     accent: dark ? t[3] : t[2],
   };
 }

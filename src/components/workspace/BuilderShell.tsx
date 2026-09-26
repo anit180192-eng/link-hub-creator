@@ -1,6 +1,6 @@
 import { applyTheme } from "@/lib/theme";
 import { ColourModeToggle, useSavedMode } from "@/components/ColourControls";
-import { themeStyle } from "@/lib/page-themes";
+import { themeStyle, type ColourMode } from "@/lib/page-themes";
 import { useEffect, useState, type ReactNode } from "react";
 import { Check, Eye, Menu, Pencil, ExternalLink, PanelLeft } from "lucide-react";
 import { Brand } from "@/components/Brand";
@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/sheet";
 
 type Props = {
+  pagePreset?: string;
+  pageMode?: ColourMode;
   tools: ReactNode;
   account: ReactNode;
   profilePicker: ReactNode;
@@ -30,6 +32,8 @@ type Props = {
 
 /** Dashboard chrome stays outside the page frame in both edit and preview mode. */
 export function BuilderShell({
+  pagePreset = "cobalt",
+  pageMode = "system",
   tools,
   account,
   profilePicker,
@@ -143,7 +147,7 @@ export function BuilderShell({
             {publishAction}
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1680px] px-3 py-5 sm:px-7 sm:py-7 lg:px-9">
+        <main data-colour-mode={pageMode} style={themeStyle(pagePreset)} className="theme-scope bg-hub-background text-hub-foreground mx-auto w-full max-w-[1680px] px-3 py-5 sm:px-7 sm:py-7 lg:px-9">
           <section
             aria-label="Profile selection"
             className="mb-6 flex flex-wrap items-center justify-between gap-3"
