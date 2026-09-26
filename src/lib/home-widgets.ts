@@ -25,10 +25,35 @@ export const WIDGETS = [
     name: "Recently opened",
     description: "Return to your last opened links in this browser.",
   },
+  {
+    id: "notes",
+    name: "Sticky notes",
+    description:
+      "Keep multiple notes. Saved only in this browser, never published.",
+  },
+  {
+    id: "tasks",
+    name: "Checklist",
+    description:
+      "Track small tasks. Saved only in this browser, never published.",
+  },
+  {
+    id: "focus",
+    name: "Focus timer",
+    description: "A simple focus or break timer that survives a page refresh.",
+  },
+  {
+    id: "calendar",
+    name: "Monthly calendar",
+    description:
+      "Browse months and jump back to today. No calendar account needed.",
+  },
 ] as const;
 export type WidgetId = (typeof WIDGETS)[number]["id"];
 export type HomeWidget = { id: WidgetId; size: "compact" | "wide" };
-export const LEGACY_WIDGETS: HomeWidget[] = WIDGETS.map(({ id }) => ({
+export const LEGACY_WIDGETS: HomeWidget[] = WIDGETS.filter(({ id }) =>
+  ["clock", "world", "favourites", "visited", "recent"].includes(id),
+).map(({ id }) => ({
   id,
   size: id === "visited" || id === "recent" ? "compact" : "wide",
 }));
