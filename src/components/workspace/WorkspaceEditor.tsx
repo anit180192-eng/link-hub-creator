@@ -1,3 +1,4 @@
+import { ExtensionImportDialog } from "./ExtensionImportDialog";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -1489,33 +1490,7 @@ export function WorkspaceEditor() {
           <Button onClick={() => setImportNotice("")}>Got it</Button>
         </DialogContent>
       </Dialog>
-      <Dialog open={extOpen} onOpenChange={setExtOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Import bookmarks</DialogTitle>
-            <DialogDescription>
-              Bring your saved websites into this profile, or get our browser extension to save a website while you browse.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 text-sm text-muted-foreground">
-            <p>{canUseChromeStore
-              ? "Get the extension from the Chrome Web Store, then pin it to your browser toolbar."
-              : "The extension is available for desktop Chrome and compatible browsers. For Safari, Firefox or mobile, use a bookmarks HTML file exported from a desktop browser."}</p>
-            <p>The current store version lets you save a bookmark. The updated version is under review. To import your whole collection now, choose Import from a file below.</p>
-          </div>
-          {tabs.length >= MAX_TABS ? <p className="text-sm text-muted-foreground">Your profile has reached its tab limit. Remove a tab before importing a file.</p> : null}
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant={canUseChromeStore ? "default" : "outline"}>
-              <a href="https://chromewebstore.google.com/detail/cgbpomcaomohgkboedipghgiojcjkmdk" target="_blank" rel="noopener noreferrer">
-                <ExternalLink />{canUseChromeStore ? "Get Chrome extension" : "View Chrome Web Store listing"}
-              </a>
-            </Button>
-            <Button disabled={tabs.length >= MAX_TABS} variant={canUseChromeStore ? "outline" : "default"} onClick={() => { setExtOpen(false); setImportOpen(true); }}>
-              <Download />Import from a file
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ExtensionImportDialog open={extOpen} onOpenChange={setExtOpen} canUseChromeStore={canUseChromeStore} canImport={tabs.length < MAX_TABS} onImport={() => { setExtOpen(false); setImportOpen(true); }} />
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
         <DialogContent>
           <DialogHeader>
