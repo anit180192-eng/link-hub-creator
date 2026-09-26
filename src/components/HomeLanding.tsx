@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -10,6 +10,9 @@ import {
   Layers,
   Link2,
   Plus,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 import homeImage from "@/assets/homepage/04-published-home-demo.webp.asset.json";
 import creativeImage from "@/assets/homepage/05-creative-tab-demo.webp.asset.json";
@@ -175,6 +178,19 @@ function Example() {
 }
 
 export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
+  const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("lpb-home-theme");
+      if (saved === "light" || saved === "dark" || saved === "system") setTheme(saved);
+    } catch { /* Use the system theme when storage is unavailable. */ }
+    const sync = (event: StorageEvent) => {
+      if (event.key !== "lpb-home-theme") return;
+      setTheme(event.newValue === "light" || event.newValue === "dark" ? event.newValue : "system");
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
+  }, []);
   const [screen, setScreen] = useState<"home" | "links">("home");
   const ctaUrl = signedIn ? "/dashboard" : "/auth?mode=signup";
   const ctaText = signedIn ? "Open my dashboard" : "Create my free page";
@@ -185,7 +201,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
     </a>
   );
   return (
-    <div className="lp-home">
+    <div className="lp-home" data-theme={theme}>
       <a className="lp-skip" href="#main">
         Skip to content
       </a>
@@ -203,6 +219,21 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
           <a href="#plans">Plans</a>
           <a href="#questions">Questions</a>
         </nav>
+        <div className="lp-header-actions">
+          <div className="lp-theme-control" role="group" aria-label="Homepage colour theme">
+            {([
+              ["light", "Light", Sun],
+              ["dark", "Dark", Moon],
+              ["system", "System", Monitor],
+            ] as const).map(([value, label, Icon]) => (
+              <button key={value} type="button" aria-label={label + " theme"} title={value === "system" ? "Match system theme" : label + " theme"} aria-pressed={theme === value} onClick={() => {
+                setTheme(value);
+                try { localStorage.setItem("lpb-home-theme", value); } catch { /* Keep the selection for this visit. */ }
+              }}>
+                <Icon size={15} aria-hidden="true" /><span>{label}</span>
+              </button>
+            ))}
+          </div>
         <a
           className="lp-signin"
           href={signedIn ? "/dashboard" : "/auth?mode=signin"}
@@ -210,6 +241,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
           {signedIn ? "My dashboard" : "Log in"}
           <ArrowUpRight size={15} />
         </a>
+        </div>
       </header>
       <main id="main">
         <section className="lp-hero lp-container">
