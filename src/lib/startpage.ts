@@ -1,3 +1,4 @@
+import type { Json } from '@/integrations/supabase/types';
 import { readPageTheme, themeColours } from "./page-themes";
 export type Theme = "grid" | "list";
 
@@ -26,6 +27,7 @@ export type StartPageProfile = {
   theme: string;
   dark_mode: boolean;
   clocks?: StartPageClock[];
+  home_widgets?: Json | null;
 };
 
 export const MAX_CLOCKS = 5;
