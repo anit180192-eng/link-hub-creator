@@ -79,52 +79,94 @@ function Notes({ profile }: { profile: string }) {
     error,
   } = useBrowserData<Note[]>(productivityKey(profile, "notes"), [], cleanNotes);
   const [removed, setRemoved] = useState<Note | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const active = notes.find((note) => note.id === selected);
+  const colours = [
+    "bg-amber-100",
+    "bg-rose-100",
+    "bg-sky-100",
+    "bg-emerald-100",
+    "bg-violet-100",
+  ];
   return (
     <>
       <StorageNotice error={error} />
-      <div className="grid gap-3">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,160px))] gap-3">
         {notes.map((note, i) => (
-          <div
+          <button
             key={note.id}
-            className="rounded-md border border-hub-border bg-hub-elevated p-3"
+            type="button"
+            aria-label={`Open note ${i + 1}`}
+            aria-expanded={selected === note.id}
+            aria-controls="sticky-note-editor"
+            onClick={() => setSelected(selected === note.id ? null : note.id)}
+            className={`relative h-32 overflow-hidden rounded-sm border border-black/10 p-3 text-left text-slate-900 shadow-sm transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-hub-accent ${colours[i % colours.length]} ${selected === note.id ? "ring-2 ring-hub-accent" : ""}`}
           >
-            <div className="mb-2 flex items-center justify-between">
-              <label
-                htmlFor={`note-${note.id}`}
-                className="text-xs text-hub-muted"
-              >
-                Note {i + 1}
-              </label>
+            <span
+              aria-hidden="true"
+              className="absolute right-0 top-0 size-5 bg-white/50 [clip-path:polygon(0_0,100%_100%,100%_0)]"
+            />
+            <span className="mb-2 block text-[11px] font-medium text-slate-600">
+              Note {i + 1}
+            </span>
+            <span className="line-clamp-3 whitespace-pre-wrap break-words text-sm">
+              {note.text || "Click to write a note…"}
+            </span>
+          </button>
+        ))}
+      </div>
+      {active && (
+        <div
+          id="sticky-note-editor"
+          className="mt-4 rounded-md border border-hub-border bg-hub-elevated p-3"
+        >
+          <label
+            htmlFor={`note-${active.id}`}
+            className="mb-2 block text-sm font-medium"
+          >
+            Edit note {notes.findIndex((n) => n.id === active.id) + 1}
+          </label>
+          <textarea
+            key={active.id}
+            autoFocus
+            id={`note-${active.id}`}
+            rows={6}
+            maxLength={2000}
+            placeholder="Write a thought or reminder…"
+            className={inputClass + " resize-y"}
+            value={active.text}
+            onChange={(e) =>
+              update((old) =>
+                old.map((n) =>
+                  n.id === active.id ? { ...n, text: e.target.value } : n,
+                ),
+              )
+            }
+          />
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs text-hub-muted">
+              {active.text.length}/2,000 characters ·{" "}
+              {error ? "Not saved" : "Saved in this browser"}
+            </span>
+            <div className="flex gap-2">
               <Button
                 size="sm"
                 variant="ghost"
-                aria-label={`Delete note ${i + 1}`}
                 onClick={() => {
-                  setRemoved(note);
-                  update((old) => old.filter((n) => n.id !== note.id));
+                  setRemoved(active);
+                  update((old) => old.filter((n) => n.id !== active.id));
+                  setSelected(null);
                 }}
               >
-                Delete
+                Delete note
+              </Button>
+              <Button size="sm" onClick={() => setSelected(null)}>
+                Done
               </Button>
             </div>
-            <textarea
-              id={`note-${note.id}`}
-              rows={3}
-              maxLength={2000}
-              placeholder="Write a thought or reminder…"
-              className={inputClass + " resize-y"}
-              value={note.text}
-              onChange={(e) =>
-                update((old) =>
-                  old.map((n) =>
-                    n.id === note.id ? { ...n, text: e.target.value } : n,
-                  ),
-                )
-              }
-            />
           </div>
-        ))}
-      </div>
+        </div>
+      )}
       {!notes.length && (
         <p className="mb-3 text-sm text-hub-muted">
           Capture an idea, a reminder or your next step.
@@ -134,9 +176,11 @@ function Notes({ profile }: { profile: string }) {
         <Button
           size="sm"
           disabled={!ready || notes.length >= 20}
-          onClick={() =>
-            update((old) => [...old, { id: crypto.randomUUID(), text: "" }])
-          }
+          onClick={() => {
+            const id = crypto.randomUUID();
+            update((old) => [...old, { id, text: "" }]);
+            setSelected(id);
+          }}
         >
           Add note
         </Button>
@@ -155,7 +199,7 @@ function Notes({ profile }: { profile: string }) {
         )}
       </div>
       <p className="mt-2 text-xs text-hub-muted">
-        {notes.length}/20 notes · up to 2,000 characters each
+        {notes.length}/20 notes · click a note to expand
       </p>
     </>
   );
