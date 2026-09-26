@@ -2,7 +2,7 @@ import { ColourModeToggle, useSavedMode } from "@/components/ColourControls";
 import { readPageTheme, themeStyle } from "@/lib/page-themes";
 import { parseWidgets, recordVisit } from "@/lib/home-widgets";
 import { useState } from "react";
-import { StartPageView } from "@/components/StartPageView";
+import { StartPageView, BrandLink } from "@/components/StartPageView";
 import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { cn } from "@/lib/utils";
 import {
@@ -102,15 +102,14 @@ export function PublishedTabs({
         "bg-hub-background text-hub-foreground",
       )}
     >
-      {!embedded ? (
-        <div className="mx-auto flex max-w-[1120px] justify-end px-4 pt-3">
-          <ColourModeToggle
-            value={mode}
-            onChange={setMode}
-            label="Published page colour mode"
-          />
-        </div>
-      ) : null}
+      <header className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <BrandLink />
+        {!embedded ? <ColourModeToggle
+          value={mode}
+          onChange={setMode}
+          label="Published page colour mode"
+        /> : null}
+      </header>
       <nav
         className={cn(
           !embedded && "sticky top-0",
@@ -152,6 +151,7 @@ export function PublishedTabs({
         </main>
       ) : (
         <StartPageView
+          hideBrand
           modeOverride={mode}
           profile={profile}
           links={tabLinks}
