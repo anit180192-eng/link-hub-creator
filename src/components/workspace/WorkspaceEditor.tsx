@@ -1,3 +1,4 @@
+import { folderName } from "@/lib/folder-names";
 import {
   ColourModeToggle,
   ThemePresets,
@@ -403,7 +404,7 @@ export function WorkspaceEditor() {
         page_id: c.data.id,
         tab_id: t.data.id,
         user_id: user.id,
-        name: "My links",
+        name: "Folder 1",
         position: 0,
       });
       if (f.error) throw f.error;
@@ -453,7 +454,7 @@ export function WorkspaceEditor() {
         page_id: page.id,
         tab_id: t.data.id,
         user_id: page.user_id,
-        name: "My links",
+        name: "Folder 1",
         position: 0,
       });
       if (f.error) throw f.error;
@@ -511,7 +512,7 @@ export function WorkspaceEditor() {
         page_id: page.id,
         tab_id: first.id,
         user_id: page.user_id,
-        name: "My links",
+        name: "Folder 1",
         position: 0,
       });
       if (error && !error.message.includes("duplicate"))
@@ -557,13 +558,18 @@ export function WorkspaceEditor() {
       Array.from(
         new Set(
           [
-            ...folderRows.map((f) => f.name),
-            ...tabLinks.map((l) => l.group_name.trim()),
+            ...folderRows.map((f) => folderName(f.name)),
+            ...tabLinks.map((l) => folderName(l.group_name)),
           ].filter(Boolean),
         ),
       ),
     [folderRows, tabLinks],
   );
+  const nextFolderName = () => {
+    let index = 1;
+    while (folders.includes(`Folder ${index}`)) index++;
+    return `Folder ${index}`;
+  };
   const clocks = parseClocks(page?.clocks);
   const openAll = (urls: string[]) => {
     if (openAllLinks(urls))
@@ -629,7 +635,7 @@ export function WorkspaceEditor() {
         page_id: c.data.id,
         tab_id: t.data.id,
         user_id: page.user_id,
-        name: "My links",
+        name: "Folder 1",
         position: 0,
       });
       if (f.error) throw f.error;
@@ -737,7 +743,7 @@ export function WorkspaceEditor() {
           linkDraft.label.trim() || hostOf(url).replace(/^www\./, "")
         ).slice(0, 60),
         url,
-        group_name: linkDraft.group_name.trim().slice(0, 40),
+        group_name: folderName(linkDraft.group_name).slice(0, 40),
         icon_only: linkDraft.icon_only,
         favourite: linkDraft.favourite,
         tab_id: tab.id,
@@ -793,13 +799,12 @@ export function WorkspaceEditor() {
         });
         if (q.error) throw q.error;
       }
-      if (folderDraft.from && folderDraft.from !== name) {
+      if (folderDraft.from && folderDraft.from !== name && tabLinks.some(l => folderName(l.group_name) === folderDraft.from)) {
         const linksUpdate = await supabase
           .from("links")
           .update({ group_name: name })
           .eq("page_id", page.id)
-          .eq("tab_id", tab.id)
-          .eq("group_name", folderDraft.from);
+          .in("id", tabLinks.filter(l => folderName(l.group_name) === folderDraft.from).map(l => l.id));
         if (linksUpdate.error) throw linksUpdate.error;
       }
     },
@@ -1073,7 +1078,7 @@ export function WorkspaceEditor() {
         Your workspace could not be loaded. Refresh to try again.
       </div>
     );
-  const currentFolders = folders.length ? folders : [""];
+  const currentFolders = folders.length ? folders : ["Folder 1"];
   const publicUrl =
     typeof window === "undefined"
       ? `/p/${page.slug}`
@@ -1346,7 +1351,7 @@ export function WorkspaceEditor() {
                       id: "",
                       label: "",
                       url: "",
-                      group_name: folderRows[0]?.name || "My links",
+                      group_name: folderRows[0]?.name || "Folder 1",
                       icon_only: false,
                       favourite: false,
                     });
@@ -1531,7 +1536,7 @@ export function WorkspaceEditor() {
                   {currentFolders.map((folder) => {
                     const items = tabLinks.filter(
                       (l) =>
-                        l.group_name === folder &&
+                        folderName(l.group_name) === folder &&
                         `${l.label} ${hostOf(l.url)}`
                           .toLowerCase()
                           .includes(query.toLowerCase()),
@@ -1553,7 +1558,7 @@ export function WorkspaceEditor() {
                         <header className="flex min-h-10 items-center gap-2 border-b border-hub-border bg-hub-elevated/45 px-3">
                           <Folder className="size-4 text-hub-accent" />
                           <h2 className="min-w-0 flex-1 truncate font-display text-xs font-semibold">
-                            {folder || "Unfiled links"}
+                            {folderName(folder)}
                           </h2>
                           <span className="text-[10px] text-hub-muted">
                             {items.length}
@@ -1611,7 +1616,7 @@ export function WorkspaceEditor() {
                                   id: l.id,
                                   label: l.label,
                                   url: l.url,
-                                  group_name: l.group_name,
+                                  group_name: folderName(l.group_name),
                                   icon_only: !!l.icon_only,
                                   favourite: l.favourite,
                                 });
@@ -1657,7 +1662,7 @@ export function WorkspaceEditor() {
                       variant="outline"
                       className="min-h-20 w-full border-dashed border-hub-border bg-transparent text-hub-muted"
                       onClick={() => {
-                        setFolderDraft({ id: "", from: "", name: "" });
+                        setFolderDraft({ id: "", from: "", name: nextFolderName() });
                         setDrawer("folder");
                       }}
                     >
@@ -2161,11 +2166,11 @@ export function WorkspaceEditor() {
               <div>
                 <Label htmlFor="folder">Folder</Label>
                 <Select
-                  value={linkDraft.group_name || "__none"}
+                  value={folderName(linkDraft.group_name)}
                   onValueChange={(v) =>
                     setLinkDraft({
                       ...linkDraft,
-                      group_name: v === "__none" ? "" : v,
+                      group_name: v,
                     })
                   }
                 >
@@ -2173,8 +2178,7 @@ export function WorkspaceEditor() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none">No folder</SelectItem>
-                    {folders.map((f) => (
+                    {Array.from(new Set([...currentFolders, folderName(linkDraft.group_name)])).map((f) => (
                       <SelectItem key={f} value={f}>
                         {f}
                       </SelectItem>
@@ -2244,10 +2248,9 @@ export function WorkspaceEditor() {
                     if (!page || !tab) return;
                     const linksUpdate = await supabase
                       .from("links")
-                      .update({ group_name: "" })
+                      .update({ group_name: folders.find(f => f !== folderDraft.from) || nextFolderName() })
                       .eq("page_id", page.id)
-                      .eq("tab_id", tab.id)
-                      .eq("group_name", folderDraft.from);
+                      .in("id", tabLinks.filter(l => folderName(l.group_name) === folderDraft.from).map(l => l.id));
                     if (linksUpdate.error) {
                       toast.error("Couldn't remove folder");
                       return;

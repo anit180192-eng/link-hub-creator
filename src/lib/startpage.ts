@@ -1,3 +1,4 @@
+import { folderName } from "./folder-names";
 import type { Json } from '@/integrations/supabase/types';
 import { readPageTheme, themeColours } from "./page-themes";
 export type Theme = "grid" | "list";
@@ -178,7 +179,7 @@ export function linkTitle(link: StartPageLink) {
 export function groupLinks(links: StartPageLink[]) {
   const groups = new Map<string, StartPageLink[]>();
   for (const link of [...links].sort((a, b) => a.position - b.position)) {
-    const key = link.group_name.trim();
+    const key = folderName(link.group_name);
     const bucket = groups.get(key);
     if (bucket) bucket.push(link);
     else groups.set(key, [link]);
