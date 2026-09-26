@@ -7,6 +7,7 @@ import {
   Clock3,
   Copy,
   Download,
+  ExternalLink,
   Ellipsis,
   Eye,
   Folder,
@@ -271,6 +272,12 @@ export function WorkspaceEditor() {
   const [importOpen, setImportOpen] = useState(false);
   const [importNotice, setImportNotice] = useState("");
   const [extOpen, setExtOpen] = useState(false);
+  const [canUseChromeStore, setCanUseChromeStore] = useState(false);
+  useEffect(() => {
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    setCanUseChromeStore(!mobile && /Chrome|Chromium|Edg\//.test(navigator.userAgent));
+  }, []);
   const defaultFolderPending = useRef(false);
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -990,7 +997,6 @@ export function WorkspaceEditor() {
               variant="ghost"
               className="h-10 w-full justify-start rounded-xl text-xs text-hub-muted"
               onClick={() => setExtOpen(true)}
-              disabled={tabs.length >= MAX_TABS}
             >
               <Download />
               Import bookmarks
@@ -1486,43 +1492,26 @@ export function WorkspaceEditor() {
       <Dialog open={extOpen} onOpenChange={setExtOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Import bookmarks with our extension</DialogTitle>
+            <DialogTitle>Import bookmarks</DialogTitle>
             <DialogDescription>
-              Install the Landing Page Builder extension, keep this page open, then click the
-              extension and press Import. Each top bookmark folder becomes a tab (up to {MAX_TABS}).
+              Bring your saved websites into this profile, or get our browser extension to save a website while you browse.
             </DialogDescription>
           </DialogHeader>
-          <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-            <li>Download and unzip the extension.</li>
-            <li>Open chrome://extensions and turn on Developer mode.</li>
-            <li>Click Load unpacked and pick the unzipped folder.</li>
-          </ol>
-          <p className="text-xs text-muted-foreground">Chrome Web Store listing coming soon.</p>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <p>{canUseChromeStore
+              ? "Get the extension from the Chrome Web Store, then pin it to your browser toolbar."
+              : "The extension is available for desktop Chrome and compatible browsers. For Safari, Firefox or mobile, use a bookmarks HTML file exported from a desktop browser."}</p>
+            <p>The current store version lets you save a bookmark. The updated version is under review. To import your whole collection now, choose Import from a file below.</p>
+          </div>
+          {tabs.length >= MAX_TABS ? <p className="text-sm text-muted-foreground">Your profile has reached its tab limit. Remove a tab before importing a file.</p> : null}
           <div className="flex flex-wrap gap-2">
-            <Button
-              onClick={() => {
-                fetch("/landing-page-builder-extension.zip")
-                  .then((r) => r.blob())
-                  .then((b) => {
-                    const a = document.createElement("a");
-                    a.href = URL.createObjectURL(b);
-                    a.download = "landing-page-builder-extension.zip";
-                    a.click();
-                    URL.revokeObjectURL(a.href);
-                  });
-              }}
-            >
-              <Download />
-              Download extension
+            <Button asChild variant={canUseChromeStore ? "default" : "outline"}>
+              <a href="https://chromewebstore.google.com/detail/cgbpomcaomohgkboedipghgiojcjkmdk" target="_blank" rel="noopener noreferrer">
+                <ExternalLink />{canUseChromeStore ? "Get Chrome extension" : "View Chrome Web Store listing"}
+              </a>
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setExtOpen(false);
-                setImportOpen(true);
-              }}
-            >
-              Import from a file instead
+            <Button disabled={tabs.length >= MAX_TABS} variant={canUseChromeStore ? "outline" : "default"} onClick={() => { setExtOpen(false); setImportOpen(true); }}>
+              <Download />Import from a file
             </Button>
           </div>
         </DialogContent>
