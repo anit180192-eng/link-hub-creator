@@ -938,6 +938,8 @@ export function WorkspaceEditor() {
   return (
     <div>
       <BuilderShell
+        pagePreset={readPageTheme(page.theme, page.dark_mode).preset}
+        pageMode={readPageTheme(page.theme, page.dark_mode).mode}
         preview={preview}
         onPreviewChange={setPreview}
         profileName={page.name}
