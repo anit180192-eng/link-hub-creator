@@ -14,7 +14,7 @@ import {
   Moon,
   Monitor,
 } from "lucide-react";
-import homeImage from "@/assets/homepage/04-published-home-demo.webp.asset.json";
+import { HomeWidgetDemo } from "./HomeWidgetDemo";
 import creativeImage from "@/assets/homepage/05-creative-tab-demo.webp.asset.json";
 import "./homepage.css";
 
@@ -97,7 +97,7 @@ function Example() {
             <span>Your next click starts here.</span>
           </div>
           <div className="lp-clock" aria-label="Example clock, nine forty one">
-            09:41<span>Local time · example</span>
+            09:41<span>Optional clock · example</span>
           </div>
         </div>
         <div
@@ -216,6 +216,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
         </a>
         <nav aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
+          <a href="#features">Features</a>
           <a href="#plans">Plans</a>
           <a href="#questions">Questions</a>
         </nav>
@@ -256,7 +257,8 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
             </h1>
             <p className="lp-intro">
               Turn your favourite links into a page you can open every day. Keep
-              work, life and side projects organised in tabs and folders.
+              work, life and side projects organised in tabs and folders. Add the
+              widgets you need, then drag everything into place.
             </p>
             <div className="lp-actions">
               {cta()}
@@ -297,7 +299,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
               [
                 "02",
                 "Add the websites you use",
-                "Paste your first link, or import a bookmarks file. Give related links a tab or folder.",
+                "Paste your first link, or import a bookmarks file. Group links in folders, then add optional widgets to Home.",
               ],
               [
                 "03",
@@ -314,48 +316,49 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
           </div>
         </section>
 
-        <section className="lp-proof">
+        <section id="features" className="lp-proof">
           <div className="lp-container lp-proof-grid">
             <div>
-              <p className="lp-eyebrow">YOUR LINKS, WITH ROOM TO BREATHE</p>
+              <p className="lp-eyebrow">NEW WAYS TO MAKE HOME YOURS</p>
               <h2>
-                A familiar place.
+                Your links. Your widgets.
                 <br />
-                Every time you open it.
+                Your way to start.
               </h2>
               <p>
-                Keep favourite links close, group the rest by topic, and add
-                world clocks for the places that matter to you.
+                Choose from nine optional Home widgets. Keep a few useful things
+                in view, without filling your page with things you don’t need.
               </p>
               <ul className="lp-checks">
                 <li>
                   <Check />
-                  Separate profiles for work and personal life
+                  Small sticky notes that expand when clicked
                 </li>
                 <li>
                   <Check />
-                  Tabs and folders that make sense to you
+                  Checklists, a focus timer and a monthly calendar
                 </li>
                 <li>
-                  <Check />A page address you can use in any browser
+                  <Check />Drag folders and widgets into your preferred order
                 </li>
               </ul>
               <p className="lp-proof-note">
-                Build in your dashboard. Use your published page day to day.
+                In the builder, open Home → Add widget. Choose compact or wide cards,
+                arrange them, and use them on your published page.
               </p>
             </div>
             <div className="lp-shot">
               <div
                 className="lp-shot-tabs"
                 role="group"
-                aria-label="Choose a published-page screenshot"
+                aria-label="Choose a product preview"
               >
                 <button
                   type="button"
                   aria-pressed={screen === "home"}
                   onClick={() => setScreen("home")}
                 >
-                  Published home
+                  Try Home widgets
                 </button>
                 <button
                   type="button"
@@ -365,20 +368,21 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
                   Published links tab
                 </button>
               </div>
-              <img
-                src={screen === "home" ? homeImage.url : creativeImage.url}
-                alt={
-                  screen === "home"
-                    ? "Sample published start page showing a greeting, clocks and favourite links"
-                    : "Sample published links tab with links grouped in a folder"
-                }
-                width="1600"
-                height="900"
-                loading="lazy"
-              />
-              <p>Actual product screenshots · sample content</p>
+              {screen === "home" ? <HomeWidgetDemo /> : <>
+                <img src={creativeImage.url} alt="Sample published links tab with links grouped in a folder" width="1600" height="900" loading="lazy" />
+                <p>Product screenshot · sample content</p>
+              </>}
             </div>
           </div>
+        </section>
+
+        <section className="lp-container lp-feature-overview" aria-label="What you can add to your start page">
+          <div className="lp-feature-cards">
+            <article><span>01 / PICK YOUR WIDGETS</span><h3>Only what helps your day.</h3><p>Clock & date, world clocks, favourites, most visited, recently opened, sticky notes, checklist, focus timer and monthly calendar. Nothing is added automatically to a new profile.</p></article>
+            <article><span>02 / ARRANGE YOUR SPACE</span><h3>Grab. Move. Make it yours.</h3><p>Drag folders within a tab and widgets on Home using the dotted handles. Positions save automatically. Move arrows are there when you prefer them.</p></article>
+            <article><span>03 / CHOOSE YOUR LOOK</span><h3>A page that feels like you.</h3><p>Choose from 20 colour combinations, use light, dark or system mode, and give each profile its own style.</p></article>
+          </div>
+          <p className="lp-feature-privacy">Notes and checklist items stay in the current browser for each profile; they aren’t synced or published. Anyone using that browser can see them. Most visited and recently opened count only links opened through your page in that browser.</p>
         </section>
 
         <section id="plans" className="lp-container lp-plans">
@@ -409,6 +413,9 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
               <li>
                 <Check />
                 Bookmark file import and publishing
+              </li>
+              <li>
+                <Check />Optional widgets and drag-and-drop organisation
               </li>
             </ul>
             {cta()}
@@ -476,6 +483,14 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
               [
                 "Does it replace my browser or change every new tab?",
                 "No. It is a website you open in your existing browser. After publishing, you can bookmark your page or follow the setup guide to set it as your homepage. Browser setup is a separate, optional step.",
+              ],
+              [
+                "How do I add widgets or move things around?",
+                "In the builder, open Home and click Add widget. Choose only the widgets you want, set their width, and drag the dotted handles to rearrange them. You can also drag folders within a tab. The move arrows offer an alternative to dragging.",
+              ],
+              [
+                "Are my sticky notes and tasks shared with visitors?",
+                "No. Note text and checklist items are stored only in the current browser, separately for each profile. Visitors in another browser get their own notes and tasks. These items do not sync between devices, and clearing browser data removes them. Anyone sharing your browser can see them.",
               ],
               [
                 "Can I protect my published page?",
