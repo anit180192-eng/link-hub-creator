@@ -1,3 +1,5 @@
+import { useDragOrder } from "./useDragOrder";
+import { moveItem, orderLinksByFolders } from "@/lib/reorder";
 import { folderName } from "@/lib/folder-names";
 import {
   ColourModeToggle,
@@ -19,6 +21,9 @@ import {
   Ellipsis,
   Eye,
   Folder,
+  GripVertical,
+  ArrowUp,
+  ArrowDown,
   Image as ImageIcon,
   LogOut,
   Monitor,
@@ -932,6 +937,24 @@ export function WorkspaceEditor() {
     window.addEventListener("message", on);
     return () => window.removeEventListener("message", on);
   });
+  const reorderFolders = useMutation({
+    mutationFn: async ({names, pageId, tabId}: {names: string[]; pageId: string; tabId: string}) => {
+      const {error} = await supabase.rpc("reorder_page_folders", {p_page_id: pageId, p_tab_id: tabId, p_names: names});
+      if (error) throw error;
+    },
+    onSuccess: async (_, variables) => {
+      await qc.invalidateQueries({queryKey: ["folders", variables.pageId]});
+      toast.success("Folder order saved");
+    },
+    onError: () => { toast.error("Couldn’t save folder order. Refresh and try again."); qc.invalidateQueries({queryKey: ["folders", page?.id]}); },
+  });
+  const folderDrag = useDragOrder(folders, `${page?.id}:${tab?.id}`, preview || archivedTab || reorderFolders.isPending, names => {
+    if (page && tab) reorderFolders.mutate({names, pageId: page.id, tabId: tab.id});
+  });
+  const moveFolder = (index: number, delta: number) => {
+    const next = moveItem(folders, index, index + delta);
+    if (next !== folders && page && tab) reorderFolders.mutate({names: next, pageId: page.id, tabId: tab.id});
+  };
   const moveLink = async (id: string, group_name: string) => {
     const l = links.find((x) => x.id === id);
     if (!l || l.group_name === group_name) return;
@@ -1038,7 +1061,7 @@ export function WorkspaceEditor() {
     );
     const html = renderStartPageHtml(
       { ...page, clocks: parseClocks(page.clocks) },
-      exportLinks,
+      orderLinksByFolders(exportLinks, foldersQ.data || [], tabs[0]?.id),
     );
     const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
     const a = document.createElement("a");
@@ -1378,7 +1401,7 @@ export function WorkspaceEditor() {
           <PublishedTabs
             key={page.id + ":" + tabId}
             profile={{ ...page, clocks }}
-            links={links}
+            links={orderLinksByFolders(links, foldersQ.data || [], tabs[0]?.id)}
             tabs={tabs.map((t, index) => ({
               ...t,
               archived: archivedPage || index >= MAX_TABS,
@@ -1533,7 +1556,7 @@ export function WorkspaceEditor() {
                 <div
                   className={`mt-5 columns-1 gap-4 space-y-4 ${readPageTheme(page.theme).layout === "list" ? "mx-auto max-w-3xl" : "md:columns-2 xl:columns-3"}`}
                 >
-                  {currentFolders.map((folder) => {
+                  {currentFolders.map((folder, folderIndex) => {
                     const items = tabLinks.filter(
                       (l) =>
                         folderName(l.group_name) === folder &&
@@ -1546,16 +1569,20 @@ export function WorkspaceEditor() {
                       <section
                         key={folder || "ungrouped"}
                         onDragOver={(e) => {
-                          if (!preview) e.preventDefault();
+                          if (!preview && !archivedTab && e.dataTransfer.types.includes("text/link-id")) e.preventDefault();
                         }}
                         onDrop={(e) => {
+                          if (preview || archivedTab) return;
                           e.preventDefault();
                           const id = e.dataTransfer.getData("text/link-id");
                           if (id) moveLink(id, folder);
                         }}
+                        {...folderDrag.targetProps(folder)}
+                        style={folderDrag.over === folder ? {outline: "2px solid var(--hub-accent)", outlineOffset: 2} : undefined}
                         className="break-inside-avoid overflow-hidden rounded-md border border-hub-border bg-hub-surface"
                       >
                         <header className="flex min-h-10 items-center gap-2 border-b border-hub-border bg-hub-elevated/45 px-3">
+                          {!preview && <Button variant="ghost" size="icon" className="size-6 shrink-0 cursor-grab active:cursor-grabbing" aria-label={`Drag folder ${folder}`} title="Drag to reorder folders" disabled={archivedTab || reorderFolders.isPending || folders.length < 2} {...folderDrag.handleProps(folder)}><GripVertical className="size-4" /></Button>}
                           <Folder className="size-4 text-hub-accent" />
                           <h2 className="min-w-0 flex-1 truncate font-display text-xs font-semibold">
                             {folderName(folder)}
@@ -1574,6 +1601,10 @@ export function WorkspaceEditor() {
                               Open all
                             </Button>
                           ) : null}
+                          {!preview && <span className="flex shrink-0">
+                            <Button variant="ghost" size="icon" className="size-6" aria-label={`Move folder ${folder} up`} disabled={archivedTab || reorderFolders.isPending || folderIndex === 0} onClick={() => moveFolder(folderIndex, -1)}><ArrowUp className="size-3" /></Button>
+                            <Button variant="ghost" size="icon" className="size-6" aria-label={`Move folder ${folder} down`} disabled={archivedTab || reorderFolders.isPending || folderIndex === folders.length - 1} onClick={() => moveFolder(folderIndex, 1)}><ArrowDown className="size-3" /></Button>
+                          </span>}
                           {!preview && folder ? (
                             <Button
                               variant="ghost"
