@@ -289,6 +289,8 @@ export function WorkspaceEditor() {
   const [preview, setPreview] = useState(false);
   const [query, setQuery] = useState("");
   const [drawer, setDrawer] = useState<Drawer>(null);
+  const [publishWarningPage, setPublishWarningPage] = useState<string | null>(null);
+  const [skipPublishWarning, setSkipPublishWarning] = useState(false);
   const [identity, setIdentity] = useState({ name: "", display_name: "", tagline: "", slug: "" });
   const [dashboardMode] = useSavedMode("lpb-dashboard-theme");
   const [appearance, setAppearance] = useState({ theme: "v1:grid:cobalt:system", dark_mode: true });
@@ -882,12 +884,28 @@ export function WorkspaceEditor() {
     setAppearance({ theme: page.theme, dark_mode: page.dark_mode });
     setDrawer("appearance");
   };
-  const publish = async () => {
+  const completePublish = async () => {
     if (!page) return;
     await savePage.mutateAsync({ published: true });
     toast.success(page.published ? "Live page updated" : "Page published");
     setOnboarding(false);
     setDrawer("publish");
+  };
+  const publishWarningKey = page ? `lpb-public-warning:${page.user_id}:${page.id}` : "";
+  const finishPublishRequest = async () => {
+    if (page?.published) setDrawer("publish");
+    else await completePublish();
+  };
+  const publish = async () => {
+    if (!page) return;
+    let dismissed = false;
+    try { dismissed = localStorage.getItem(publishWarningKey) === "dismissed"; } catch { /* Keep warning available if storage is blocked. */ }
+    if (!page.pin_protected && !dismissed) {
+      setSkipPublishWarning(false);
+      setPublishWarningPage(page.id);
+      return;
+    }
+    await finishPublishRequest();
   };
   const saveClocks = async (next: StartPageClock[]) => {
     await savePage.mutateAsync({ clocks: next.slice(0, MAX_CLOCKS) } as Partial<PageRow>);
@@ -1130,7 +1148,7 @@ export function WorkspaceEditor() {
           <Button
             data-tour="publish"
             size="sm"
-            onClick={() => (page.published ? setDrawer("publish") : void publish())}
+            onClick={() => void publish()}
             disabled={savePage.isPending || links.length === 0}
           >
             <Check />
@@ -2024,6 +2042,42 @@ export function WorkspaceEditor() {
           ) : null}
         </SheetContent>
       </Sheet>
+      <Dialog open={publishWarningPage === page.id} onOpenChange={(open) => {
+        if (!open) setPublishWarningPage(null);
+      }}>
+        <DialogContent className="border-hub-border bg-hub-surface text-hub-foreground">
+          <DialogHeader>
+            <DialogTitle>Secure your page before publishing?</DialogTitle>
+            <DialogDescription>
+              PIN protection is not enabled for “{page.name}”. This page has a public URL:
+              anyone with the link can view its content. Would you like to secure this profile with a PIN?
+              {page.published ? " Your page is already live and changes save automatically." : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <label className="flex items-start gap-3 text-sm">
+            <input type="checkbox" className="mt-1" checked={skipPublishWarning}
+              onChange={(event) => setSkipPublishWarning(event.target.checked)} />
+            <span>Don’t show this message again for this profile on this browser.</span>
+          </label>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button variant="ghost" onClick={() => setPublishWarningPage(null)}>Cancel</Button>
+            <Button variant="outline" disabled={savePage.isPending} onClick={async () => {
+              try {
+                await finishPublishRequest();
+                if (skipPublishWarning) {
+                  try { localStorage.setItem(publishWarningKey, "dismissed"); }
+                  catch { toast.info("Your browser could not save this preference."); }
+                }
+                setPublishWarningPage(null);
+              } catch { /* Existing mutation displays the save error; keep dialog open. */ }
+            }}>{page.published ? "Continue without PIN" : "Publish without PIN"}</Button>
+            <Button onClick={() => {
+              setPublishWarningPage(null);
+              setDrawer("security");
+            }}>Set a PIN</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} />
       <AlertDialog
         open={!!notice}
