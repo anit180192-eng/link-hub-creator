@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, ArrowUp, ArrowDown, X } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  ArrowUp,
+  ArrowDown,
+  X,
+  GripVertical,
+} from "lucide-react";
+import { useDragOrder } from "./useDragOrder";
 import { Button } from "@/components/ui/button";
 import { ProductivityWidget } from "./ProductivityWidgets";
 import { faviconFor, hostOf, normalizeUrl, clockParts } from "@/lib/startpage";
@@ -56,6 +64,13 @@ export function HomeDashboard({
   onPublish,
 }: Props) {
   const layout = parseWidgets(widgets);
+  const drag = useDragOrder(
+    layout.map((w) => w.id),
+    slug,
+    !editing || !!saving,
+    (ids) =>
+      onWidgetsChange?.(ids.map((id) => layout.find((w) => w.id === id)!)),
+  );
   const [now, setNow] = useState<Date | null>(null);
   const [activity, setActivity] = useState<ReturnType<typeof readActivity>>({
     visits: [],
@@ -170,6 +185,12 @@ export function HomeDashboard({
         {layout.map((widget, index) => (
           <section
             key={widget.id}
+            {...drag.targetProps(widget.id)}
+            style={
+              drag.over === widget.id
+                ? { outline: "2px solid var(--hub-accent)", outlineOffset: 2 }
+                : undefined
+            }
             className={`min-w-0 rounded-lg border border-hub-border bg-hub-surface p-4 ${widget.size === "wide" ? "md:col-span-2" : ""}`}
           >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -178,6 +199,17 @@ export function HomeDashboard({
               </h3>
               {editing ? (
                 <div className="flex flex-wrap items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 cursor-grab active:cursor-grabbing"
+                    disabled={saving || layout.length < 2}
+                    aria-label={`Drag ${WIDGETS.find((w) => w.id === widget.id)?.name} to reorder`}
+                    title="Drag to reorder, or use the move buttons"
+                    {...drag.handleProps(widget.id)}
+                  >
+                    <GripVertical />
+                  </Button>
                   {widget.id === "world" ? (
                     <Button variant="ghost" size="sm" onClick={onEditClocks}>
                       Settings
