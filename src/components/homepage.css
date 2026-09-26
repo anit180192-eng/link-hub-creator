@@ -1046,3 +1046,44 @@
   .lp-header-actions { width: 100%; justify-content: space-between; gap: 12px; }
   .lp-theme-control button { min-height: 40px; padding-inline: 12px; }
 }
+
+/* Interactive feature preview; scoped to the marketing homepage. */
+.lp-widget-demo { padding: 20px; background: var(--lp-soft); text-align: left; }
+.lp-widget-demo-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lp-widget-demo-title b { font-size: 16px; }
+.lp-widget-demo-title > span { font-size: 9px; letter-spacing: .1em; color: var(--lp-muted); }
+.lp-widget-demo .lp-widget-hint { padding: 0; margin: 12px 0; font-size: 11px; text-align: left; color: var(--lp-muted); }
+.lp-widget-options { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.lp-widget-options button { display: flex; align-items: center; gap: 4px; font-size: 10px; border: 1px solid var(--lp-line); border-radius: 16px; padding: 6px 9px; background: var(--lp-surface); color: var(--lp-muted); }
+.lp-widget-options button[aria-pressed="true"] { background: var(--lp-tint); color: var(--lp-blue); border-color: var(--lp-blue); }
+.lp-widget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lp-widget-card { min-width: 0; padding: 12px; border: 1px solid var(--lp-line); border-radius: 10px; background: var(--lp-surface); }
+.lp-widget-card:first-child { grid-column: 1 / -1; }
+.lp-widget-card.lp-widget-over { outline: 2px solid var(--lp-blue); outline-offset: 2px; }
+.lp-widget-card header { display: flex; align-items: center; gap: 5px; margin-bottom: 12px; font-size: 11px; }
+.lp-widget-card header b { flex: 1; }
+.lp-widget-card header button { border: 0; background: none; color: var(--lp-muted); padding: 5px; }
+.lp-widget-card header button:last-child { cursor: grab; }
+.lp-widget-card header button:disabled { opacity: .35; cursor: default; }
+.lp-mini-notes { display: flex; flex-wrap: wrap; gap: 10px; }
+.lp-mini-notes > button { width: 115px; height: 105px; padding: 12px; border: 1px solid #00000010; border-radius: 2px; background: #fff0b5; color: #283143; box-shadow: 0 2px 4px #00000010; text-align: left; font-size: 12px; overflow: hidden; overflow-wrap: anywhere; }
+.lp-mini-notes > button:nth-child(2) { background: #fce0e6; }
+.lp-note-editor { margin-top: 12px; }
+.lp-note-editor label { display: block; font-size: 11px; margin-bottom: 6px; }
+.lp-note-editor textarea { width: 100%; resize: vertical; border: 1px solid var(--lp-line); border-radius: 6px; padding: 8px; background: var(--lp-bg); color: var(--lp-ink); font: inherit; font-size: 12px; }
+.lp-note-editor > button { display: block; margin-top: 6px; padding: 5px 12px; border: 0; border-radius: 6px; background: var(--lp-action); color: var(--lp-action-text); font-size: 11px; }
+.lp-sample-clock { display: flex; flex-direction: column; gap: 4px; }
+.lp-sample-clock strong { font-size: 29px; line-height: 1; color: var(--lp-blue); }
+.lp-sample-clock span, .lp-sample-clock small { font-size: 10px; color: var(--lp-muted); }
+.lp-sample-task { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; }
+.lp-sample-task input { margin-top: 4px; accent-color: var(--lp-blue); }
+.lp-widget-empty { font-size: 12px; color: var(--lp-muted); }
+.lp-feature-overview { padding-block: 48px; }
+.lp-feature-cards { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+.lp-feature-cards article { padding: 24px; border: 1px solid var(--lp-line); border-radius: 14px; background: var(--lp-surface); }
+.lp-feature-cards article > span { font-size: 10px; letter-spacing: .08em; color: var(--lp-blue); }
+.lp-feature-cards h3 { margin: 12px 0; font-size: 20px; }
+.lp-feature-cards p { font-size: 13px; color: var(--lp-muted); }
+.lp-feature-overview .lp-feature-privacy { margin-top: 22px; font-size: 12px; color: var(--lp-muted); max-width: 920px; }
+@media (max-width: 760px) { .lp-feature-cards { grid-template-columns: 1fr; gap: 12px; } .lp-feature-cards article { padding: 20px; } }
+@media (max-width: 420px) { .lp-widget-demo { padding: 14px; } .lp-widget-grid { grid-template-columns: 1fr; } }
