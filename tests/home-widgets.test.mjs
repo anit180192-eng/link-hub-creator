@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { parseWidgets, cleanVisits, rankVisits, SEVEN_DAYS } from '../src/lib/home-widgets.ts';
+assert.equal(parseWidgets(null).length,5, 'legacy profiles keep all widgets');
+assert.deepEqual(parseWidgets([]),[], 'new or intentionally empty profiles stay empty');
+assert.deepEqual(parseWidgets([{id:'recent',size:'compact'}, {id:'clock',size:'wide'}, {id:'recent'}, {id:'bogus'}]),[{id:'recent',size:'compact'},{id:'clock',size:'wide'}]);
+const now = 1000000000;
+assert.equal(cleanVisits([{id:'old',at:now-SEVEN_DAYS-1},{id:'future',at:now+1},{id:'ok',at:now},null],now).length,1);
+const ranked=rankVisits([{id:'a',at:now-20},{id:'a',at:now-10},{id:'b',at:now},{id:'expired',at:now-SEVEN_DAYS-1}],now);
+assert.deepEqual(ranked.map(x=>x.id),['a','b']);
+assert.equal(ranked[0].count,2);
+assert.equal(rankVisits(Array.from({length:25},(_,i)=>({id:String(i),at:now-i})),now).slice(0,20).length,20);
+assert.deepEqual(parseWidgets({id:'clock'}),[]);
+console.log('Widget compatibility, ordering, validation, seven-day expiry and ranking passed.');
