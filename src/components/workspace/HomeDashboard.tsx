@@ -1,11 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
-import { BarChart3, Check, ChevronRight, Clock3, ExternalLink, Globe2, Pencil, Rocket, RotateCcw, Star, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, Pencil, ArrowUp, ArrowDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { faviconFor, hostOf, normalizeUrl } from "@/lib/startpage";
-
-export type DashboardLink = { id: string; name: string; url: string; favourite?: boolean };
+import { faviconFor, hostOf, normalizeUrl, clockParts } from "@/lib/startpage";
+import {
+  WIDGETS,
+  parseWidgets,
+  readActivity,
+  rankVisits,
+  recordVisit,
+  type HomeWidget,
+} from "@/lib/home-widgets";
+export type DashboardLink = {
+  id: string;
+  name: string;
+  url: string;
+  favourite?: boolean;
+};
 export type DashboardClock = { tz: string; label: string };
-
 type Props = {
   profileId: string;
   profileName: string;
@@ -17,159 +28,326 @@ type Props = {
   links: DashboardLink[];
   clocks: DashboardClock[];
   editing: boolean;
+  widgets?: unknown;
+  saving?: boolean;
+  onWidgetsChange?: (widgets: HomeWidget[]) => void;
+  onAddWidget?: () => void;
   onEditIdentity: () => void;
   onEditClocks: () => void;
   onPublish: () => void;
 };
-
-const recentKey = (profileId: string) => `landing-page-builder:recent:${profileId}`;
-const visitsKey = (profileId: string) => `landing-page-builder:visits:${profileId}`;
-const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-type Visit = { id: string; at: number };
-
-function clockValue(tz: string) {
-  return new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date());
-}
-
-function dateValue(tz: string) {
-  return new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "short", day: "numeric", month: "short" }).format(new Date());
-}
-
-function greetingValue(tz: string) {
-  const hourPart = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "numeric", hourCycle: "h23" })
-    .formatToParts(new Date())
-    .find((part) => part.type === "hour");
-  const hour = Number(hourPart?.value ?? 12);
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
-
-function LinkItem({ link, onOpen }: { link: DashboardLink; onOpen: () => void }) {
-  const icon = faviconFor(link.url);
-  return (
-    <a href={normalizeUrl(link.url)} target="_blank" rel="noopener noreferrer" onClick={onOpen} className="group flex min-h-11 items-center gap-3 rounded-md border border-transparent px-2.5 transition-colors hover:border-hub-border hover:bg-hub-elevated/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent">
-      {icon ? <img src={icon} alt="" className="size-6 rounded-sm" /> : <span className="grid size-6 place-items-center rounded-sm bg-hub-accent font-semibold text-hub-background">{link.name.slice(0, 1)}</span>}
-      <span className="min-w-0 flex-1"><span className="block truncate text-[13px] font-medium">{link.name}</span><span className="block truncate text-[10px] text-hub-muted">{hostOf(link.url)}</span></span>
-      <ChevronRight className="size-4 text-hub-muted transition-transform group-hover:translate-x-0.5 group-hover:text-hub-accent" />
+export function HomeDashboard({
+  profileName,
+  displayName,
+  tagline,
+  avatarUrl,
+  slug,
+  published,
+  links,
+  clocks,
+  editing,
+  widgets,
+  saving,
+  onWidgetsChange,
+  onAddWidget,
+  onEditIdentity,
+  onEditClocks,
+  onPublish,
+}: Props) {
+  const layout = parseWidgets(widgets);
+  const [now, setNow] = useState<Date | null>(null);
+  const [activity, setActivity] = useState<ReturnType<typeof readActivity>>({
+    visits: [],
+    recent: [],
+  });
+  useEffect(() => {
+    const refresh = () => {
+      setNow(new Date());
+      setActivity(readActivity(slug));
+    };
+    refresh();
+    const timer = window.setInterval(refresh, 30_000);
+    window.addEventListener("lpb-activity", refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("lpb-activity", refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, [slug]);
+  const favourites = links.filter((l) => l.favourite);
+  const most = rankVisits(activity.visits, now?.getTime())
+    .flatMap((v) => {
+      const link = links.find((l) => l.id === v.id);
+      return link ? [{ link, count: v.count }] : [];
+    })
+    .slice(0, 20);
+  const recent = activity.recent.flatMap((id) => {
+    const link = links.find((l) => l.id === id);
+    return link ? [link] : [];
+  });
+  const move = (index: number, delta: number) => {
+    const next = [...layout];
+    const from = next[index],
+      to = next[index + delta];
+    if (!from || !to) return;
+    [next[index], next[index + delta]] = [to, from];
+    onWidgetsChange?.(next);
+  };
+  const linkItem = (link: DashboardLink) => (
+    <a
+      key={link.id}
+      href={normalizeUrl(link.url)}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => {
+        if (editing) recordVisit(slug, link.id);
+      }}
+      className="flex min-h-12 min-w-0 items-center gap-3 rounded-md px-2 py-2 hover:bg-hub-elevated focus-visible:ring-2 focus-visible:ring-hub-accent"
+    >
+      <img
+        src={faviconFor(link.url) || "/favicon.svg"}
+        alt=""
+        className="size-6"
+      />
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-medium">{link.name}</span>
+        <span className="block truncate text-xs text-hub-muted">
+          {hostOf(link.url)}
+        </span>
+      </span>
     </a>
   );
-}
-
-export function HomeDashboard({ profileId, profileName, displayName, tagline, avatarUrl, slug, published, links, clocks, editing, onEditIdentity, onEditClocks, onPublish }: Props) {
-  const [tick, setTick] = useState(0);
-  const [recentIds, setRecentIds] = useState<string[]>([]);
-  const [visits, setVisits] = useState<Visit[]>([]);
-  const favourites = useMemo(() => links.filter((link) => link.favourite).slice(0, 6), [links]);
-  const recent = recentIds.map((id) => links.find((link) => link.id === id)).filter((link): link is DashboardLink => Boolean(link)).slice(0, 8);
-  const mostVisited = useMemo(() => {
-    const cutoff = Date.now() - SEVEN_DAYS;
-    const totals = new Map<string, { count: number; last: number }>();
-    visits.filter((visit) => visit.at >= cutoff).forEach((visit) => {
-      const current = totals.get(visit.id) ?? { count: 0, last: 0 };
-      totals.set(visit.id, { count: current.count + 1, last: Math.max(current.last, visit.at) });
-    });
-    return Array.from(totals.entries())
-      .map(([id, activity]) => ({ link: links.find((link) => link.id === id), ...activity }))
-      .filter((item): item is { link: DashboardLink; count: number; last: number } => Boolean(item.link))
-      .sort((a, b) => b.count - a.count || b.last - a.last)
-      .slice(0, 4);
-  }, [links, visits]);
-  const leadClock = clocks[0] ?? { tz: "Europe/London", label: "London" };
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setTick((value) => value + 1), 30_000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(recentKey(profileId));
-      setRecentIds(stored ? JSON.parse(stored) : []);
-      const storedVisits = window.localStorage.getItem(visitsKey(profileId));
-      const cutoff = Date.now() - SEVEN_DAYS;
-      const nextVisits = storedVisits ? (JSON.parse(storedVisits) as Visit[]).filter((visit) => visit.at >= cutoff) : [];
-      setVisits(nextVisits);
-      window.localStorage.setItem(visitsKey(profileId), JSON.stringify(nextVisits));
-    } catch {
-      setRecentIds([]);
-      setVisits([]);
-    }
-  }, [profileId]);
-
-  function remember(link: DashboardLink) {
-    setRecentIds((current) => {
-      const next = [link.id, ...current.filter((id) => id !== link.id)].slice(0, 10);
-      try { window.localStorage.setItem(recentKey(profileId), JSON.stringify(next)); } catch { /* Browser storage is optional. */ }
-      return next;
-    });
-    setVisits((current) => {
-      const cutoff = Date.now() - SEVEN_DAYS;
-      const next = [...current.filter((visit) => visit.at >= cutoff), { id: link.id, at: Date.now() }].slice(-500);
-      try { window.localStorage.setItem(visitsKey(profileId), JSON.stringify(next)); } catch { /* Browser storage is optional. */ }
-      return next;
-    });
-  }
-
-  function clearRecent() {
-    setRecentIds([]);
-    try { window.localStorage.removeItem(recentKey(profileId)); } catch { /* Browser storage is optional. */ }
-  }
-
   return (
-    <div className="mt-5 space-y-4" data-tick={tick}>
-      <section className="relative overflow-hidden rounded-lg border border-hub-border bg-hub-surface p-5 sm:p-6">
-        <div className="absolute inset-x-0 top-0 h-px bg-hub-accent/70" />
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="shrink-0">{avatarUrl ? <img src={avatarUrl} alt={`${displayName} profile`} className="size-16 rounded-md border border-hub-border object-cover sm:size-20" /> : <span className="grid size-16 place-items-center rounded-md border border-hub-border bg-hub-elevated font-display text-xl font-semibold text-hub-accent sm:size-20 sm:text-2xl">{displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "?"}</span>}</div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase text-hub-accent">Your daily starting point</p>
-              <h2 className="mt-1 font-display text-2xl font-medium leading-tight text-hub-foreground sm:text-3xl" suppressHydrationWarning>{greetingValue(leadClock.tz)}, {displayName}.</h2>
-              <p className="mt-1 line-clamp-2 text-xs text-hub-muted">{tagline}</p>
-              <p className="mt-1 text-[10px] text-hub-muted" suppressHydrationWarning>{dateValue(leadClock.tz)} · {profileName}</p>
-              {editing ? <Button variant="ghost" size="sm" className="mt-2 h-8 px-0 text-hub-accent hover:bg-transparent hover:text-hub-foreground" onClick={onEditIdentity}><Pencil className="size-3.5" /> Edit name & picture</Button> : null}
-            </div>
-          </div>
-          <div className="flex items-end justify-between gap-5 border-t border-hub-border pt-4 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
-            <div><p className="font-display text-4xl font-light tabular-nums text-hub-accent sm:text-5xl" suppressHydrationWarning>{clockValue(leadClock.tz)}</p><p className="mt-1 text-[10px] uppercase text-hub-muted">{leadClock.label} · Local time</p></div>
-            <span className="mb-2 size-2 rounded-full bg-hub-accent shadow-[0_0_12px_var(--hub-accent)] motion-safe:animate-pulse" aria-label="Clock is live" />
-          </div>
+    <div className="mt-5 space-y-4">
+      <section className="flex flex-wrap items-center gap-4 rounded-lg border border-hub-border bg-hub-surface p-5">
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt=""
+            className="size-14 rounded-md object-cover"
+          />
+        ) : null}
+        <div className="min-w-0 flex-1">
+          <h2 className="text-2xl font-semibold">
+            {displayName || profileName}
+          </h2>
+          <p className="text-sm text-hub-muted">{tagline}</p>
         </div>
+        {editing ? (
+          <>
+            <Button variant="ghost" onClick={onEditIdentity}>
+              <Pencil />
+              Edit name & picture
+            </Button>
+            <Button onClick={onAddWidget}>
+              <Plus />
+              Add widget
+            </Button>
+          </>
+        ) : null}
       </section>
-
-      <div className="grid gap-4 xl:grid-cols-12">
-        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-12">
-          <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">World time</p><h3 className="mt-1 font-display text-base font-semibold">Your places, at a glance</h3></div>{editing ? <Button variant="ghost" size="sm" className="text-hub-muted hover:text-hub-accent" onClick={onEditClocks}><Pencil /> Edit clocks</Button> : null}</div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            {clocks.map((clock, index) => <div key={`${clock.tz}-${clock.label}`} className={`rounded-md border p-3 transition-colors hover:border-hub-accent/60 ${index === 0 ? "border-hub-accent/35 bg-hub-elevated/55" : "border-hub-border bg-hub-background/45"}`}><div className="flex items-center justify-between"><span className="flex items-center gap-1.5 text-xs text-hub-muted"><Globe2 className="size-3.5" />{clock.label}</span><span className="text-[10px] text-hub-muted" suppressHydrationWarning>{dateValue(clock.tz)}</span></div><p className="mt-3 font-display text-2xl tabular-nums text-hub-foreground" suppressHydrationWarning>{clockValue(clock.tz)}</p></div>)}
-          </div>
+      {!layout.length ? (
+        <section className="rounded-lg border border-dashed border-hub-border p-10 text-center">
+          <h3 className="text-lg font-semibold">
+            {editing ? "Make Home your own" : "Welcome to my page"}
+          </h3>
+          <p className="mt-2 text-sm text-hub-muted">
+            {editing
+              ? "Add clocks, favourite links or browsing activity. Choose only what you need."
+              : "Choose a tab above to explore the links."}
+          </p>
+          {editing ? (
+            <Button className="mt-5" onClick={onAddWidget}>
+              <Plus />
+              Add your first widget
+            </Button>
+          ) : null}
         </section>
-
-        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-12">
-          <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">Pinned across your tabs</p><h3 className="mt-1 flex items-center gap-2 font-display text-base font-semibold"><Star className="size-4 fill-hub-accent text-hub-accent" /> Favourite links</h3></div><span className="text-xs tabular-nums text-hub-muted">{favourites.length}</span></div>
-          {favourites.length ? <div className="mt-3 grid gap-1 sm:grid-cols-2">{favourites.map((link) => <LinkItem key={link.id} link={link} onOpen={() => remember(link)} />)}</div> : <p className="mt-5 text-xs text-hub-muted">{editing ? "Mark a link as favourite in any tab and it will appear here." : "No favourites yet — open a tab above to see all links."}</p>}
-        </section>
-
-        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-6">
-          <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">This browser · last 7 days</p><h3 className="mt-1 flex items-center gap-2 font-display text-base font-semibold"><BarChart3 className="size-4 text-hub-accent" /> Most visited</h3></div></div>
-          <p className="mt-2 text-[11px] text-hub-muted">(Counts only links you open from this landing page)</p>
-          {mostVisited.length ? <div className="mt-2 space-y-1">{mostVisited.map(({ link, count }) => <div key={link.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2"><LinkItem link={link} onOpen={() => remember(link)} /><span className="pr-2 text-[10px] tabular-nums text-hub-muted">{count} {count === 1 ? "open" : "opens"}</span></div>)}</div> : <div className="mt-5 flex items-center gap-3 rounded-md border border-dashed border-hub-border p-3 text-xs text-hub-muted"><BarChart3 className="size-4" />Your most-used links will appear here.</div>}
-        </section>
-
-        <section className="rounded-lg border border-hub-border bg-hub-surface p-4 xl:col-span-6">
-          <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold uppercase text-hub-muted">This browser only</p><h3 className="mt-1 flex items-center gap-2 font-display text-base font-semibold"><Clock3 className="size-4 text-hub-accent" /> Recently opened here</h3></div>{recent.length ? <Button variant="ghost" size="icon" className="size-8 text-hub-muted" onClick={clearRecent} aria-label="Clear recently opened links"><X /></Button> : null}</div>
-          <p className="mt-2 text-[11px] text-hub-muted">(Only links you open from this landing page)</p>
-          {recent.length ? <div className="mt-2 space-y-1">{recent.slice(0, 4).map((link) => <LinkItem key={link.id} link={link} onOpen={() => remember(link)} />)}</div> : <div className="mt-5 flex items-center gap-3 rounded-md border border-dashed border-hub-border p-3 text-xs text-hub-muted"><RotateCcw className="size-4" />Your recent links will collect here.</div>}
-        </section>
+      ) : null}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {layout.map((widget, index) => (
+          <section
+            key={widget.id}
+            className={`min-w-0 rounded-lg border border-hub-border bg-hub-surface p-4 ${widget.size === "wide" ? "md:col-span-2" : ""}`}
+          >
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="font-semibold">
+                {WIDGETS.find((w) => w.id === widget.id)?.name}
+              </h3>
+              {editing ? (
+                <div className="flex flex-wrap items-center gap-1">
+                  {widget.id === "world" ? (
+                    <Button variant="ghost" size="sm" onClick={onEditClocks}>
+                      Settings
+                    </Button>
+                  ) : null}
+                  <select
+                    aria-label={`Width of ${widget.id}`}
+                    value={widget.size}
+                    disabled={saving}
+                    className="rounded border border-hub-border bg-hub-background px-2 py-1 text-xs"
+                    onChange={(e) =>
+                      onWidgetsChange?.(
+                        layout.map((w) =>
+                          w.id === widget.id
+                            ? {
+                                ...w,
+                                size: e.target.value as HomeWidget["size"],
+                              }
+                            : w,
+                        ),
+                      )
+                    }
+                  >
+                    <option value="compact">Compact</option>
+                    <option value="wide">Wide</option>
+                  </select>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    aria-label={`Move ${widget.id} up`}
+                    disabled={saving || index === 0}
+                    onClick={() => move(index, -1)}
+                  >
+                    <ArrowUp />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    aria-label={`Move ${widget.id} down`}
+                    disabled={saving || index === layout.length - 1}
+                    onClick={() => move(index, 1)}
+                  >
+                    <ArrowDown />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    aria-label={`Remove ${widget.id}`}
+                    disabled={saving}
+                    onClick={() =>
+                      onWidgetsChange?.(
+                        layout.filter((w) => w.id !== widget.id),
+                      )
+                    }
+                  >
+                    <X />
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+            {widget.id === "clock" ? (
+              <>
+                <p className="text-4xl tabular-nums text-hub-accent">
+                  {now
+                    ? now.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "—"}
+                </p>
+                <p className="mt-2 text-sm text-hub-muted">
+                  {now
+                    ? now.toLocaleDateString([], {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    : "Local time"}
+                </p>
+              </>
+            ) : null}
+            {widget.id === "world" ? (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {clocks.map((clock, i) => (
+                  <div key={i} className="rounded border border-hub-border p-3">
+                    <p className="text-sm text-hub-muted">{clock.label}</p>
+                    <p className="mt-2 text-2xl tabular-nums">
+                      {now ? clockParts(clock.tz, now).time : "—"}
+                    </p>
+                  </div>
+                ))}
+                {!clocks.length ? (
+                  <p className="text-sm text-hub-muted">
+                    {editing
+                      ? "Open Settings to add your cities."
+                      : "No cities selected yet."}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+            {widget.id === "favourites" ? (
+              favourites.length ? (
+                <div className="grid gap-1 sm:grid-cols-2">
+                  {favourites.map(linkItem)}
+                </div>
+              ) : (
+                <p className="text-sm text-hub-muted">
+                  {editing
+                    ? "Star a link in any tab to show it here."
+                    : "No favourite links yet."}
+                </p>
+              )
+            ) : null}
+            {widget.id === "visited" ? (
+              <>
+                <p className="mb-3 text-xs text-hub-muted">
+                  Top 20 · last 7 days · only links opened through this profile
+                  in this browser.
+                </p>
+                {most.length ? (
+                  most.map(({ link, count }) => (
+                    <div
+                      key={link.id}
+                      className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2"
+                    >
+                      {linkItem(link)}
+                      <span className="text-xs text-hub-muted">
+                        {count} {count === 1 ? "open" : "opens"}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-hub-muted">
+                    Your most-used links will appear here.
+                  </p>
+                )}
+              </>
+            ) : null}
+            {widget.id === "recent" ? (
+              <>
+                <p className="mb-3 text-xs text-hub-muted">
+                  Only links opened through this profile in this browser.
+                </p>
+                {recent.length ? (
+                  recent.map(linkItem)
+                ) : (
+                  <p className="text-sm text-hub-muted">
+                    Your recent links will appear here.
+                  </p>
+                )}
+              </>
+            ) : null}
+          </section>
+        ))}
       </div>
-
-      {editing ? <section className="overflow-hidden rounded-lg border border-hub-accent/45 bg-hub-elevated/55">
-        <div className="grid gap-4 p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-          <div className="flex gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-md bg-hub-accent text-hub-background"><Rocket className="size-5" /></span><div><p className="font-display text-base font-semibold">{published ? "Your page is published" : "Ready to build your landing page?"}</p><p className="mt-1 text-xs leading-5 text-hub-muted">{published ? "Update the live page after your changes. Its address stays the same." : "Publish once to create an address you can open on any browser or device."}</p><p className="mt-2 flex items-center gap-1.5 font-mono text-xs text-hub-accent">{published ? <Check className="size-3.5" /> : <ExternalLink className="size-3.5" />} landingpagebuilder.aurunex.com/p/{slug}</p></div></div>
-          <Button onClick={onPublish} className="w-full sm:w-auto">{published ? "Publish changes to live page" : "Publish this page"}</Button>
-        </div>
-      </section> : null}
+      {editing ? (
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-hub-border bg-hub-surface p-5">
+          <p className="text-sm text-hub-muted">
+            {published
+              ? "Your page is live. Changes save automatically."
+              : "Publish your profile when you are ready."}
+          </p>
+          <Button onClick={onPublish}>
+            {published ? "Publish settings" : "Publish this page"}
+          </Button>
+        </section>
+      ) : null}
     </div>
   );
 }
