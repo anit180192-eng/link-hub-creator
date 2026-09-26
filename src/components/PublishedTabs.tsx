@@ -1,13 +1,17 @@
 import { ColourModeToggle, useSavedMode } from "@/components/ColourControls";
 import { readPageTheme, themeStyle } from "@/lib/page-themes";
 import { parseWidgets, recordVisit } from "@/lib/home-widgets";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Search, X, ArrowUpRight } from "lucide-react";
+import { folderName } from "@/lib/folder-names";
 import { StartPageView, BrandLink } from "@/components/StartPageView";
 import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { cn } from "@/lib/utils";
 import {
   isSafeUrl,
   linkTitle,
+  normalizeUrl,
+  hostOf,
   parseClocks,
   type StartPageLink,
   type StartPageProfile,
@@ -36,6 +40,21 @@ export function PublishedTabs({
         ? "__home"
         : tabs[0].id,
   );
+  const [query, setQuery] = useState("");
+  const searching = query.trim().length > 0;
+  const results = useMemo(() => {
+    const terms = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length) return [];
+    return links.flatMap((link) => {
+      const tab = tabs.find((t) => t.id === (link.tab_id || tabs[0]?.id));
+      if (!tab || !isSafeUrl(link.url)) return [];
+      const folder = folderName(link.group_name);
+      const haystack = [linkTitle(link), link.url, folder, tab.name].join(" ").toLocaleLowerCase();
+      return terms.every((term) => haystack.includes(term))
+        ? [{ link, tab, folder, archived: archivedProfile || tab.archived }]
+        : [];
+    });
+  }, [query, links, tabs, archivedProfile]);
   const appearance = readPageTheme(profile.theme, profile.dark_mode);
   const [mode, setMode] = useSavedMode(
     embedded ? null : "lpb-page-mode:" + profile.slug,
@@ -117,6 +136,21 @@ export function PublishedTabs({
         )}
         aria-label="Tabs"
       >
+        <div className="mx-auto max-w-[1120px] px-4 pt-3 sm:px-6" role="search" aria-label="Search this profile">
+          <div className="flex items-center gap-2 rounded-lg border border-hub-border bg-hub-surface px-3 focus-within:ring-2 focus-within:ring-hub-accent">
+            <Search className="h-4 w-4 shrink-0 text-hub-muted" aria-hidden="true" />
+            <input
+              type="search"
+              aria-label="Search links across all tabs"
+              placeholder="Search links across all tabs…"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => { if (event.key === "Escape") setQuery(""); }}
+              className="min-w-0 flex-1 bg-transparent py-3 text-sm text-hub-foreground outline-none placeholder:text-hub-muted [&::-webkit-search-cancel-button]:hidden"
+            />
+            {query ? <button type="button" aria-label="Clear search" onClick={() => setQuery("")} className="rounded p-2 text-hub-muted hover:text-hub-foreground focus-visible:ring-2 focus-visible:ring-hub-accent"><X className="h-4 w-4" /></button> : null}
+          </div>
+        </div>
         <div className="mx-auto flex max-w-[1120px] gap-1 overflow-x-auto px-4 py-2 sm:px-6">
           {btn("__home", "Home")}
           {tabs.map((t) =>
@@ -124,7 +158,24 @@ export function PublishedTabs({
           )}
         </div>
       </nav>
-      {active === "__home" ? (
+      {searching ? (
+        <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
+          <h1 className="text-xl font-semibold">Search results</h1>
+          <p role="status" aria-live="polite" className="mb-5 mt-1 text-sm text-hub-muted">{results.length} {results.length === 1 ? "link" : "links"} found across all tabs</p>
+          {results.length ? <ul className="grid gap-3 sm:grid-cols-2">
+            {results.map(({ link, tab, folder, archived }) => <li key={link.id} className="min-w-0 rounded-lg border border-hub-border bg-hub-surface p-4">
+              <p className="mb-2 break-words text-xs text-hub-muted">{tab.name} / {folder}{archived ? " · Archived" : ""}</p>
+              <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="flex items-center justify-between gap-3 rounded text-sm font-semibold text-hub-foreground focus-visible:ring-2 focus-visible:ring-hub-accent">
+                <span className="min-w-0 break-words">{linkTitle(link)}</span>
+                {!archived ? <ArrowUpRight className="h-4 w-4 shrink-0 text-hub-accent" aria-hidden="true" /> : null}
+              </a>
+              <p className="mt-1 break-all text-xs text-hub-muted">{hostOf(link.url)}</p>
+              {archived ? <p className="mt-2 text-xs text-hub-muted">Archived — renew Premium to open this link.</p> : null}
+              <button type="button" onClick={() => { setActive(tab.id); setQuery(""); }} className="mt-3 rounded text-xs font-semibold text-hub-accent underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-hub-accent">View in {tab.name}</button>
+            </li>)}
+          </ul> : <p className="rounded-lg border border-hub-border p-5 text-sm text-hub-muted">No matching links. Try a website name, address, folder or tab name.</p>}
+        </main>
+      ) : active === "__home" ? (
         <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
           {archivedProfile ? (
             <p className="rounded-md border border-hub-accent/40 p-3 text-sm">
