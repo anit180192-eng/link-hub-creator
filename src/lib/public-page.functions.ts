@@ -1,3 +1,4 @@
+import { orderLinksByFolders } from "@/lib/reorder";
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
@@ -88,6 +89,10 @@ export const getPublicPage = createServerFn({ method: "GET" })
     const archivedProfile = isProfileArchived(profileIndex, plan);
     const tabs = (tabRows ?? []).map((item, index) => ({ ...item, archived: isTabArchived(index, plan, archivedProfile) }));
 
+    const {data: folderRows, error: foldersError} = await admin.from("page_folders").select("tab_id,name,position").eq("page_id", page.id).order("position");
+    if (foldersError) throw new Error("This page couldn’t be loaded right now.");
+    const orderedLinks = (items: StartPageLink[]) => orderLinksByFolders(items, folderRows || [], tabs[0]?.id);
+
     if (!page.pin_protected) {
       const supabase = publicClient();
       const { data: links } = await supabase
@@ -95,7 +100,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
         .select(LINK_COLUMNS)
         .eq("page_id", page.id)
         .order("position", { ascending: true });
-      return { profile, links: (links ?? []) as StartPageLink[], locked: false, protected: false, trusted: false, archivedProfile, tabs };
+      return { profile, links: orderedLinks((links ?? []) as StartPageLink[]), locked: false, protected: false, trusted: false, archivedProfile, tabs };
     }
 
     if (!device) throw new Error("This page couldn't be loaded right now.");
@@ -105,7 +110,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
     ]);
     return {
       profile,
-      links: (links ?? []) as StartPageLink[],
+      links: orderedLinks((links ?? []) as StartPageLink[]),
       locked: false,
       protected: true,
       trusted: device.kind === "trusted",
