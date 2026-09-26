@@ -82,7 +82,7 @@ function QuickTiles({ links, label, className, archived = false }: { links: Star
   );
 }
 
-function BrandLink({ className }: { className?: string }) {
+export function BrandLink({ className }: { className?: string }) {
   return (
     <a
       href="https://landingpagebuilder.aurunex.com/"
@@ -121,11 +121,13 @@ export function StartPageView({
   links,
   archived = false,
   modeOverride,
+  hideBrand = false,
 }: {
   profile: StartPageProfile;
   links: StartPageLink[];
   archived?: boolean;
   modeOverride?: ColourMode;
+  hideBrand?: boolean;
   adSlot?: React.ReactNode;
 }) {
   const safe = links.filter((l) => isSafeUrl(l.url));
@@ -160,7 +162,7 @@ export function StartPageView({
     return (
       <div data-colour-mode={modeOverride ?? appearance.mode} style={themeStyle(appearance.preset)} className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
         <main className="mx-auto w-full max-w-[560px] px-4 py-6 sm:py-10">
-          <BrandLink className="mb-6" />
+          {!hideBrand ? <BrandLink className="mb-6" /> : null}
           {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}
           <header className="flex flex-col items-center text-center">
             <Avatar url={profile.avatar_url} initials={initials} size="lg" />
@@ -218,7 +220,7 @@ export function StartPageView({
   return (
     <div data-colour-mode={modeOverride ?? appearance.mode} style={themeStyle(appearance.preset)} className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
       <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
-        <BrandLink className="mb-4" />
+        {!hideBrand ? <BrandLink className="mb-4" /> : null}
         {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}
         <div className="grid items-start gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
           <aside className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
