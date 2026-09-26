@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, ArrowUp, ArrowDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProductivityWidget } from "./ProductivityWidgets";
 import { faviconFor, hostOf, normalizeUrl, clockParts } from "@/lib/startpage";
 import {
   WIDGETS,
@@ -240,6 +241,11 @@ export function HomeDashboard({
                 </div>
               ) : null}
             </div>
+            <ProductivityWidget
+              key={`${slug}:${widget.id}`}
+              id={widget.id}
+              profile={slug}
+            />
             {widget.id === "clock" ? (
               <>
                 <p className="text-4xl tabular-nums text-hub-accent">
