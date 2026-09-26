@@ -4,8 +4,8 @@ import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { cn } from "@/lib/utils";
 import { isSafeUrl, linkTitle, parseClocks, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 
-export function PublishedTabs({ profile, links, tabs, archivedProfile = false }: { profile: StartPageProfile; links: StartPageLink[]; tabs: { id: string; name: string; archived: boolean }[]; archivedProfile?: boolean }) {
-  const [active, setActive] = useState(() => (links.some((l) => l.favourite) || !tabs[0] ? "__home" : tabs[0].id));
+export function PublishedTabs({ profile, links, tabs, archivedProfile = false, initialTabId, embedded = false }: { profile: StartPageProfile; links: StartPageLink[]; tabs: { id: string; name: string; archived: boolean }[]; archivedProfile?: boolean; initialTabId?: string; embedded?: boolean }) {
+  const [active, setActive] = useState(() => initialTabId && (initialTabId === "__home" || tabs.some(t => t.id === initialTabId)) ? initialTabId : (links.some((l) => l.favourite) || !tabs[0] ? "__home" : tabs[0].id));
   const palette = profile.dark_mode ? "dark" : "hub-light";
   const first = tabs[0]?.id;
   const tabLinks = links.filter((l) => l.tab_id === active || (!l.tab_id && active === first));
@@ -26,8 +26,8 @@ export function PublishedTabs({ profile, links, tabs, archivedProfile = false }:
     </button>
   );
   return (
-    <div className={cn(palette, "min-h-screen bg-hub-background text-hub-foreground")}>
-      <nav className="sticky top-0 z-10 border-b border-hub-border bg-hub-background/95 backdrop-blur" aria-label="Tabs">
+    <div className={cn(palette, embedded ? "min-h-[520px]" : "min-h-screen", "bg-hub-background text-hub-foreground")}>
+      <nav className={cn(!embedded && "sticky top-0", "z-10 border-b border-hub-border bg-hub-background/95 backdrop-blur")} aria-label="Tabs">
         <div className="mx-auto flex max-w-[1120px] gap-1 overflow-x-auto px-4 py-2 sm:px-6">
           {btn("__home", "Home")}
           {tabs.map((t) => btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`))}
