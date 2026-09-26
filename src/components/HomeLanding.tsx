@@ -10,6 +10,9 @@ import {
   Layers,
   Link2,
   Plus,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 import homeImage from "@/assets/homepage/04-published-home-demo.webp.asset.json";
 import creativeImage from "@/assets/homepage/05-creative-tab-demo.webp.asset.json";
@@ -217,18 +220,20 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
           <a href="#questions">Questions</a>
         </nav>
         <div className="lp-header-actions">
-          <label className="lp-theme-control">
-            <span>Theme</span>
-            <select aria-label="Homepage colour theme" value={theme} onChange={(event) => {
-              const next = event.target.value as "light" | "dark" | "system";
-              setTheme(next);
-              try { localStorage.setItem("lpb-home-theme", next); } catch { /* Keep the selection for this visit. */ }
-            }}>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="system">System</option>
-            </select>
-          </label>
+          <div className="lp-theme-control" role="group" aria-label="Homepage colour theme">
+            {([
+              ["light", "Light", Sun],
+              ["dark", "Dark", Moon],
+              ["system", "System", Monitor],
+            ] as const).map(([value, label, Icon]) => (
+              <button key={value} type="button" aria-label={label + " theme"} title={value === "system" ? "Match system theme" : label + " theme"} aria-pressed={theme === value} onClick={() => {
+                setTheme(value);
+                try { localStorage.setItem("lpb-home-theme", value); } catch { /* Keep the selection for this visit. */ }
+              }}>
+                <Icon size={15} aria-hidden="true" /><span>{label}</span>
+              </button>
+            ))}
+          </div>
         <a
           className="lp-signin"
           href={signedIn ? "/dashboard" : "/auth?mode=signin"}
