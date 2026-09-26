@@ -1,3 +1,5 @@
+import { ColourModeToggle, ThemePresets, useSavedMode } from "@/components/ColourControls";
+import { readPageTheme, writePageTheme, themeStyle } from "@/lib/page-themes";
 import { ExtensionImportDialog } from "./ExtensionImportDialog";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -288,7 +290,8 @@ export function WorkspaceEditor() {
   const [query, setQuery] = useState("");
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [identity, setIdentity] = useState({ name: "", display_name: "", tagline: "", slug: "" });
-  const [appearance, setAppearance] = useState({ theme: "grid", dark_mode: true });
+  const [dashboardMode] = useSavedMode("lpb-dashboard-theme");
+  const [appearance, setAppearance] = useState({ theme: "v1:grid:cobalt:system", dark_mode: true });
   const [linkDraft, setLinkDraft] = useState({
     id: "",
     label: "",
@@ -328,6 +331,7 @@ export function WorkspaceEditor() {
         .insert({
           user_id: user.id,
           name: "Personal",
+          theme: "v1:grid:cobalt:system",
           slug: `${base}-${user.id.slice(0, 4)}`,
           display_name: user.user_metadata?.["full_name"] || base,
         })
@@ -917,7 +921,7 @@ export function WorkspaceEditor() {
   };
   if (pagesQ.isLoading || !page)
     return (
-      <div className="dark grid min-h-screen place-items-center bg-hub-background text-hub-muted">
+      <div data-colour-mode={dashboardMode} style={themeStyle("cobalt")} className="theme-scope grid min-h-screen place-items-center bg-hub-background text-hub-muted">
         Loading your workspace…
       </div>
     );
@@ -932,7 +936,7 @@ export function WorkspaceEditor() {
     typeof window === "undefined" ? `/p/${page.slug}` : `${window.location.origin}/p/${page.slug}`;
   const firstRun = onboarding === true && !guideDismissed;
   return (
-    <div className="dark">
+    <div>
       <BuilderShell
         preview={preview}
         onPreviewChange={setPreview}
@@ -979,7 +983,7 @@ export function WorkspaceEditor() {
               }}
             >
               <Sparkles />
-              Appearance
+              Themes & appearance
             </Button>
             <Button
               data-tour="security"
@@ -993,7 +997,7 @@ export function WorkspaceEditor() {
               <ShieldCheck />
               PIN & access
             </Button>
-            <div className="my-5 border-t border-white/10" />
+            <div className="my-5 border-t border-hub-border" />
             <Button
               variant="ghost"
               className="h-10 w-full justify-start rounded-xl text-xs text-hub-muted"
@@ -1049,7 +1053,7 @@ export function WorkspaceEditor() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={openAppearance}>
                   <Sparkles />
-                  Appearance
+                  Themes & appearance
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={download}>
                   <Download />
@@ -1221,10 +1225,7 @@ export function WorkspaceEditor() {
             aria-labelledby={
               "builder-tab-" + (tabId === "__home" ? "__home" : (tab?.id ?? "__home"))
             }
-            className={
-              "min-w-0 bg-hub-background px-4 py-5 text-hub-foreground sm:p-6 " +
-              (page.dark_mode ? "dark" : "hub-light")
-            }
+            data-colour-mode={readPageTheme(page.theme, page.dark_mode).mode} style={themeStyle(readPageTheme(page.theme).preset)} className="theme-scope min-w-0 bg-hub-background px-4 py-5 text-hub-foreground sm:p-6"
           >
             {archivedPage || archivedTab ? (
               <div className="mb-4 rounded-md border border-hub-accent/40 bg-hub-surface p-3 text-sm">
@@ -1347,7 +1348,7 @@ export function WorkspaceEditor() {
                   </div>
                 </div>
                 <div
-                  className={`mt-5 columns-1 gap-4 space-y-4 ${page.theme === "list" ? "mx-auto max-w-3xl" : "md:columns-2 xl:columns-3"}`}
+                  className={`mt-5 columns-1 gap-4 space-y-4 ${readPageTheme(page.theme).layout === "list" ? "mx-auto max-w-3xl" : "md:columns-2 xl:columns-3"}`}
                 >
                   {currentFolders.map((folder) => {
                     const items = tabLinks.filter(
@@ -1536,14 +1537,14 @@ export function WorkspaceEditor() {
         }}
       >
         <SheetContent
-          className={`dark w-full overflow-y-auto border-hub-border bg-hub-surface text-hub-foreground ${drawer === "security" ? "sm:max-w-[50vw] lg:w-1/2" : "sm:max-w-md"}`}
+          data-colour-mode={dashboardMode} style={themeStyle("cobalt")} className={`theme-scope w-full overflow-y-auto border-hub-border bg-hub-surface text-hub-foreground ${drawer === "security" ? "sm:max-w-[50vw] lg:w-1/2" : "sm:max-w-md"}`}
         >
           <SheetHeader>
             <SheetTitle className="font-display text-hub-foreground">
               {drawer === "identity"
                 ? "Profile name, picture & address"
                 : drawer === "appearance"
-                  ? "Appearance"
+                  ? "Themes & appearance"
                   : drawer === "security"
                     ? "PIN & trusted browsers"
                     : drawer === "clocks"
@@ -1683,8 +1684,8 @@ export function WorkspaceEditor() {
               <div className="rounded-md border border-hub-border bg-hub-background p-4">
                 <Label htmlFor="layout">Page layout</Label>
                 <Select
-                  value={appearance.theme}
-                  onValueChange={(theme) => setAppearance({ ...appearance, theme })}
+                  value={readPageTheme(appearance.theme).layout}
+                  onValueChange={(layout) => setAppearance({ ...appearance, theme: writePageTheme({ ...readPageTheme(appearance.theme, appearance.dark_mode), layout }) })}
                 >
                   <SelectTrigger id="layout" className="mt-2 bg-hub-surface">
                     <SelectValue />
@@ -1695,18 +1696,16 @@ export function WorkspaceEditor() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center justify-between rounded-md border border-hub-border bg-hub-background p-4">
-                <div>
-                  <Label htmlFor="dark-page">Dark published page</Label>
-                  <p className="mt-1 text-xs text-hub-muted">
-                    Turn off for the warm light version.
-                  </p>
+              <div className="space-y-3">
+                <Label>Published page mode</Label>
+                <ColourModeToggle value={readPageTheme(appearance.theme, appearance.dark_mode).mode} onChange={(mode) => setAppearance({ ...appearance, dark_mode: mode !== "light", theme: writePageTheme({ ...readPageTheme(appearance.theme, appearance.dark_mode), mode }) })} />
+                <p className="text-xs text-hub-muted">System follows the visitor’s device. This applies only to this profile.</p>
+                <Label>Choose a theme · 20 colour combinations</Label>
+                <ThemePresets value={readPageTheme(appearance.theme).preset} onChange={(preset) => setAppearance({ ...appearance, theme: writePageTheme({ ...readPageTheme(appearance.theme, appearance.dark_mode), preset }) })} />
+                <div className="theme-scope rounded-lg border border-hub-border bg-hub-background p-4 text-hub-foreground" data-colour-mode={readPageTheme(appearance.theme, appearance.dark_mode).mode} style={themeStyle(readPageTheme(appearance.theme).preset)}>
+                  <p className="font-semibold">Your page preview</p>
+                  <div className="mt-3 rounded border border-hub-border bg-hub-surface p-3"><span className="text-hub-accent">★ Favourite links</span><p className="text-xs text-hub-muted">Your websites, in your colours.</p></div>
                 </div>
-                <Switch
-                  id="dark-page"
-                  checked={appearance.dark_mode}
-                  onCheckedChange={(dark_mode) => setAppearance({ ...appearance, dark_mode })}
-                />
               </div>
               <Button
                 onClick={async () => {

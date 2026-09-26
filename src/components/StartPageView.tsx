@@ -1,3 +1,4 @@
+import { readPageTheme, themeStyle, type ColourMode } from "@/lib/page-themes";
 import { WorldClocks } from "@/components/WorldClocks";
 import { ArrowUpRight, Folder } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -119,10 +120,12 @@ export function StartPageView({
   profile,
   links,
   archived = false,
+  modeOverride,
 }: {
   profile: StartPageProfile;
   links: StartPageLink[];
   archived?: boolean;
+  modeOverride?: ColourMode;
   adSlot?: React.ReactNode;
 }) {
   const safe = links.filter((l) => isSafeUrl(l.url));
@@ -139,9 +142,10 @@ export function StartPageView({
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
   const clocks = parseClocks(profile.clocks);
-  const isList = profile.theme === "list";
+  const appearance = readPageTheme(profile.theme, profile.dark_mode);
+  const isList = appearance.layout === "list";
   // "dark" re-applies the dark palette inside the page; "hub-light" swaps the page's own colours to light.
-  const paletteClass = profile.dark_mode ? "dark" : "hub-light";
+  const paletteClass = "theme-scope";
 
   const footer = (
     <footer className="mt-4 flex flex-col gap-2 border-t border-hub-border pt-4 text-[10px] uppercase text-hub-muted sm:flex-row sm:items-center sm:justify-between md:col-span-2">
@@ -154,7 +158,7 @@ export function StartPageView({
 
   if (isList) {
     return (
-      <div className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
+      <div data-colour-mode={modeOverride ?? appearance.mode} style={themeStyle(appearance.preset)} className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
         <main className="mx-auto w-full max-w-[560px] px-4 py-6 sm:py-10">
           <BrandLink className="mb-6" />
           {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}
@@ -212,7 +216,7 @@ export function StartPageView({
   }
 
   return (
-    <div className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
+    <div data-colour-mode={modeOverride ?? appearance.mode} style={themeStyle(appearance.preset)} className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
       <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
         <BrandLink className="mb-4" />
         {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}

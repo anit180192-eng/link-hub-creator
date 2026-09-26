@@ -1,3 +1,4 @@
+import { readPageTheme, themeColours } from "./page-themes";
 export type Theme = "grid" | "list";
 
 export type StartPageLink = {
@@ -194,15 +195,12 @@ function esc(value: string) {
 
 /** Builds a standalone HTML document for download / local landing page use. */
 export function renderStartPageHtml(profile: StartPageProfile, links: StartPageLink[]) {
-  const dark = profile.dark_mode !== false;
-  const isList = profile.theme === "list";
-  const bg = dark ? "#08151F" : "#F7F5EF";
-  const fg = dark ? "#F4F5F2" : "#08151F";
-  const card = dark ? "#122633" : "#FFFFFF";
-  const border = dark ? "#355361" : "#DCD6C8";
-  const muted = dark ? "#B3C1CA" : "#495B67";
-  const accent = dark ? "#E3C581" : "#825B0C";
-  const glow = dark ? "rgba(227,197,129,.18)" : "rgba(130,91,12,.18)";
+  const appearance = readPageTheme(profile.theme, profile.dark_mode);
+  const isList = appearance.layout === "list";
+  const declarations = (dark: boolean) => Object.entries(themeColours(appearance.preset, dark)).map(([key, value]) => `--page-${key}:${value}`).join(";");
+  const paletteCss = `:root{${declarations(false)}}:root[data-mode="dark"]{${declarations(true)}}@media(prefers-color-scheme:dark){:root[data-mode="system"]{${declarations(true)}}}`;
+  const bg = "var(--page-background)", fg = "var(--page-foreground)", card = "var(--page-surface)", border = "var(--page-border)", muted = "var(--page-muted)", accent = "var(--page-accent)";
+  const glow = "color-mix(in srgb,var(--page-accent) 18%,transparent)";
   const safe = links.filter((l) => isSafeUrl(l.url));
   const name = profile.display_name || profile.slug;
   const tagline = profile.tagline.trim().toLowerCase() === "everything at once :)"
@@ -286,6 +284,8 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
+  ${paletteCss}
+  .mode-bar{display:flex;justify-content:flex-end;gap:6px;padding:12px 24px}.mode-bar button{cursor:pointer;border:1px solid ${border};border-radius:7px;padding:9px;background:${card};color:${fg}}.mode-bar button[aria-pressed="true"]{outline:2px solid ${accent}}
   * { box-sizing: border-box; }
   body { margin:0; background:${bg}; color:${fg}; font-family:"DM Sans",sans-serif; }
   main { max-width:1120px; margin:0 auto; padding:32px 24px; }
@@ -369,6 +369,8 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 </style>
 </head>
 <body>
+<div class="mode-bar" role="group" aria-label="Colour mode">${(["light", "dark", "system"] as const).map(mode => `<button type="button" data-mode-choice="${mode}" aria-pressed="${mode === appearance.mode}">${mode.charAt(0).toUpperCase() + mode.slice(1)}</button>`).join("")}</div>
+<script>(function(){var root=document.documentElement;root.dataset.mode=${JSON.stringify(appearance.mode)};document.querySelectorAll('[data-mode-choice]').forEach(function(b){b.addEventListener('click',function(){root.dataset.mode=b.dataset.modeChoice;document.querySelectorAll('[data-mode-choice]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))})})})})();</script>
 <main${isList ? ' class="is-list"' : ""}><div class="frame">
   <a class="brand" href="https://landingpagebuilder.aurunex.com/" aria-label="Landing Page Builder home"><svg class="brandmark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#E3C581"/><g fill="none" stroke="#08151F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="18" height="18" rx="2.5"/><path d="M7 13h18M13 25V13"/></g></svg>Landing Page Builder</a>
   <div class="side"><header><div class="identity">${avatar}<h1>${esc(name)}</h1><p class="tag">${esc(tagline)}</p></div><span class="index">Personal hub</span></header>${clockStrip}</div>
