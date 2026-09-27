@@ -1,3 +1,4 @@
+import { SOCIAL_PLATFORMS, parseSocialLinks, socialName, socialUrl, type SocialLink } from "@/lib/social-links";
 import { useDragOrder } from "./useDragOrder";
 import { moveItem, orderLinksByFolders } from "@/lib/reorder";
 import { folderName } from "@/lib/folder-names";
@@ -327,6 +328,8 @@ export function WorkspaceEditor() {
     null,
   );
   const [skipPublishWarning, setSkipPublishWarning] = useState(false);
+  const [socialDraft, setSocialDraft] = useState<SocialLink[]>([]);
+  const [moveTarget, setMoveTarget] = useState("");
   const [identity, setIdentity] = useState({
     name: "",
     display_name: "",
@@ -699,6 +702,25 @@ export function WorkspaceEditor() {
         e.message.includes("duplicate") ? "That tab already exists" : limErr(e),
       ),
   });
+  const reorderTabs = useMutation({
+    mutationFn: async (ids: string[]) => {
+      if (!page || archivedPage) throw Error("This profile is archived");
+      const q = await supabase.rpc("reorder_page_tabs", {p_page_id: page.id, p_ids: ids});
+      if (q.error) throw q.error;
+    },
+    onSuccess: async () => { await refresh(); toast.success("Tab order saved"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const transferFolder = useMutation({
+    mutationFn: async () => {
+      if (!page || !tab || archivedTab || !moveTarget) throw Error("Choose another active tab");
+      const q = await supabase.rpc("move_page_folder", {p_page_id: page.id, p_source_tab: tab.id, p_target_tab: moveTarget, p_name: folderDraft.from});
+      if (q.error) throw q.error;
+      return {name: q.data, target: moveTarget};
+    },
+    onSuccess: async (result) => { await refresh(); setTabId(result.target); setQuery(""); setDrawer(null); setMoveTarget(""); toast.success(`Moved folder: ${result.name}`); },
+    onError: (e: Error) => toast.error(e.message),
+  });
   const updateTab = useMutation({
     mutationFn: async () => {
       const name = tabDraft.name.trim().slice(0, 30);
@@ -1003,6 +1025,7 @@ export function WorkspaceEditor() {
   });
   const openIdentity = () => {
     if (!page) return;
+    setSocialDraft(parseSocialLinks(page.social_links));
     setIdentity({
       name: page.name,
       display_name: page.display_name,
@@ -1341,6 +1364,8 @@ export function WorkspaceEditor() {
                 setDrawer("tab");
               }
             }}
+            onReorder={(ids) => reorderTabs.mutate(ids)}
+            saving={reorderTabs.isPending || archivedPage}
             canAdd={tabs.length < MAX_TABS}
           />
         }
@@ -1434,6 +1459,8 @@ export function WorkspaceEditor() {
                 profileName={page.name}
                 displayName={page.display_name}
                 tagline={page.tagline}
+                socialLinks={page.social_links}
+                socialDisabled={archivedPage}
                 avatarUrl={page.avatar_url}
                 slug={page.slug}
                 published={page.published}
@@ -1610,7 +1637,9 @@ export function WorkspaceEditor() {
                               variant="ghost"
                               size="icon"
                               className="size-7 text-hub-muted"
+                              aria-label={`Folder actions for ${folder}`}
                               onClick={() => {
+                                setMoveTarget("");
                                 setFolderDraft({
                                   id: row?.id || "",
                                   from: folder,
@@ -1894,6 +1923,16 @@ export function WorkspaceEditor() {
                     className="mt-1 bg-hub-background"
                   />
                 </div>
+                <fieldset className="space-y-3 rounded-lg border border-hub-border p-3">
+                  <legend className="px-1 text-sm font-semibold">Social & website links</legend>
+                  <p className="text-xs text-hub-muted">Icons appear beside your name on Home and below your introduction on each tab. Add multiple accounts if you like.</p>
+                  {socialDraft.map((item,index) => <div key={index} className="space-y-2 border-b border-hub-border pb-3">
+                    <div className="flex items-center gap-2"><select aria-label={`Platform for social link ${index+1}`} className="min-w-0 flex-1 rounded border border-hub-border bg-hub-background p-2 text-sm" value={item.platform} onChange={e=>setSocialDraft(old=>old.map((l,i)=>i===index?{...l,platform:e.target.value as SocialLink['platform']}:l))}>{SOCIAL_PLATFORMS.map(p=><option key={p} value={p}>{socialName(p)}</option>)}</select><Button variant="ghost" size="icon" aria-label={`Remove social link ${index+1}`} onClick={()=>setSocialDraft(old=>old.filter((_,i)=>i!==index))}><Trash2 className="size-4"/></Button></div>
+                    <Input aria-label={`Address for social link ${index+1}`} placeholder="https://instagram.com/yourname" maxLength={500} value={item.url} onChange={e=>setSocialDraft(old=>old.map((l,i)=>i===index?{...l,url:e.target.value}:l))}/>
+                    <Input aria-label={`Label for social link ${index+1}`} placeholder="Optional label, e.g. Personal account" maxLength={60} value={item.label || ''} onChange={e=>setSocialDraft(old=>old.map((l,i)=>i===index?{...l,label:e.target.value}:l))}/>
+                  </div>)}
+                  <Button variant="outline" disabled={socialDraft.length>=20} onClick={()=>setSocialDraft(old=>[...old,{platform:'website',url:'',label:''}])}><Plus className="size-4"/>Add social link</Button>
+                </fieldset>
                 <div>
                   <Label htmlFor="slug">Published address</Label>
                   <Input
@@ -1916,14 +1955,16 @@ export function WorkspaceEditor() {
                     !identity.name.trim() || !identity.display_name.trim()
                   }
                   onClick={async () => {
-                    await savePage.mutateAsync({
+                    if (socialDraft.some(l => !socialUrl(l.url))) { toast.error("Enter a valid website address for every social link"); return; }
+                    try { await savePage.mutateAsync({
+                      social_links: parseSocialLinks(socialDraft) as Json,
                       ...identity,
                       name: identity.name.trim(),
                       display_name: identity.display_name.trim(),
                       tagline: identity.tagline.trim(),
                       slug: slugify(identity.slug),
                     });
-                    setDrawer(null);
+                    setDrawer(null); } catch { /* savePage displays the error */ }
                   }}
                 >
                   Save profile
@@ -2271,6 +2312,14 @@ export function WorkspaceEditor() {
               >
                 {folderDraft.from ? "Rename folder" : "Create empty folder"}
               </Button>
+              {folderDraft.from ? <>
+                <div className="space-y-2 border-t border-hub-border pt-4">
+                  <Label htmlFor="move-folder-target">Move to another tab</Label>
+                  <select id="move-folder-target" className="w-full rounded border border-hub-border bg-hub-background p-2 text-sm" value={moveTarget} onChange={e=>setMoveTarget(e.target.value)}><option value="">Choose a tab</option>{tabs.filter(t=>t.id!==tab?.id && activeTabIds.has(t.id)).map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select>
+                  <p className="text-xs text-hub-muted">All links move together. If the name exists, a number is added so folders stay separate.</p>
+                  <Button disabled={!moveTarget || archivedTab || transferFolder.isPending} onClick={()=>transferFolder.mutate()}>Move folder</Button>
+                </div>
+              </> : null}
               {folderDraft.from ? (
                 <Button
                   variant="ghost"

@@ -136,26 +136,26 @@ export function PublishedTabs({
         )}
         aria-label="Tabs"
       >
-        <div className="mx-auto max-w-[1120px] px-4 pt-3 sm:px-6" role="search" aria-label="Search this profile">
+        <div className="mx-auto flex max-w-[1120px] flex-wrap items-center gap-2 px-4 py-2 sm:flex-nowrap sm:px-6">
+          <div className="flex min-w-0 w-full gap-1 overflow-x-auto sm:w-auto sm:flex-1">
+            {btn("__home", "Home")}
+            {tabs.map((t) => btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`))}
+          </div>
+        <div className="w-full sm:w-64 sm:shrink-0" role="search" aria-label="Search this profile">
           <div className="flex items-center gap-2 rounded-lg border border-hub-border bg-hub-surface px-3 focus-within:ring-2 focus-within:ring-hub-accent">
             <Search className="h-4 w-4 shrink-0 text-hub-muted" aria-hidden="true" />
             <input
               type="search"
               aria-label="Search links across all tabs"
-              placeholder="Search links across all tabs…"
+              placeholder="Search all tabs…"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={(event) => { if (event.key === "Escape") setQuery(""); }}
-              className="min-w-0 flex-1 bg-transparent py-3 text-sm text-hub-foreground outline-none placeholder:text-hub-muted [&::-webkit-search-cancel-button]:hidden"
+              className="min-w-0 flex-1 bg-transparent py-2 text-sm text-hub-foreground outline-none placeholder:text-hub-muted [&::-webkit-search-cancel-button]:hidden"
             />
             {query ? <button type="button" aria-label="Clear search" onClick={() => setQuery("")} className="rounded p-2 text-hub-muted hover:text-hub-foreground focus-visible:ring-2 focus-visible:ring-hub-accent"><X className="h-4 w-4" /></button> : null}
           </div>
         </div>
-        <div className="mx-auto flex max-w-[1120px] gap-1 overflow-x-auto px-4 py-2 sm:px-6">
-          {btn("__home", "Home")}
-          {tabs.map((t) =>
-            btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`),
-          )}
         </div>
       </nav>
       {searching ? (
@@ -188,6 +188,8 @@ export function PublishedTabs({
             profileName={name}
             displayName={name}
             tagline={profile.tagline}
+            socialLinks={profile.social_links}
+            socialDisabled={archivedProfile}
             avatarUrl={profile.avatar_url}
             slug={profile.slug}
             published

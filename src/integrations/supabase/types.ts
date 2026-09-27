@@ -326,6 +326,7 @@ export type Database = {
       pages: {
         Row: {
           avatar_url: string | null
+          social_links: Json
           home_widgets: Json | null
           clocks: Json
           created_at: string
@@ -344,6 +345,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          social_links?: Json
           home_widgets?: Json | null
           clocks?: Json
           created_at?: string
@@ -362,6 +364,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          social_links?: Json
           home_widgets?: Json | null
           clocks?: Json
           created_at?: string
@@ -448,6 +451,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      reorder_page_tabs: { Args: { p_page_id: string; p_ids: string[] }; Returns: undefined }
+      move_page_folder: { Args: { p_page_id: string; p_source_tab: string; p_target_tab: string; p_name: string }; Returns: string }
       reorder_page_folders: {
         Args: { p_page_id: string; p_tab_id: string; p_names: string[] }
         Returns: undefined

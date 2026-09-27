@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import ts from 'typescript';
+const source=fs.readFileSync(new URL('../src/lib/social-links.ts',import.meta.url),'utf8');
+const mod={exports:{}};
+new Function('module','exports',ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(mod,mod.exports);
+const {socialUrl,parseSocialLinks}=mod.exports;
+assert.equal(socialUrl('instagram.com/demo'),'https://instagram.com/demo');
+for(const url of ['javascript:alert(1)','data:text/html,test','https://user:secret@example.com','https://','']) assert.equal(socialUrl(url),null);
+assert.deepEqual(parseSocialLinks(null),[]);
+assert.deepEqual(parseSocialLinks([{platform:'unknown',url:'https://example.com'}]),[]);
+assert.equal(parseSocialLinks([{platform:'instagram',url:'https://instagram.com/one'},{platform:'instagram',url:'https://instagram.com/two'}]).length,2);
+assert.equal(parseSocialLinks(Array(21).fill({platform:'website',url:'https://example.com'})).length,20);
+console.log('Social links tests passed');
