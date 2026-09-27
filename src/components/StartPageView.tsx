@@ -1,3 +1,5 @@
+import { SocialLinks } from "@/components/SocialLinks";
+import { parseSocialLinks } from "@/lib/social-links";
 import { readPageTheme, themeStyle, type ColourMode } from "@/lib/page-themes";
 import { WorldClocks } from "@/components/WorldClocks";
 import { ArrowUpRight, Folder } from "lucide-react";
@@ -168,6 +170,7 @@ export function StartPageView({
             <Avatar url={profile.avatar_url} initials={initials} size="lg" />
             <h1 className="mt-4 font-display text-2xl font-semibold leading-tight">{name}</h1>
             <p className="mt-2 max-w-sm text-sm leading-6 text-hub-muted">{tagline}</p>
+            <div className="mt-3 flex justify-center"><SocialLinks value={profile.social_links} disabled={archived} /></div>
           </header>
 
           {clocks.length ? (
@@ -229,7 +232,7 @@ export function StartPageView({
               <h1 className="mt-5 font-display text-2xl font-semibold leading-tight">{name}</h1>
               <p className="mt-2 text-xs leading-5 text-hub-muted">{tagline}</p>
               <div className="mt-5 flex items-center gap-2 border-t border-hub-border pt-4 text-[10px] font-semibold uppercase text-hub-muted">
-                <span className="h-1.5 w-1.5 rounded-full bg-hub-accent" aria-hidden="true" /> Personal hub
+                {parseSocialLinks(profile.social_links).length ? <SocialLinks value={profile.social_links} disabled={archived} /> : <><span className="h-1.5 w-1.5 rounded-full bg-hub-accent" aria-hidden="true" /> Personal hub</>}
               </div>
             </header>
             <WorldClocks clocks={clocks} dark={profile.dark_mode} />
