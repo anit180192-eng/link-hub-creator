@@ -159,7 +159,7 @@ export function HomeDashboard({
           <>
             <Button variant="ghost" onClick={onEditIdentity}>
               <Pencil />
-              Edit name & picture
+              Edit profile
             </Button>
             <Button onClick={onAddWidget}>
               <Plus />
