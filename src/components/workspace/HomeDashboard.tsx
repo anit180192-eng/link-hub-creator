@@ -1,3 +1,4 @@
+import { SocialLinks } from "@/components/SocialLinks";
 import { useEffect, useState } from "react";
 import {
   Plus,
@@ -31,6 +32,8 @@ type Props = {
   profileName: string;
   displayName: string;
   tagline: string;
+  socialLinks?: unknown;
+  socialDisabled?: boolean;
   avatarUrl: string | null;
   slug: string;
   published: boolean;
@@ -49,6 +52,8 @@ export function HomeDashboard({
   profileName,
   displayName,
   tagline,
+  socialLinks,
+  socialDisabled,
   avatarUrl,
   slug,
   published,
@@ -145,9 +150,9 @@ export function HomeDashboard({
           />
         ) : null}
         <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-semibold">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1"><h2 className="text-2xl font-semibold">
             {displayName || profileName}
-          </h2>
+          </h2><SocialLinks value={socialLinks} disabled={!!socialDisabled} /></div>
           <p className="text-sm text-hub-muted">{tagline}</p>
         </div>
         {editing ? (
