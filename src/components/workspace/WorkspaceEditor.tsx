@@ -1171,7 +1171,7 @@ export function WorkspaceEditor() {
               }}
             >
               <Settings />
-              Name & picture
+              Profile
             </Button>
             <Button
               variant="ghost"
@@ -1815,7 +1815,7 @@ export function WorkspaceEditor() {
           <SheetHeader>
             <SheetTitle className="font-display text-hub-foreground">
               {drawer === "identity"
-                ? "Profile name, picture & address"
+                ? "Profile settings"
                 : drawer === "appearance"
                   ? "Themes & appearance"
                   : drawer === "security"
