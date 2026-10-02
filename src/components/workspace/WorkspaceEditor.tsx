@@ -43,6 +43,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { BuilderShell } from "./BuilderShell";
 import { BuilderTabs } from "./BuilderTabs";
+import { LinkCommentButton } from "@/components/LinkCommentButton";
+import { commentWordCount, type LinkComment } from "@/lib/link-comments";
 import { TAB_COLORS, tabColorStyle } from "@/lib/tab-color";
 import { PublishedTabs } from "@/components/PublishedTabs";
 import { WIDGETS, parseWidgets, type HomeWidget } from "@/lib/home-widgets";
@@ -234,6 +236,9 @@ function LinkItem({
   onEdit,
   onFavourite,
   onDelete,
+  comments,
+  onAddComment,
+  onDeleteComment,
 }: {
   link: LinkRow;
   editing: boolean;
@@ -241,6 +246,9 @@ function LinkItem({
   onEdit: () => void;
   onFavourite: () => void;
   onDelete: () => void;
+  comments: LinkComment[];
+  onAddComment: (body: string) => Promise<void>;
+  onDeleteComment: (id: string) => Promise<void>;
 }) {
   const icon = faviconFor(link.url);
   return (
@@ -252,7 +260,7 @@ function LinkItem({
           {(link.label || link.platform)[0]?.toUpperCase()}
         </span>
       )}
-      <a
+      <div className="min-w-0 py-1"><div className="flex min-w-0 items-center gap-1"><a
         href={editing || archived ? undefined : normalizeUrl(link.url)}
         target={editing || archived ? undefined : "_blank"}
         rel="noopener noreferrer"
@@ -266,17 +274,15 @@ function LinkItem({
               }
             : undefined
         }
-        className="min-w-0 rounded-sm py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent"
+        className="min-w-0 truncate rounded-sm text-[13px] font-medium text-hub-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent"
       >
-        <span className="block truncate text-[13px] font-medium text-hub-foreground">
           {link.label || link.platform}
           {archived ? " · Archived" : ""}
-        </span>
+      </a><LinkCommentButton linkId={link.id} linkName={link.label || link.platform} ownerNote={link.comment_text} comments={comments} onSubmit={onAddComment} onDelete={onDeleteComment} /></div>
         <span className="block truncate text-[10px] text-hub-muted">
           {hostOf(link.url)}
         </span>
-        {link.comment_text ? <span className="block truncate text-[10px] text-hub-muted" title={link.comment_text}>Comment: {link.comment_text}</span> : null}
-      </a>
+      </div>
       {editing ? (
         <div className="flex">
           <Button
@@ -513,6 +519,17 @@ export function WorkspaceEditor() {
       return q.data as LinkRow[];
     },
   });
+  const commentsQ = useQuery({
+    queryKey: ["link-comments", page?.id],
+    enabled: !!page,
+    queryFn: async (): Promise<LinkComment[]> => {
+      const { data, error } = await supabase.from("link_comments")
+        .select("id,link_id,body,author_kind,created_at")
+        .eq("page_id", page?.id || "").order("created_at", { ascending: true }).limit(1000);
+      if (error) throw error;
+      return (data ?? []) as LinkComment[];
+    },
+  });
   useEffect(() => {
     if (linksQ.isSuccess && onboarding === null)
       setOnboarding((linksQ.data?.length ?? 0) === 0);
@@ -602,6 +619,7 @@ export function WorkspaceEditor() {
       qc.invalidateQueries({ queryKey: ["tabs", page?.id] }),
       qc.invalidateQueries({ queryKey: ["folders", page?.id] }),
       qc.invalidateQueries({ queryKey: ["links", page?.id] }),
+      qc.invalidateQueries({ queryKey: ["link-comments", page?.id] }),
     ]);
   };
   const savePage = useMutation({
@@ -813,6 +831,22 @@ export function WorkspaceEditor() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+  const submitOwnerComment = async (linkId: string, body: string): Promise<LinkComment> => {
+    if (!page || !body.trim() || commentWordCount(body) > 500 || body.length > 10000)
+      throw Error("Comments are limited to 500 words.");
+    const { data, error } = await supabase.from("link_comments")
+      .insert({ page_id: page.id, link_id: linkId, body: body.trim(), author_kind: "owner" })
+      .select("id,link_id,body,author_kind,created_at").single();
+    if (error || !data) throw Error("Could not add comment.");
+    await qc.invalidateQueries({ queryKey: ["link-comments", page.id] });
+    return data as LinkComment;
+  };
+  const deleteOwnerComment = async (id: string): Promise<void> => {
+    if (!page) return;
+    const { error } = await supabase.from("link_comments").delete().eq("id", id).eq("page_id", page.id);
+    if (error) throw error;
+    await qc.invalidateQueries({ queryKey: ["link-comments", page.id] });
+  };
   const removeLink = useMutation({
     mutationFn: async (id: string) => {
       const q = await supabase.from("links").delete().eq("id", id);
@@ -1451,6 +1485,8 @@ export function WorkspaceEditor() {
             key={page.id + ":" + tabId}
             profile={{ ...page, clocks }}
             links={orderLinksByFolders(links, foldersQ.data || [], tabs[0]?.id)}
+            comments={commentsQ.data || []}
+            onAddComment={submitOwnerComment}
             tabs={tabs.map((t, index) => ({
               ...t,
               archived: archivedPage || index >= MAX_TABS,
@@ -1680,6 +1716,9 @@ export function WorkspaceEditor() {
                           >
                             <LinkItem
                               link={l}
+                              comments={(commentsQ.data || []).filter((item) => item.link_id === l.id)}
+                              onAddComment={async (body) => { await submitOwnerComment(l.id, body); }}
+                              onDeleteComment={deleteOwnerComment}
                               editing={!preview}
                               archived={archivedTab}
                               onFavourite={() => toggleFavourite(l)}
