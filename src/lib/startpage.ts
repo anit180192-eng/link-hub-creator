@@ -397,8 +397,8 @@ export function eligibleUrls(urls: string[]) {
 /**
  * Opens each URL synchronously (call directly from a click handler).
  * "noopener" is not passed as a window feature because it makes window.open
- * return null even on success; instead the opener link is cut on the returned
- * window, so opened pages cannot reach this page.
+ * return null even on success. Instead a blank window is opened, its opener is
+ * cut while still blank, then it is sent to the URL.
  */
 export function openUrls(urls: string[]): { opened: string[]; failed: string[] } {
   const opened: string[] = [];
@@ -406,18 +406,20 @@ export function openUrls(urls: string[]): { opened: string[]; failed: string[] }
   for (const url of eligibleUrls(urls)) {
     let w: Window | null = null;
     try {
-      w = window.open(url, "_blank");
+      // Open blank first and cut the opener before the destination can load.
+      w = window.open("about:blank", "_blank");
+      if (!w) throw new Error("blocked");
+      w.opener = null;
+      w.location.href = url;
+      opened.push(url);
     } catch {
-      w = null;
-    }
-    if (w) {
       try {
-        w.opener = null;
+        w?.close();
       } catch {
         /* ignore */
       }
-      opened.push(url);
-    } else failed.push(url);
+      failed.push(url);
+    }
   }
   return { opened, failed };
 }

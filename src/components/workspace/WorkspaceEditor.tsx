@@ -2063,11 +2063,7 @@ export function WorkspaceEditor() {
                 pageProtected={page.pin_protected}
                 toggling={savePage.isPending}
                 onToggle={(pin_protected) => savePage.mutate({ pin_protected })}
-                enableProtection={async () => {
-                  const { error } = await supabase.from("pages").update({ pin_protected: true }).eq("id", page.id);
-                  if (error) throw new Error("Your PIN was saved, but PIN protection couldn't be switched on. Try the switch below.");
-                  await qc.invalidateQueries({ queryKey: ["pages"] });
-                }}
+                onSaved={() => void qc.invalidateQueries({ queryKey: ["pages"] })}
               />
             </div>
           ) : null}
