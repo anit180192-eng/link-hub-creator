@@ -97,7 +97,6 @@ import {
   hostOf,
   isSafeUrl,
   normalizeUrl,
-  openAllLinks,
   parseClocks,
   renderStartPageHtml,
   slugify,
@@ -579,12 +578,6 @@ export function WorkspaceEditor() {
     return `Folder ${index}`;
   };
   const clocks = parseClocks(page?.clocks);
-  const openAll = (urls: string[]) => {
-    if (openAllLinks(urls))
-      toast.error(
-        "Your browser blocked some tabs. Allow pop-ups for this site, then try again.",
-      );
-  };
   const refresh = async () => {
     await Promise.all([
       qc.invalidateQueries({ queryKey: ["pages"] }),
@@ -1558,17 +1551,6 @@ export function WorkspaceEditor() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    {tabLinks.length ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-hub-border"
-                        onClick={() => openAll(tabLinks.map((i) => i.url))}
-                        disabled={archivedTab}
-                      >
-                        Open all
-                      </Button>
-                    ) : null}
                     <div className="relative w-40 sm:w-64">
                       <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-hub-muted" />
                       <Input
@@ -1617,17 +1599,6 @@ export function WorkspaceEditor() {
                           <span className="text-[10px] text-hub-muted">
                             {items.length}
                           </span>
-                          {items.length ? (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 text-[11px] text-hub-accent"
-                              onClick={() => openAll(items.map((i) => i.url))}
-                              disabled={archivedTab}
-                            >
-                              Open all
-                            </Button>
-                          ) : null}
                           {!preview && <span className="flex shrink-0">
                             <Button variant="ghost" size="icon" className="size-6" aria-label={`Move folder ${folder} up`} disabled={archivedTab || reorderFolders.isPending || folderIndex === 0} onClick={() => moveFolder(folderIndex, -1)}><ArrowUp className="size-3" /></Button>
                             <Button variant="ghost" size="icon" className="size-6" aria-label={`Move folder ${folder} down`} disabled={archivedTab || reorderFolders.isPending || folderIndex === folders.length - 1} onClick={() => moveFolder(folderIndex, 1)}><ArrowDown className="size-3" /></Button>
@@ -2092,6 +2063,11 @@ export function WorkspaceEditor() {
                 pageProtected={page.pin_protected}
                 toggling={savePage.isPending}
                 onToggle={(pin_protected) => savePage.mutate({ pin_protected })}
+                enableProtection={async () => {
+                  const { error } = await supabase.from("pages").update({ pin_protected: true }).eq("id", page.id);
+                  if (error) throw new Error("Your PIN was saved, but PIN protection couldn't be switched on. Try the switch below.");
+                  await qc.invalidateQueries({ queryKey: ["pages"] });
+                }}
               />
             </div>
           ) : null}

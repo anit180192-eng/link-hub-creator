@@ -94,13 +94,18 @@ export function PublishedTabs({
       aria-label={n === undefined ? undefined : `${label}, ${linkCountLabel(n)}`}
       onClick={() => setActive(id)}
       className={cn(
-        "shrink-0 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors",
+        "group relative shrink-0 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors",
         active === id
           ? "bg-hub-accent text-hub-background"
           : "text-hub-muted hover:text-hub-foreground",
       )}
     >
       {label}
+      {n !== undefined ? (
+        <span aria-hidden="true" className="ml-1.5 hidden rounded bg-hub-background/60 px-1 text-[10px] tabular-nums group-hover:inline group-focus-visible:inline">
+          {n}
+        </span>
+      ) : null}
     </button>
   );
   return (
