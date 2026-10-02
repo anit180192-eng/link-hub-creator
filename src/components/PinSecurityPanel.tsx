@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { isStrongPin } from "@/lib/pin-validation";
+import { supabase } from "@/integrations/supabase/client";
 import {
   getSecurityStatus,
   removeAllBrowsers,
@@ -77,7 +78,17 @@ export function PinSecurityPanel({
       }
       if (pin !== confirm) throw new Error("The two PINs don't match.");
       await savePin({ data: { pageId, pin } });
-      // A newly saved or changed PIN turns protection on by default; it can still be switched off manually.
+      // Confirm the saved PIN also protects this profile, including when an older server build handles the request.
+      const { data: protectedPage, error: protectError } = await supabase
+        .from("pages")
+        .update({ pin_protected: true })
+        .eq("id", pageId)
+        .select("id, pin_protected")
+        .single();
+      if (protectError || !protectedPage?.pin_protected) {
+        throw new Error("Your PIN was saved, but protection could not be switched on. Use the switch below to turn it on.");
+      }
+      await queryClient.invalidateQueries({ queryKey: ["pages"] });
     },
     onSuccess: () => {
       toast.success(hasPin ? "PIN changed — protection is on" : "PIN saved — protection is on");
