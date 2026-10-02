@@ -149,7 +149,7 @@ export function PublishedTabs({
         <div className="mx-auto flex max-w-[1120px] flex-wrap items-center gap-2 px-4 py-2 sm:flex-nowrap sm:px-6">
           <div className="flex min-w-0 w-full gap-1 overflow-x-auto sm:w-auto sm:flex-1">
             {btn("__home", "Home")}
-            {tabs.map((t) => btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`))}
+            {tabs.map((t) => btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`, countFor(t.id)))}
           </div>
         <div className="w-full sm:w-64 sm:shrink-0" role="search" aria-label="Search this profile">
           <div className="flex items-center gap-2 rounded-lg border border-hub-border bg-hub-surface px-3 focus-within:ring-2 focus-within:ring-hub-accent">
