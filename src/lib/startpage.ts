@@ -35,6 +35,8 @@ export type StartPageProfile = {
   notepad_enabled?: boolean;
   notepad_content?: string;
   landing_tab?: string;
+  home_tab_color?: string | null;
+  notepad_tab_color?: string | null;
 };
 
 export const MAX_CLOCKS = 5;
