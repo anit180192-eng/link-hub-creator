@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
+import { commentWordCount, type LinkComment } from "@/lib/link-comments";
 import { parseClocks, type StartPageLink, type StartPageProfile } from "@/lib/startpage";
 import { isProfileArchived, isTabArchived, type Plan } from "@/lib/plans";
 
@@ -15,6 +16,7 @@ export type PublicPage = {
 } | {
   profile: StartPageProfile;
   links: StartPageLink[];
+  comments: LinkComment[];
   /** True when the page needs a PIN and this browser hasn't unlocked it. */
   locked: false;
   /** True when the page is PIN protected. */
@@ -98,6 +100,13 @@ export const getPublicPage = createServerFn({ method: "GET" })
     const {data: folderRows, error: foldersError} = await admin.from("page_folders").select("tab_id,name,position").eq("page_id", page.id).order("position");
     if (foldersError) throw new Error("This page couldn’t be loaded right now.");
     const orderedLinks = (items: StartPageLink[]) => orderLinksByFolders(items, folderRows || [], tabs[0]?.id);
+    const loadComments = async (): Promise<LinkComment[]> => {
+      const { data, error: commentsError } = await admin.from("link_comments")
+        .select("id,link_id,body,author_kind,created_at")
+        .eq("page_id", page.id).order("created_at", { ascending: true }).limit(1000);
+      if (commentsError) throw new Error("This page couldn't be loaded right now.");
+      return (data ?? []) as LinkComment[];
+    };
 
     if (!page.pin_protected) {
       const supabase = publicClient();
@@ -106,7 +115,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
         .select(LINK_COLUMNS)
         .eq("page_id", page.id)
         .order("position", { ascending: true });
-      return { profile, links: orderedLinks((links ?? []) as StartPageLink[]), locked: false, protected: false, trusted: false, archivedProfile, tabs };
+      return { profile, links: orderedLinks((links ?? []) as StartPageLink[]), comments: await loadComments(), locked: false, protected: false, trusted: false, archivedProfile, tabs };
     }
 
     if (!device) throw new Error("This page couldn't be loaded right now.");
@@ -117,12 +126,46 @@ export const getPublicPage = createServerFn({ method: "GET" })
     return {
       profile,
       links: orderedLinks((links ?? []) as StartPageLink[]),
+      comments: await loadComments(),
       locked: false,
       protected: true,
       trusted: device.kind === "trusted",
       archivedProfile,
       tabs,
     };
+  });
+
+export const addPublicLinkComment = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({
+    slug: z.string().min(1).max(60),
+    linkId: z.string().uuid(),
+    body: z.string().trim().min(1).max(10000),
+  }).parse(input))
+  .handler(async ({ data }): Promise<LinkComment> => {
+    if (commentWordCount(data.body) > 500) throw new Error("Comments are limited to 500 words.");
+    const pin = await import("./pin.server");
+    const admin = await pin.getAdmin();
+    const { data: page } = await admin.from("pages")
+      .select("id,user_id,pin_protected")
+      .eq("slug", data.slug).eq("published", true).maybeSingle();
+    if (!page) throw new Error("Page unavailable.");
+    if (page.pin_protected && !(await pin.findUnlockedDevice(page.user_id, page.id)))
+      throw new Error("Enter the page PIN before commenting.");
+    const { data: link } = await admin.from("links")
+      .select("id").eq("id", data.linkId).eq("page_id", page.id).maybeSingle();
+    if (!link) throw new Error("Link unavailable.");
+    const sourceHash = await pin.visitorFingerprint(page.user_id);
+    const { count, error: countError } = await admin.from("link_comments")
+      .select("id", { head: true, count: "exact" })
+      .eq("page_id", page.id).eq("source_hash", sourceHash)
+      .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
+    if (countError) throw new Error("Comments are unavailable right now.");
+    if ((count ?? 0) >= 10) throw new Error("Comment limit reached. Try again later.");
+    const { data: comment, error } = await admin.from("link_comments")
+      .insert({ page_id: page.id, link_id: link.id, body: data.body, author_kind: "visitor", source_hash: sourceHash })
+      .select("id,link_id,body,author_kind,created_at").single();
+    if (error || !comment) throw new Error("Could not add comment.");
+    return comment as LinkComment;
   });
 
 export type UnlockResult =
