@@ -14,6 +14,7 @@ export type StartPageLink = {
   icon_only?: boolean;
   favourite?: boolean;
   tab_id?: string | null;
+  comment_text?: string;
 };
 
 export type StartPageClock = {
@@ -31,6 +32,9 @@ export type StartPageProfile = {
   social_links?: import("@/integrations/supabase/types").Json;
   clocks?: StartPageClock[];
   home_widgets?: Json | null;
+  notepad_enabled?: boolean;
+  notepad_content?: string;
+  landing_tab?: string;
 };
 
 export const MAX_CLOCKS = 5;
