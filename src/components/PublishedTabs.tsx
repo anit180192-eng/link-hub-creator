@@ -9,6 +9,7 @@ import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { cn } from "@/lib/utils";
 import {
   isSafeUrl,
+  linkCountLabel,
   linkTitle,
   normalizeUrl,
   hostOf,
@@ -83,10 +84,14 @@ export function PublishedTabs({
       favourite: !!l.favourite,
     }));
   const name = profile.display_name || profile.slug;
-  const btn = (id: string, label: string) => (
+  const countFor = (id: string) =>
+    links.filter((l) => isSafeUrl(l.url) && (l.tab_id === id || (!l.tab_id && id === first))).length;
+  const btn = (id: string, label: string, n?: number) => (
     <button
       key={id}
       type="button"
+      title={n === undefined ? undefined : `${label}: ${linkCountLabel(n)}`}
+      aria-label={n === undefined ? undefined : `${label}, ${linkCountLabel(n)}`}
       onClick={() => setActive(id)}
       className={cn(
         "shrink-0 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors",
@@ -206,6 +211,8 @@ export function PublishedTabs({
         <StartPageView
           hideBrand
           modeOverride={mode}
+          openAll={!embedded}
+          tabName={tabs.find((t) => t.id === active)?.name}
           profile={profile}
           links={tabLinks}
           archived={
