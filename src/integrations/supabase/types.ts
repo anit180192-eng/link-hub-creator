@@ -16,34 +16,40 @@ export type Database = {
     Tables: {
       account_entitlements: {
         Row: {
+          billing_environment: string
           created_at: string
           current_period_end: string | null
           last_event_at: string | null
           paddle_customer_id: string | null
           paddle_subscription_id: string | null
           plan: string
+          scheduled_cancel_at: string | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          billing_environment?: string
           created_at?: string
           current_period_end?: string | null
           last_event_at?: string | null
           paddle_customer_id?: string | null
           paddle_subscription_id?: string | null
           plan?: string
+          scheduled_cancel_at?: string | null
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          billing_environment?: string
           created_at?: string
           current_period_end?: string | null
           last_event_at?: string | null
           paddle_customer_id?: string | null
           paddle_subscription_id?: string | null
           plan?: string
+          scheduled_cancel_at?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -71,6 +77,21 @@ export type Database = {
           pin_salt?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      billing_settings: {
+        Row: {
+          active_environment: string
+          id: boolean
+        }
+        Insert: {
+          active_environment: string
+          id?: boolean
+        }
+        Update: {
+          active_environment?: string
+          id?: boolean
         }
         Relationships: []
       }
@@ -326,17 +347,17 @@ export type Database = {
       pages: {
         Row: {
           avatar_url: string | null
-          social_links: Json
-          home_widgets: Json | null
           clocks: Json
           created_at: string
           dark_mode: boolean
           display_name: string
+          home_widgets: Json | null
           id: string
           name: string
           pin_protected: boolean
           published: boolean
           slug: string
+          social_links: Json
           tagline: string
           theme: string
           updated_at: string
@@ -345,17 +366,17 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
-          social_links?: Json
-          home_widgets?: Json | null
           clocks?: Json
           created_at?: string
           dark_mode?: boolean
           display_name?: string
+          home_widgets?: Json | null
           id?: string
           name?: string
           pin_protected?: boolean
           published?: boolean
           slug: string
+          social_links?: Json
           tagline?: string
           theme?: string
           updated_at?: string
@@ -364,17 +385,17 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
-          social_links?: Json
-          home_widgets?: Json | null
           clocks?: Json
           created_at?: string
           dark_mode?: boolean
           display_name?: string
+          home_widgets?: Json | null
           id?: string
           name?: string
           pin_protected?: boolean
           published?: boolean
           slug?: string
+          social_links?: Json
           tagline?: string
           theme?: string
           updated_at?: string
@@ -451,12 +472,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      reorder_page_tabs: { Args: { p_page_id: string; p_ids: string[] }; Returns: undefined }
-      move_page_folder: { Args: { p_page_id: string; p_source_tab: string; p_target_tab: string; p_name: string }; Returns: string }
-      reorder_page_folders: {
-        Args: { p_page_id: string; p_tab_id: string; p_names: string[] }
-        Returns: undefined
-      }
       apply_paddle_event: {
         Args: {
           p_ent: Json
@@ -467,6 +482,23 @@ export type Database = {
         Returns: string
       }
       effective_plan: { Args: { _user_id: string }; Returns: string }
+      move_page_folder: {
+        Args: {
+          p_name: string
+          p_page_id: string
+          p_source_tab: string
+          p_target_tab: string
+        }
+        Returns: string
+      }
+      reorder_page_folders: {
+        Args: { p_names: string[]; p_page_id: string; p_tab_id: string }
+        Returns: undefined
+      }
+      reorder_page_tabs: {
+        Args: { p_ids: string[]; p_page_id: string }
+        Returns: undefined
+      }
       reserve_pin_attempt: {
         Args: { p_ip_hash: string; p_owner_id: string }
         Returns: {
@@ -475,6 +507,7 @@ export type Database = {
           remaining: number
         }[]
       }
+      valid_social_links: { Args: { value: Json }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
