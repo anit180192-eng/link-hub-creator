@@ -5,6 +5,8 @@ import { WorldClocks } from "@/components/WorldClocks";
 import { ArrowUpRight, Folder } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OpenAllButton } from "@/components/OpenAllButton";
+import { LinkCommentButton } from "@/components/LinkCommentButton";
+import type { LinkComment } from "@/lib/link-comments";
 import {
   faviconFor,
   groupLinks,
@@ -20,17 +22,13 @@ import {
 
 const DEFAULT_TAGLINE = "Personal links, projects, and creative work.";
 
-function LinkCard({ link, tall = true, archived = false }: { link: StartPageLink; tall?: boolean; archived?: boolean }) {
+type CommentProps = { comments: LinkComment[]; onAddComment?: ((linkId: string, body: string) => Promise<void>) | undefined };
+
+function LinkCard({ link, tall = true, archived = false, comments, onAddComment }: { link: StartPageLink; tall?: boolean; archived?: boolean } & CommentProps) {
   const icon = faviconFor(link.url);
   const title = linkTitle(link);
   return (
-    <div className="min-w-0">
-    <a
-      href={archived ? undefined : normalizeUrl(link.url)}
-      target={archived ? undefined : "_blank"}
-      rel="noopener noreferrer"
-      aria-disabled={archived || undefined}
-      title={archived ? "Archived — renew Premium to open this link" : undefined}
+    <div
       className={cn(
         "group grid cursor-pointer grid-cols-[28px_minmax(0,1fr)_18px] items-center gap-3 rounded-md border border-hub-border bg-hub-background px-3 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-hub-accent hover:shadow-[0_0_14px_color-mix(in_oklab,var(--hub-accent)_14%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent active:translate-y-0",
         tall ? "h-16" : "h-14",
@@ -44,20 +42,21 @@ function LinkCard({ link, tall = true, archived = false }: { link: StartPageLink
         </span>
       )}
       <span className="min-w-0">
-        <span className="block truncate text-sm font-semibold text-hub-foreground">{title}</span>
+        <span className="flex min-w-0 items-center gap-1">
+          <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="min-w-0 truncate rounded text-sm font-semibold text-hub-foreground focus-visible:ring-2 focus-visible:ring-hub-accent">{title}</a>
+          {onAddComment ? <LinkCommentButton linkId={link.id} linkName={title} ownerNote={link.comment_text} comments={comments.filter((item) => item.link_id === link.id)} onSubmit={(body) => onAddComment(link.id, body)} /> : null}
+        </span>
         <span className="block truncate text-[11px] text-hub-muted">{hostOf(link.url)}</span>
       </span>
-      <ArrowUpRight
+      <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-label={`Open ${title}`} aria-disabled={archived || undefined} className="rounded focus-visible:ring-2 focus-visible:ring-hub-accent"><ArrowUpRight
         className="h-4 w-4 text-hub-muted transition-transform duration-200 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-hub-accent"
         aria-hidden="true"
-      />
-    </a>
-    {link.comment_text ? <details className="mt-1 rounded-md border border-hub-border bg-hub-surface px-3 py-2 text-xs"><summary className="cursor-pointer font-medium text-hub-muted">Comment</summary><p className="mt-2 whitespace-pre-wrap break-words leading-5">{link.comment_text}</p></details> : null}
+      /></a>
     </div>
   );
 }
 
-function QuickTiles({ links, label, className, archived = false }: { links: StartPageLink[]; label: string; className?: string; archived?: boolean }) {
+function QuickTiles({ links, label, className, archived = false, comments, onAddComment }: { links: StartPageLink[]; label: string; className?: string; archived?: boolean } & CommentProps) {
   if (!links.length) return null;
   return (
     <div className={cn("flex flex-wrap gap-2", className)} aria-label={`${label} quick links`}>
@@ -83,7 +82,7 @@ function QuickTiles({ links, label, className, archived = false }: { links: Star
               </span>
             )}
           </a>
-          {link.comment_text ? <details className="max-w-48 rounded border border-hub-border bg-hub-surface px-2 py-1 text-xs"><summary className="cursor-pointer text-hub-muted">Comment</summary><p className="mt-1 whitespace-pre-wrap break-words">{link.comment_text}</p></details> : null}
+          {onAddComment ? <span className="flex max-w-28 items-center gap-0.5"><span className="truncate text-[10px]">{title}</span><LinkCommentButton linkId={link.id} linkName={title} ownerNote={link.comment_text} comments={comments.filter((item) => item.link_id === link.id)} onSubmit={(body) => onAddComment(link.id, body)} /></span> : null}
           </div>
         );
       })}
@@ -133,6 +132,8 @@ export function StartPageView({
   hideBrand = false,
   openAll = false,
   tabName,
+  comments = [],
+  onAddComment,
 }: {
   profile: StartPageProfile;
   links: StartPageLink[];
@@ -142,6 +143,8 @@ export function StartPageView({
   /** Show Open all controls (published page). */
   openAll?: boolean;
   tabName?: string | undefined;
+  comments?: LinkComment[];
+  onAddComment?: (linkId: string, body: string) => Promise<void>;
   adSlot?: React.ReactNode;
 }) {
   const safe = links.filter((l) => isSafeUrl(l.url));
@@ -219,13 +222,15 @@ export function StartPageView({
                     {fullLinks.length ? (
                       <div className="grid gap-2">
                         {fullLinks.map((link) => (
-                          <LinkCard key={link.id} link={link} tall={false} archived={archived} />
+                          <LinkCard key={link.id} link={link} tall={false} archived={archived} comments={comments} onAddComment={onAddComment} />
                         ))}
                       </div>
                     ) : null}
                     <QuickTiles
                       archived={archived}
                       links={logoLinks}
+                      comments={comments}
+                      onAddComment={onAddComment}
                       label={label}
                       className={cn("justify-center", fullLinks.length ? "mt-2" : "")}
                     />
@@ -286,11 +291,11 @@ export function StartPageView({
                       {fullLinks.length ? (
                         <div className={cn("grid grid-cols-1 gap-2", featured && "sm:grid-cols-2")}>
                           {fullLinks.map((link) => (
-                            <LinkCard key={link.id} link={link} archived={archived} />
+                            <LinkCard key={link.id} link={link} archived={archived} comments={comments} onAddComment={onAddComment} />
                           ))}
                         </div>
                       ) : null}
-                      <QuickTiles links={logoLinks} label={label} className={fullLinks.length ? "mt-2" : ""} archived={archived} />
+                      <QuickTiles links={logoLinks} label={label} className={fullLinks.length ? "mt-2" : ""} archived={archived} comments={comments} onAddComment={onAddComment} />
                     </section>
                   );
                 })
