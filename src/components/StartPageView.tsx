@@ -24,6 +24,7 @@ function LinkCard({ link, tall = true, archived = false }: { link: StartPageLink
   const icon = faviconFor(link.url);
   const title = linkTitle(link);
   return (
+    <div className="min-w-0">
     <a
       href={archived ? undefined : normalizeUrl(link.url)}
       target={archived ? undefined : "_blank"}
@@ -51,6 +52,8 @@ function LinkCard({ link, tall = true, archived = false }: { link: StartPageLink
         aria-hidden="true"
       />
     </a>
+    {link.comment_text ? <details className="mt-1 rounded-md border border-hub-border bg-hub-surface px-3 py-2 text-xs"><summary className="cursor-pointer font-medium text-hub-muted">Comment</summary><p className="mt-2 whitespace-pre-wrap break-words leading-5">{link.comment_text}</p></details> : null}
+    </div>
   );
 }
 
@@ -62,8 +65,8 @@ function QuickTiles({ links, label, className, archived = false }: { links: Star
         const icon = faviconFor(link.url);
         const title = linkTitle(link);
         return (
+          <div key={link.id} className="flex flex-col items-center gap-1">
           <a
-            key={link.id}
             href={archived ? undefined : normalizeUrl(link.url)}
             target={archived ? undefined : "_blank"}
             rel="noopener noreferrer"
@@ -80,6 +83,8 @@ function QuickTiles({ links, label, className, archived = false }: { links: Star
               </span>
             )}
           </a>
+          {link.comment_text ? <details className="max-w-48 rounded border border-hub-border bg-hub-surface px-2 py-1 text-xs"><summary className="cursor-pointer text-hub-muted">Comment</summary><p className="mt-1 whitespace-pre-wrap break-words">{link.comment_text}</p></details> : null}
+          </div>
         );
       })}
     </div>
