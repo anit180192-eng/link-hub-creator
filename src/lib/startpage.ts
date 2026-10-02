@@ -389,11 +389,37 @@ ${clockScript}
 }
 
 
-export function openAllLinks(urls: string[]) {
-  let blocked = 0;
-  for (const u of urls) {
-    const w = window.open(normalizeUrl(u), "_blank", "noopener,noreferrer");
-    if (!w) blocked++;
-  }
-  return blocked;
+/** Unique, safe, normalised URLs in their original order. */
+export function eligibleUrls(urls: string[]) {
+  return [...new Set(urls.filter(isSafeUrl).map(normalizeUrl))];
 }
+
+/**
+ * Opens each URL synchronously (call directly from a click handler).
+ * "noopener" is not passed as a window feature because it makes window.open
+ * return null even on success; instead the opener link is cut on the returned
+ * window, so opened pages cannot reach this page.
+ */
+export function openUrls(urls: string[]): { opened: string[]; failed: string[] } {
+  const opened: string[] = [];
+  const failed: string[] = [];
+  for (const url of eligibleUrls(urls)) {
+    let w: Window | null = null;
+    try {
+      w = window.open(url, "_blank");
+    } catch {
+      w = null;
+    }
+    if (w) {
+      try {
+        w.opener = null;
+      } catch {
+        /* ignore */
+      }
+      opened.push(url);
+    } else failed.push(url);
+  }
+  return { opened, failed };
+}
+
+export const linkCountLabel = (n: number) => `${n} ${n === 1 ? "link" : "links"}`;
