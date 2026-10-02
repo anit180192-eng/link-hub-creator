@@ -147,8 +147,8 @@ export function PublishedTabs({
       >
         <div className="mx-auto flex max-w-[1120px] flex-wrap items-center gap-2 px-4 py-2 sm:flex-nowrap sm:px-6">
           <div className="flex min-w-0 w-full gap-1 overflow-x-auto sm:w-auto sm:flex-1">
-            {btn("__home", "Home")}
-            {profile.notepad_enabled ? btn("__notepad", "Notepad") : null}
+            {btn("__home", "Home", undefined, profile.home_tab_color)}
+            {profile.notepad_enabled ? btn("__notepad", "Notepad", undefined, profile.notepad_tab_color) : null}
             {tabs.map((t) => btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`, countFor(t.id), t.tab_color))}
           </div>
         <div className="w-full sm:w-64 sm:shrink-0" role="search" aria-label="Search this profile">
