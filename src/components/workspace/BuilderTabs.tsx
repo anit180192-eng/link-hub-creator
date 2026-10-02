@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 type Props = {
   tabs: { id: string; name: string; archived?: boolean; tab_color?: string | null }[];
   notepadEnabled: boolean;
+  homeColor?: string | null;
+  notepadColor?: string | null;
   onAddNotepad: () => void;
   activeId: string;
   onSelect: (id: string) => void;
@@ -17,8 +19,8 @@ type Props = {
   saving?: boolean;
 };
 
-export function BuilderTabs({ tabs, notepadEnabled, onAddNotepad, activeId, onSelect, onAdd, onRename, canAdd, onReorder, saving = false }: Props) {
-  const items = [{ id: "__home", name: "Home", archived: false }, ...(notepadEnabled ? [{ id: "__notepad", name: "Notepad", archived: false }] : []), ...tabs];
+export function BuilderTabs({ tabs, notepadEnabled, homeColor, notepadColor, onAddNotepad, activeId, onSelect, onAdd, onRename, canAdd, onReorder, saving = false }: Props) {
+  const items = [{ id: "__home", name: "Home", archived: false, tab_color: homeColor }, ...(notepadEnabled ? [{ id: "__notepad", name: "Notepad", archived: false, tab_color: notepadColor }] : []), ...tabs];
   const movable = tabs.filter(t => !t.archived).map(t => t.id);
   const saveOrder = (ids: string[]) => onReorder?.([...ids, ...tabs.filter(t=>t.archived).map(t=>t.id)]);
   const drag = useDragOrder(movable, 'builder-tabs', saving || !onReorder, saveOrder);
@@ -64,7 +66,7 @@ export function BuilderTabs({ tabs, notepadEnabled, onAddNotepad, activeId, onSe
               onDoubleClick={() => {
                 if (!item.id.startsWith("__")) onRename(item.id);
               }}
-              style={tabColorStyle('tab_color' in item ? item.tab_color : null)}
+              style={tabColorStyle(item.tab_color)}
               className={`relative flex max-w-56 shrink-0 items-center gap-2 rounded-t-xl border px-4 py-3 text-xs font-medium transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-hub-accent ${activeId === item.id ? "border-hub-border border-b-hub-background bg-hub-background text-hub-accent shadow-[0_-3px_12px_rgba(0,0,0,0.08)]" : "border-hub-border/50 bg-hub-surface text-hub-muted hover:bg-hub-elevated/50 hover:text-hub-foreground"}`}
             >
               {item.id === "__home" ? (
