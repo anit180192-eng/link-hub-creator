@@ -352,6 +352,8 @@ export type Database = {
       }
       pages: {
         Row: {
+          home_tab_color: string | null
+          notepad_tab_color: string | null
           landing_tab: string
           notepad_content: string
           notepad_enabled: boolean
@@ -374,6 +376,8 @@ export type Database = {
           weather_city: string
         }
         Insert: {
+          home_tab_color?: string | null
+          notepad_tab_color?: string | null
           landing_tab?: string
           notepad_content?: string
           notepad_enabled?: boolean
@@ -396,6 +400,8 @@ export type Database = {
           weather_city?: string
         }
         Update: {
+          home_tab_color?: string | null
+          notepad_tab_color?: string | null
           landing_tab?: string
           notepad_content?: string
           notepad_enabled?: boolean
