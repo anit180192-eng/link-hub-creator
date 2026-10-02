@@ -43,6 +43,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { BuilderShell } from "./BuilderShell";
 import { BuilderTabs } from "./BuilderTabs";
+import { TAB_COLORS, tabColorStyle } from "@/lib/tab-color";
 import { PublishedTabs } from "@/components/PublishedTabs";
 import { WIDGETS, parseWidgets, type HomeWidget } from "@/lib/home-widgets";
 import { HomeDashboard } from "@/components/workspace/HomeDashboard";
@@ -107,6 +108,9 @@ import {
 } from "@/lib/startpage";
 
 type PageRow = Omit<StartPageProfile, "clocks"> & {
+  notepad_enabled: boolean;
+  notepad_content: string;
+  landing_tab: string;
   id: string;
   user_id: string;
   name: string;
@@ -122,6 +126,7 @@ type TabRow = {
   user_id: string;
   name: string;
   position: number;
+  tab_color: string | null;
 };
 type FolderRow = {
   id: string;
@@ -261,6 +266,7 @@ function LinkItem({
         <span className="block truncate text-[10px] text-hub-muted">
           {hostOf(link.url)}
         </span>
+        {link.comment_text ? <span className="block truncate text-[10px] text-hub-muted" title={link.comment_text}>Comment: {link.comment_text}</span> : null}
       </a>
       {editing ? (
         <div className="flex">
@@ -347,13 +353,15 @@ export function WorkspaceEditor() {
     group_name: "",
     icon_only: false,
     favourite: false,
+    comment_text: "",
   });
   const [folderDraft, setFolderDraft] = useState({
     id: "",
     from: "",
     name: "",
   });
-  const [tabDraft, setTabDraft] = useState({ id: "", name: "" });
+  const [tabDraft, setTabDraft] = useState({ id: "", name: "", tab_color: null as string | null });
+  const [notepadDraft, setNotepadDraft] = useState("");
   const [clockDraft, setClockDraft] = useState({ label: "", tz: "" });
   const [photoError, setPhotoError] = useState("");
   const [email, setEmail] = useState("");
@@ -488,7 +496,7 @@ export function WorkspaceEditor() {
       const q = await supabase
         .from("links")
         .select(
-          "id,platform,label,url,group_name,position,icon_only,favourite,tab_id",
+          "id,platform,label,url,group_name,position,icon_only,favourite,tab_id,comment_text",
         )
         .eq("page_id", page?.id || "")
         .order("position");
@@ -539,9 +547,10 @@ export function WorkspaceEditor() {
   ]);
   const tabs = tabsQ.data || [];
   useEffect(() => {
-    if (tabId !== "__home" && tabs.length && !tabs.some((t) => t.id === tabId))
+    if (tabId !== "__home" && !(tabId === "__notepad" && page?.notepad_enabled) && tabs.length && !tabs.some((t) => t.id === tabId))
       setTabId(tabs[0]?.id || "__home");
-  }, [tabs, tabId]);
+  }, [tabs, tabId, page?.notepad_enabled]);
+  useEffect(() => setNotepadDraft(page?.notepad_content ?? ""), [page?.id, page?.notepad_content]);
   const tab = tabs.find((t) => t.id === tabId) || tabs[0];
   const links = linksQ.data || [];
   const tabLinks = links.filter(
@@ -677,6 +686,7 @@ export function WorkspaceEditor() {
           page_id: page.id,
           user_id: page.user_id,
           name,
+          tab_color: tabDraft.tab_color,
           position: tabs.length,
         })
         .select("id")
@@ -720,14 +730,14 @@ export function WorkspaceEditor() {
       if (!name) throw Error("Enter a tab name");
       const q = await supabase
         .from("page_tabs")
-        .update({ name })
+        .update({ name, tab_color: tabDraft.tab_color })
         .eq("id", tabDraft.id);
       if (q.error) throw q.error;
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["tabs", page?.id] });
       setDrawer(null);
-      toast.success("Tab renamed");
+      toast.success("Tab settings saved");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -743,6 +753,10 @@ export function WorkspaceEditor() {
       if (move.error) throw move.error;
       const q = await supabase.from("page_tabs").delete().eq("id", tab.id);
       if (q.error) throw q.error;
+      if (page?.landing_tab === tab.id) {
+        const fallback = await supabase.from("pages").update({ landing_tab: target.id }).eq("id", page.id);
+        if (fallback.error) throw fallback.error;
+      }
       return target.id;
     },
     onSuccess: async (id) => {
@@ -758,6 +772,8 @@ export function WorkspaceEditor() {
       if (!page || !tab || !isSafeUrl(linkDraft.url))
         throw Error("Enter a valid web address");
       const url = normalizeUrl(linkDraft.url).slice(0, 500);
+      const comment_text = linkDraft.comment_text.trim();
+      if (comment_text.split(/\s+/).filter(Boolean).length > 500) throw Error("Comments are limited to 500 words");
       const payload = {
         label: (
           linkDraft.label.trim() || hostOf(url).replace(/^www\./, "")
@@ -767,6 +783,7 @@ export function WorkspaceEditor() {
         icon_only: linkDraft.icon_only,
         favourite: linkDraft.favourite,
         tab_id: tab.id,
+        comment_text,
       };
       const q = linkDraft.id
         ? await supabase.from("links").update(payload).eq("id", linkDraft.id)
@@ -1329,7 +1346,7 @@ export function WorkspaceEditor() {
             data-tour="publish"
             size="sm"
             onClick={() => void publish()}
-            disabled={savePage.isPending || links.length === 0}
+            disabled={savePage.isPending || (links.length === 0 && !page.notepad_enabled)}
           >
             <Check />
             {page.published ? "Publish settings" : "Publish page"}
@@ -1341,19 +1358,21 @@ export function WorkspaceEditor() {
               ...t,
               archived: archivedPage || index >= MAX_TABS,
             }))}
-            activeId={tabId === "__home" ? "__home" : (tab?.id ?? "__home")}
+            activeId={tabId.startsWith("__") ? tabId : (tab?.id ?? "__home")}
+            notepadEnabled={!!page.notepad_enabled}
+            onAddNotepad={async () => { await savePage.mutateAsync({ notepad_enabled: true }); setTabId("__notepad"); }}
             onSelect={(id) => {
               setTabId(id);
               setQuery("");
             }}
             onAdd={() => {
-              setTabDraft({ id: "", name: "" });
+              setTabDraft({ id: "", name: "", tab_color: null });
               setDrawer("tab");
             }}
             onRename={(id) => {
               const selected = tabs.find((t) => t.id === id);
               if (selected) {
-                setTabDraft({ id, name: selected.name });
+                setTabDraft({ id, name: selected.name, tab_color: selected.tab_color });
                 setDrawer("tab");
               }
             }}
@@ -1395,6 +1414,7 @@ export function WorkspaceEditor() {
                       group_name: folderRows[0]?.name || "Folder 1",
                       icon_only: false,
                       favourite: false,
+                      comment_text: "",
                     });
                     setDrawer("link");
                   }}
@@ -1434,7 +1454,7 @@ export function WorkspaceEditor() {
             role="tabpanel"
             aria-labelledby={
               "builder-tab-" +
-              (tabId === "__home" ? "__home" : (tab?.id ?? "__home"))
+              (tabId.startsWith("__") ? tabId : (tab?.id ?? "__home"))
             }
             data-colour-mode={readPageTheme(page.theme, page.dark_mode).mode}
             style={themeStyle(readPageTheme(page.theme).preset)}
@@ -1446,7 +1466,15 @@ export function WorkspaceEditor() {
                 cannot be opened until Premium is renewed.
               </div>
             ) : null}
-            {tabId === "__home" ? (
+            {tabId === "__notepad" && page.notepad_enabled ? (
+              <section className="mx-auto max-w-3xl space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2"><h1 className="font-display text-xl font-semibold">Notepad</h1><Button variant="outline" size="sm" disabled={page.landing_tab === "__notepad"} onClick={() => savePage.mutate({ landing_tab: "__notepad" })}>{page.landing_tab === "__notepad" ? "Landing tab" : "Make landing tab"}</Button></div>
+                <p className="text-sm text-hub-muted">Everyone visiting this page can read this note. Only you can edit it.</p>
+                <textarea aria-label="Notepad content" value={notepadDraft} onChange={(e) => setNotepadDraft(e.target.value)} className="min-h-80 w-full rounded-md border border-hub-border bg-hub-background p-4 text-sm leading-6" placeholder="Write a note for visitors…" />
+                <Button disabled={savePage.isPending || notepadDraft === page.notepad_content} onClick={() => savePage.mutate({ notepad_content: notepadDraft })}>Save Notepad</Button>
+              </section>
+            ) : tabId === "__home" ? (
+              <div className="space-y-3"><div className="flex justify-end"><Button variant="outline" size="sm" disabled={page.landing_tab === "__home"} onClick={() => savePage.mutate({ landing_tab: "__home" })}>{page.landing_tab === "__home" ? "Landing tab" : "Make Home landing tab"}</Button></div>
               <HomeDashboard
                 profileId={page.id}
                 profileName={page.name}
@@ -1482,6 +1510,7 @@ export function WorkspaceEditor() {
                 onEditClocks={() => setDrawer("clocks")}
                 onPublish={publish}
               />
+              </div>
             ) : (
               <>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-hub-border pb-4">
@@ -1526,13 +1555,13 @@ export function WorkspaceEditor() {
                         <DropdownMenuItem
                           onSelect={() => {
                             if (tab) {
-                              setTabDraft({ id: tab.id, name: tab.name });
+                              setTabDraft({ id: tab.id, name: tab.name, tab_color: tab.tab_color });
                               setDrawer("tab");
                             }
                           }}
                         >
                           <Pencil />
-                          Rename tab
+                          Tab settings
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           disabled={tabs.length <= 1}
@@ -1650,6 +1679,7 @@ export function WorkspaceEditor() {
                                   group_name: folderName(l.group_name),
                                   icon_only: !!l.icon_only,
                                   favourite: l.favourite,
+                                  comment_text: l.comment_text || "",
                                 });
                                 setDrawer("link");
                               }}
@@ -1677,6 +1707,7 @@ export function WorkspaceEditor() {
                                 group_name: folder,
                                 icon_only: false,
                                 favourite: false,
+                                comment_text: "",
                               });
                               setDrawer("link");
                             }}
@@ -2240,6 +2271,11 @@ export function WorkspaceEditor() {
                   }
                 />
               </div>
+              <div>
+                <Label htmlFor="link-comment">Comment for this link</Label>
+                <textarea id="link-comment" value={linkDraft.comment_text} onChange={(e) => setLinkDraft({ ...linkDraft, comment_text: e.target.value })} className="mt-1 min-h-28 w-full rounded-md border border-hub-border bg-hub-background p-3 text-sm" placeholder="Add context about this website…" />
+                <p className="text-right text-xs text-hub-muted">{linkDraft.comment_text.trim().split(/\s+/).filter(Boolean).length} / 500 words</p>
+              </div>
               <div className="flex items-center justify-between rounded-md border border-hub-border bg-hub-background p-3">
                 <Label htmlFor="favourite">Favourite on Home</Label>
                 <Switch
@@ -2251,7 +2287,7 @@ export function WorkspaceEditor() {
                 />
               </div>
               <div className="flex gap-2">
-                <Button type="submit" disabled={saveLink.isPending}>
+                <Button type="submit" disabled={saveLink.isPending || linkDraft.comment_text.trim().split(/\s+/).filter(Boolean).length > 500}>
                   {linkDraft.id ? "Save link" : "Add link"}
                 </Button>
                 {linkDraft.id ? (
@@ -2342,23 +2378,33 @@ export function WorkspaceEditor() {
                 placeholder="Creative"
                 className="bg-hub-background"
               />
+              <div className="space-y-2">
+                <Label>Tab color</Label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button type="button" onClick={() => setTabDraft({ ...tabDraft, tab_color: null })} aria-pressed={tabDraft.tab_color === null} className="rounded border border-hub-border px-3 py-2 text-xs aria-pressed:ring-2 aria-pressed:ring-hub-accent">Use theme</button>
+                  {TAB_COLORS.map((color) => <button key={color} type="button" onClick={() => setTabDraft({ ...tabDraft, tab_color: color })} aria-label={`Select ${color} tab color`} aria-pressed={tabDraft.tab_color === color} style={tabColorStyle(color)} className="size-9 rounded-full border aria-pressed:ring-2 aria-pressed:ring-offset-2" />)}
+                </div>
+              </div>
               <Button
                 onClick={() =>
                   tabDraft.id ? updateTab.mutate() : createTab.mutate()
                 }
                 disabled={!tabDraft.id && tabs.length >= MAX_TABS}
               >
-                {tabDraft.id ? "Rename tab" : "Add tab"}
+                {tabDraft.id ? "Save tab settings" : "Add tab"}
               </Button>
               {tabDraft.id ? (
+                <div className="space-y-2 border-t border-hub-border pt-4">
+                  <Button variant="outline" className="w-full" disabled={page.landing_tab === tabDraft.id} onClick={() => savePage.mutate({ landing_tab: tabDraft.id })}>{page.landing_tab === tabDraft.id ? "This is the landing tab" : "Make this the landing tab"}</Button>
                 <Button
                   variant="ghost"
-                  className="ml-2 text-destructive"
+                  className="text-destructive"
                   disabled={tabs.length <= 1}
                   onClick={() => deleteTab.mutate()}
                 >
                   Delete tab
                 </Button>
+                </div>
               ) : (
                 <div className="border-t border-hub-border pt-4">
                   <p className="text-sm font-medium">
