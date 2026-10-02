@@ -32,7 +32,7 @@ export function LinkCommentButton({ linkId, linkName, ownerNote, comments, onSub
   };
   return <Dialog>
     <DialogTrigger asChild>
-      <button type="button" onClick={(event) => event.stopPropagation()} aria-label={`Comments for ${linkName}`} title={`Comments for ${linkName}`} className="inline-flex shrink-0 items-center gap-0.5 rounded p-1 text-hub-muted hover:text-hub-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent">
+      <button type="button" onClick={(event) => event.stopPropagation()} aria-label={`Comments for ${linkName}`} title={`Comments for ${linkName}`} className="relative z-10 inline-flex shrink-0 items-center gap-0.5 rounded p-1 text-hub-muted hover:text-hub-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent">
         <MessageCircle className="size-4" aria-hidden="true" />
         {count ? <span className="text-[10px] tabular-nums">{count}</span> : null}
       </button>
