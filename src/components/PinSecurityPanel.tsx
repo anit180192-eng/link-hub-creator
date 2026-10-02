@@ -42,15 +42,15 @@ export function PinSecurityPanel({
   pageProtected,
   onToggle,
   toggling,
-  enableProtection,
+  onSaved,
 }: {
   pageId: string;
   pageName: string;
   pageProtected: boolean;
   onToggle: (value: boolean) => void;
   toggling: boolean;
-  /** Switches PIN protection on for this profile; throws on failure. */
-  enableProtection: () => Promise<void>;
+  /** Called after the server saved the PIN and switched protection on. */
+  onSaved: () => void;
 }) {
   const queryClient = useQueryClient();
   const fetchStatus = useServerFn(getSecurityStatus);
@@ -78,8 +78,6 @@ export function PinSecurityPanel({
       if (pin !== confirm) throw new Error("The two PINs don't match.");
       await savePin({ data: { pageId, pin } });
       // A newly saved or changed PIN turns protection on by default; it can still be switched off manually.
-      queryClient.invalidateQueries({ queryKey: ["security", pageId] });
-      await enableProtection();
     },
     onSuccess: () => {
       toast.success(hasPin ? "PIN changed — protection is on" : "PIN saved — protection is on");
@@ -88,8 +86,14 @@ export function PinSecurityPanel({
       setError(null);
       setEditing(false);
       queryClient.invalidateQueries({ queryKey: ["security", pageId] });
+      onSaved();
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (e: Error) => {
+      setError(e.message);
+      // The PIN may have been saved even if enabling failed; refresh what's shown.
+      queryClient.invalidateQueries({ queryKey: ["security", pageId] });
+      onSaved();
+    },
   });
 
   const removeMutation = useMutation({

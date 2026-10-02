@@ -52,7 +52,7 @@ export function OpenAllButton({
               Your browser blocked some new tabs. To allow them, click the blocked pop-up icon in
               the address bar and choose to always allow pop-ups from this site (or add this site
               in your browser's pop-up settings). Then press Retry. Links that already opened
-              won't open again.
+              won't open again. You can also open each one below.
             </DialogDescription>
           </DialogHeader>
           <ul className="max-h-56 space-y-1 overflow-auto text-sm">
@@ -62,7 +62,6 @@ export function OpenAllButton({
                   href={u}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => setFailed((cur) => cur.filter((x) => x !== u))}
                   className="text-primary underline"
                 >
                   Open {hostOf(u)}
