@@ -141,6 +141,7 @@ export type Database = {
       }
       links: {
         Row: {
+          comment_text: string
           created_at: string
           favourite: boolean
           group_name: string
@@ -156,6 +157,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          comment_text?: string
           created_at?: string
           favourite?: boolean
           group_name?: string
@@ -171,6 +173,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          comment_text?: string
           created_at?: string
           favourite?: boolean
           group_name?: string
@@ -308,6 +311,7 @@ export type Database = {
       }
       page_tabs: {
         Row: {
+          tab_color: string | null
           created_at: string
           id: string
           name: string
@@ -317,6 +321,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          tab_color?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -326,6 +331,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          tab_color?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -346,6 +352,9 @@ export type Database = {
       }
       pages: {
         Row: {
+          landing_tab: string
+          notepad_content: string
+          notepad_enabled: boolean
           avatar_url: string | null
           clocks: Json
           created_at: string
@@ -365,6 +374,9 @@ export type Database = {
           weather_city: string
         }
         Insert: {
+          landing_tab?: string
+          notepad_content?: string
+          notepad_enabled?: boolean
           avatar_url?: string | null
           clocks?: Json
           created_at?: string
@@ -384,6 +396,9 @@ export type Database = {
           weather_city?: string
         }
         Update: {
+          landing_tab?: string
+          notepad_content?: string
+          notepad_enabled?: boolean
           avatar_url?: string | null
           clocks?: Json
           created_at?: string
