@@ -139,6 +139,39 @@ export type Database = {
           },
         ]
       }
+      link_comments: {
+        Row: {
+          author_kind: string
+          body: string
+          created_at: string
+          id: string
+          link_id: string
+          page_id: string
+          source_hash: string | null
+        }
+        Insert: {
+          author_kind: string
+          body: string
+          created_at?: string
+          id?: string
+          link_id: string
+          page_id: string
+          source_hash?: string | null
+        }
+        Update: {
+          author_kind?: string
+          body?: string
+          created_at?: string
+          id?: string
+          link_id?: string
+          page_id?: string
+          source_hash?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "link_comments_link_id_fkey"; columns: ["link_id"]; isOneToOne: false; referencedRelation: "links"; referencedColumns: ["id"] },
+          { foreignKeyName: "link_comments_page_id_fkey"; columns: ["page_id"]; isOneToOne: false; referencedRelation: "pages"; referencedColumns: ["id"] },
+        ]
+      }
       links: {
         Row: {
           comment_text: string
