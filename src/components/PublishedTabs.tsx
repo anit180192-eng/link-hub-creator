@@ -2,11 +2,15 @@ import { ColourModeToggle, useSavedMode } from "@/components/ColourControls";
 import { readPageTheme, themeStyle } from "@/lib/page-themes";
 import { recordVisit } from "@/lib/home-widgets";
 import { useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Search, X, ArrowUpRight } from "lucide-react";
 import { folderName } from "@/lib/folder-names";
 import { StartPageView, BrandLink } from "@/components/StartPageView";
 import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { cn } from "@/lib/utils";
+import { LinkCommentButton } from "@/components/LinkCommentButton";
+import { addPublicLinkComment } from "@/lib/public-page.functions";
+import type { LinkComment } from "@/lib/link-comments";
 import { tabColorStyle } from "@/lib/tab-color";
 import {
   isSafeUrl,
@@ -22,6 +26,8 @@ import {
 export function PublishedTabs({
   profile,
   links,
+  comments = [],
+  onAddComment,
   tabs,
   archivedProfile = false,
   initialTabId,
@@ -29,11 +35,21 @@ export function PublishedTabs({
 }: {
   profile: StartPageProfile;
   links: StartPageLink[];
+  comments?: LinkComment[];
+  onAddComment?: (linkId: string, body: string) => Promise<LinkComment>;
   tabs: { id: string; name: string; archived: boolean; tab_color?: string | null }[];
   archivedProfile?: boolean;
   initialTabId?: string;
   embedded?: boolean;
 }) {
+  const submitPublicComment = useServerFn(addPublicLinkComment);
+  const [commentItems, setCommentItems] = useState<LinkComment[]>(comments);
+  const addComment = async (linkId: string, body: string) => {
+    const created = onAddComment
+      ? await onAddComment(linkId, body)
+      : await submitPublicComment({ data: { slug: profile.slug, linkId, body } });
+    setCommentItems((items) => [...items, created]);
+  };
   const [active, setActive] = useState(() => {
     const desired = initialTabId ?? profile.landing_tab ?? "__home";
     return desired === "__home" || (desired === "__notepad" && profile.notepad_enabled) || tabs.some((t) => t.id === desired && !t.archived)
@@ -175,10 +191,11 @@ export function PublishedTabs({
           {results.length ? <ul className="grid gap-3 sm:grid-cols-2">
             {results.map(({ link, tab, folder, archived }) => <li key={link.id} className="min-w-0 rounded-lg border border-hub-border bg-hub-surface p-4">
               <p className="mb-2 break-words text-xs text-hub-muted">{tab.name} / {folder}{archived ? " · Archived" : ""}</p>
-              <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="flex items-center justify-between gap-3 rounded text-sm font-semibold text-hub-foreground focus-visible:ring-2 focus-visible:ring-hub-accent">
+              <div className="flex items-center gap-1"><a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="flex min-w-0 items-center justify-between gap-3 rounded text-sm font-semibold text-hub-foreground focus-visible:ring-2 focus-visible:ring-hub-accent">
                 <span className="min-w-0 break-words">{linkTitle(link)}</span>
                 {!archived ? <ArrowUpRight className="h-4 w-4 shrink-0 text-hub-accent" aria-hidden="true" /> : null}
               </a>
+              <LinkCommentButton linkId={link.id} linkName={linkTitle(link)} ownerNote={link.comment_text} comments={commentItems.filter((item) => item.link_id === link.id)} onSubmit={(body) => addComment(link.id, body)} /></div>
               <p className="mt-1 break-all text-xs text-hub-muted">{hostOf(link.url)}</p>
               {archived ? <p className="mt-2 text-xs text-hub-muted">Archived — renew Premium to open this link.</p> : null}
               <button type="button" onClick={() => { setActive(tab.id); setQuery(""); }} className="mt-3 rounded text-xs font-semibold text-hub-accent underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-hub-accent">View in {tab.name}</button>
@@ -227,6 +244,8 @@ export function PublishedTabs({
           tabName={tabs.find((t) => t.id === active)?.name}
           profile={profile}
           links={tabLinks}
+          comments={commentItems}
+          onAddComment={addComment}
           archived={
             archivedProfile || !!tabs.find((t) => t.id === active)?.archived
           }
