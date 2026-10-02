@@ -42,12 +42,15 @@ export function PinSecurityPanel({
   pageProtected,
   onToggle,
   toggling,
+  enableProtection,
 }: {
   pageId: string;
   pageName: string;
   pageProtected: boolean;
   onToggle: (value: boolean) => void;
   toggling: boolean;
+  /** Switches PIN protection on for this profile; throws on failure. */
+  enableProtection: () => Promise<void>;
 }) {
   const queryClient = useQueryClient();
   const fetchStatus = useServerFn(getSecurityStatus);
@@ -74,9 +77,12 @@ export function PinSecurityPanel({
       }
       if (pin !== confirm) throw new Error("The two PINs don't match.");
       await savePin({ data: { pageId, pin } });
+      // A newly saved or changed PIN turns protection on by default; it can still be switched off manually.
+      queryClient.invalidateQueries({ queryKey: ["security", pageId] });
+      await enableProtection();
     },
     onSuccess: () => {
-      toast.success(hasPin ? "PIN changed" : "PIN saved");
+      toast.success(hasPin ? "PIN changed — protection is on" : "PIN saved — protection is on");
       setPinValue("");
       setConfirm("");
       setError(null);

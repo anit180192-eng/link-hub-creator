@@ -4,11 +4,13 @@ import { readPageTheme, themeStyle, type ColourMode } from "@/lib/page-themes";
 import { WorldClocks } from "@/components/WorldClocks";
 import { ArrowUpRight, Folder } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { OpenAllButton } from "@/components/OpenAllButton";
 import {
   faviconFor,
   groupLinks,
   hostOf,
   isSafeUrl,
+  linkCountLabel,
   linkTitle,
   normalizeUrl,
   parseClocks,
@@ -124,12 +126,17 @@ export function StartPageView({
   archived = false,
   modeOverride,
   hideBrand = false,
+  openAll = false,
+  tabName,
 }: {
   profile: StartPageProfile;
   links: StartPageLink[];
   archived?: boolean;
   modeOverride?: ColourMode;
   hideBrand?: boolean;
+  /** Show Open all controls (published page). */
+  openAll?: boolean;
+  tabName?: string | undefined;
   adSlot?: React.ReactNode;
 }) {
   const safe = links.filter((l) => isSafeUrl(l.url));
@@ -146,6 +153,13 @@ export function StartPageView({
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
   const clocks = parseClocks(profile.clocks);
+  const canOpen = openAll && !archived;
+  const count = (n: number) => (
+    <span className="text-[10px] tabular-nums text-hub-muted" title={linkCountLabel(n)} aria-label={linkCountLabel(n)}>{String(n).padStart(2, "0")}</span>
+  );
+  const tabBar = canOpen && safe.length ? (
+    <div className="mb-3 flex justify-end"><OpenAllButton urls={safe.map((l) => l.url)} scope={`the ${tabName ?? "current"} tab`} className="border border-hub-border" /></div>
+  ) : null;
   const appearance = readPageTheme(profile.theme, profile.dark_mode);
   const isList = appearance.layout === "list";
   // "dark" re-applies the dark palette inside the page; "hub-light" swaps the page's own colours to light.
@@ -180,6 +194,7 @@ export function StartPageView({
           ) : null}
 
           <div className="mt-6 space-y-6">
+            {tabBar}
             {safe.length === 0 ? (
               <p className="rounded-lg border border-hub-border bg-hub-surface p-5 text-center text-sm text-hub-muted">No links yet.</p>
             ) : (
@@ -188,13 +203,13 @@ export function StartPageView({
                 const fullLinks = items.filter((link) => !link.icon_only);
                 const logoLinks = items.filter((link) => link.icon_only);
                 return (
-                  <section key={group || "__default"} aria-label={label}>
+                  <section key={group || "__default"} aria-label={`${label}, ${linkCountLabel(items.length)}`} title={`${label}: ${linkCountLabel(items.length)}`}>
                     <div className="mb-2 flex items-center justify-between px-1">
                       <h2 className="flex items-center gap-2 font-display text-xs font-semibold uppercase text-hub-muted">
                         <Folder className="h-3.5 w-3.5 text-hub-accent" aria-hidden="true" />
                         {label}
                       </h2>
-                      <span className="text-[10px] tabular-nums text-hub-muted">{String(items.length).padStart(2, "0")}</span>
+                      <span className="flex items-center gap-1">{canOpen ? <OpenAllButton urls={items.map((l) => l.url)} scope={`folder ${label}`} /> : null}{count(items.length)}</span>
                     </div>
                     {fullLinks.length ? (
                       <div className="grid gap-2">
@@ -239,6 +254,7 @@ export function StartPageView({
           </aside>
 
           <div className="min-w-0">
+            {tabBar}
             <div className="grid gap-4 lg:grid-cols-2">
               {safe.length === 0 ? (
                 <p className="rounded-lg border border-hub-border bg-hub-surface p-5 text-sm text-hub-muted">No links yet.</p>
@@ -258,9 +274,9 @@ export function StartPageView({
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-hub-background text-hub-accent">
                             <Folder className="h-4 w-4" aria-hidden="true" />
                           </span>
-                          <h2 className="truncate font-display text-sm font-semibold text-hub-foreground">{label}</h2>
+                          <h2 className="truncate font-display text-sm font-semibold text-hub-foreground" title={`${label}: ${linkCountLabel(items.length)}`}>{label}</h2>
                         </div>
-                        <span className="text-[10px] tabular-nums text-hub-muted">{String(items.length).padStart(2, "0")}</span>
+                        <span className="flex items-center gap-1">{canOpen ? <OpenAllButton urls={items.map((l) => l.url)} scope={`folder ${label}`} /> : null}{count(items.length)}</span>
                       </div>
                       {fullLinks.length ? (
                         <div className={cn("grid grid-cols-1 gap-2", featured && "sm:grid-cols-2")}>

@@ -9,6 +9,7 @@ import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { cn } from "@/lib/utils";
 import {
   isSafeUrl,
+  linkCountLabel,
   linkTitle,
   normalizeUrl,
   hostOf,
@@ -83,19 +84,28 @@ export function PublishedTabs({
       favourite: !!l.favourite,
     }));
   const name = profile.display_name || profile.slug;
-  const btn = (id: string, label: string) => (
+  const countFor = (id: string) =>
+    links.filter((l) => isSafeUrl(l.url) && (l.tab_id === id || (!l.tab_id && id === first))).length;
+  const btn = (id: string, label: string, n?: number) => (
     <button
       key={id}
       type="button"
+      title={n === undefined ? undefined : `${label}: ${linkCountLabel(n)}`}
+      aria-label={n === undefined ? undefined : `${label}, ${linkCountLabel(n)}`}
       onClick={() => setActive(id)}
       className={cn(
-        "shrink-0 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors",
+        "group relative shrink-0 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors",
         active === id
           ? "bg-hub-accent text-hub-background"
           : "text-hub-muted hover:text-hub-foreground",
       )}
     >
       {label}
+      {n !== undefined ? (
+        <span aria-hidden="true" className="ml-1.5 hidden rounded bg-hub-background/60 px-1 text-[10px] tabular-nums group-hover:inline group-focus-visible:inline">
+          {n}
+        </span>
+      ) : null}
     </button>
   );
   return (
@@ -139,7 +149,7 @@ export function PublishedTabs({
         <div className="mx-auto flex max-w-[1120px] flex-wrap items-center gap-2 px-4 py-2 sm:flex-nowrap sm:px-6">
           <div className="flex min-w-0 w-full gap-1 overflow-x-auto sm:w-auto sm:flex-1">
             {btn("__home", "Home")}
-            {tabs.map((t) => btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`))}
+            {tabs.map((t) => btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`, countFor(t.id)))}
           </div>
         <div className="w-full sm:w-64 sm:shrink-0" role="search" aria-label="Search this profile">
           <div className="flex items-center gap-2 rounded-lg border border-hub-border bg-hub-surface px-3 focus-within:ring-2 focus-within:ring-hub-accent">
@@ -206,6 +216,8 @@ export function PublishedTabs({
         <StartPageView
           hideBrand
           modeOverride={mode}
+          openAll={!embedded}
+          tabName={tabs.find((t) => t.id === active)?.name}
           profile={profile}
           links={tabLinks}
           archived={
