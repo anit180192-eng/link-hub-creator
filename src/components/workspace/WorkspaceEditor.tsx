@@ -111,6 +111,8 @@ type PageRow = Omit<StartPageProfile, "clocks"> & {
   notepad_enabled: boolean;
   notepad_content: string;
   landing_tab: string;
+  home_tab_color: string | null;
+  notepad_tab_color: string | null;
   id: string;
   user_id: string;
   name: string;
@@ -217,6 +219,13 @@ const initials = (value: string) =>
     .join("")
     .slice(0, 2)
     .toUpperCase() || "?";
+
+function SpecialTabColor({ value, onChange }: { value: string | null; onChange: (color: string | null) => void }) {
+  return <div className="flex flex-wrap items-center gap-2" aria-label="Tab color">
+    <button type="button" onClick={() => onChange(null)} aria-pressed={!value} className="rounded border border-hub-border px-3 py-2 text-xs aria-pressed:ring-2 aria-pressed:ring-hub-accent">Use theme</button>
+    {TAB_COLORS.map(color => <button key={color} type="button" onClick={() => onChange(color)} aria-label={`Select ${color} tab color`} aria-pressed={value === color} style={tabColorStyle(color)} className="size-8 rounded-full border aria-pressed:ring-2 aria-pressed:ring-offset-2" />)}
+  </div>;
+}
 
 function LinkItem({
   link,
@@ -1360,6 +1369,8 @@ export function WorkspaceEditor() {
             }))}
             activeId={tabId.startsWith("__") ? tabId : (tab?.id ?? "__home")}
             notepadEnabled={!!page.notepad_enabled}
+            homeColor={page.home_tab_color}
+            notepadColor={page.notepad_tab_color}
             onAddNotepad={async () => { await savePage.mutateAsync({ notepad_enabled: true }); setTabId("__notepad"); }}
             onSelect={(id) => {
               setTabId(id);
@@ -1469,12 +1480,13 @@ export function WorkspaceEditor() {
             {tabId === "__notepad" && page.notepad_enabled ? (
               <section className="mx-auto max-w-3xl space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2"><h1 className="font-display text-xl font-semibold">Notepad</h1><Button variant="outline" size="sm" disabled={page.landing_tab === "__notepad"} onClick={() => savePage.mutate({ landing_tab: "__notepad" })}>{page.landing_tab === "__notepad" ? "Landing tab" : "Make landing tab"}</Button></div>
+                <SpecialTabColor value={page.notepad_tab_color} onChange={(notepad_tab_color) => savePage.mutate({ notepad_tab_color })} />
                 <p className="text-sm text-hub-muted">Everyone visiting this page can read this note. Only you can edit it.</p>
                 <textarea aria-label="Notepad content" value={notepadDraft} onChange={(e) => setNotepadDraft(e.target.value)} className="min-h-80 w-full rounded-md border border-hub-border bg-hub-background p-4 text-sm leading-6" placeholder="Write a note for visitors…" />
                 <Button disabled={savePage.isPending || notepadDraft === page.notepad_content} onClick={() => savePage.mutate({ notepad_content: notepadDraft })}>Save Notepad</Button>
               </section>
             ) : tabId === "__home" ? (
-              <div className="space-y-3"><div className="flex justify-end"><Button variant="outline" size="sm" disabled={page.landing_tab === "__home"} onClick={() => savePage.mutate({ landing_tab: "__home" })}>{page.landing_tab === "__home" ? "Landing tab" : "Make Home landing tab"}</Button></div>
+              <div className="space-y-3"><div className="flex flex-wrap items-center justify-between gap-2"><SpecialTabColor value={page.home_tab_color} onChange={(home_tab_color) => savePage.mutate({ home_tab_color })} /><Button variant="outline" size="sm" disabled={page.landing_tab === "__home"} onClick={() => savePage.mutate({ landing_tab: "__home" })}>{page.landing_tab === "__home" ? "Landing tab" : "Make Home landing tab"}</Button></div>
               <HomeDashboard
                 profileId={page.id}
                 profileName={page.name}
