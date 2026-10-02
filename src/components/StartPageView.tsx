@@ -136,7 +136,7 @@ export function StartPageView({
   hideBrand?: boolean;
   /** Show Open all controls (published page). */
   openAll?: boolean;
-  tabName?: string;
+  tabName?: string | undefined;
   adSlot?: React.ReactNode;
 }) {
   const safe = links.filter((l) => isSafeUrl(l.url));
