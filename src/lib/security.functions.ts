@@ -58,12 +58,19 @@ export const setPin = createServerFn({ method: "POST" })
       .from("page_security")
       .upsert({ page_id: data.pageId, user_id: context.userId, pin_hash: hash, pin_salt: salt }, { onConflict: "page_id" });
     if (error) throw new Error("Couldn't save your PIN");
+    // Turn protection on first (owner-scoped, RLS applies) so a later failure can't leave a new PIN on an unprotected page.
+    const { data: updated, error: protectError } = await context.supabase
+      .from("pages")
+      .update({ pin_protected: true })
+      .eq("id", data.pageId)
+      .eq("user_id", context.userId)
+      .select("id");
+    if (protectError || !updated || updated.length !== 1) {
+      throw new Error("Your PIN was saved, but PIN protection couldn't be switched on. Use the switch below to turn it on.");
+    }
     // A new PIN revokes every visit and trusted browser for this profile.
     const { error: revokeError } = await admin.from("device_tokens").delete().eq("page_id", data.pageId);
-    if (revokeError) throw new Error("PIN saved, but couldn't sign out trusted browsers");
-    // A new or changed PIN switches protection on for this profile (owner-scoped, RLS applies).
-    const { error: protectError } = await context.supabase.from("pages").update({ pin_protected: true }).eq("id", data.pageId);
-    if (protectError) throw new Error("Your PIN was saved, but PIN protection couldn't be switched on. Use the switch below to turn it on.");
+    if (revokeError) throw new Error("PIN saved and protection is on, but trusted browsers could not be signed out. Remove them manually from the list.");
     return { ok: true };
   });
 
