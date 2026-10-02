@@ -1,10 +1,13 @@
-import { Home, Layers, Plus, GripVertical, ArrowLeft, ArrowRight } from "lucide-react";
+import { Home, Layers, Plus, GripVertical, ArrowLeft, ArrowRight, NotebookPen } from "lucide-react";
+import { tabColorStyle } from "@/lib/tab-color";
 import { useDragOrder } from "./useDragOrder";
 import { moveItem } from "@/lib/reorder";
 import { Button } from "@/components/ui/button";
 
 type Props = {
-  tabs: { id: string; name: string; archived?: boolean }[];
+  tabs: { id: string; name: string; archived?: boolean; tab_color?: string | null }[];
+  notepadEnabled: boolean;
+  onAddNotepad: () => void;
   activeId: string;
   onSelect: (id: string) => void;
   onAdd: () => void;
@@ -14,8 +17,8 @@ type Props = {
   saving?: boolean;
 };
 
-export function BuilderTabs({ tabs, activeId, onSelect, onAdd, onRename, canAdd, onReorder, saving = false }: Props) {
-  const items = [{ id: "__home", name: "Home", archived: false }, ...tabs];
+export function BuilderTabs({ tabs, notepadEnabled, onAddNotepad, activeId, onSelect, onAdd, onRename, canAdd, onReorder, saving = false }: Props) {
+  const items = [{ id: "__home", name: "Home", archived: false }, ...(notepadEnabled ? [{ id: "__notepad", name: "Notepad", archived: false }] : []), ...tabs];
   const movable = tabs.filter(t => !t.archived).map(t => t.id);
   const saveOrder = (ids: string[]) => onReorder?.([...ids, ...tabs.filter(t=>t.archived).map(t=>t.id)]);
   const drag = useDragOrder(movable, 'builder-tabs', saving || !onReorder, saveOrder);
@@ -49,7 +52,7 @@ export function BuilderTabs({ tabs, activeId, onSelect, onAdd, onRename, canAdd,
           }}
         >
           {items.map((item) => (
-            <div key={item.id} role="presentation" {...(item.id !== '__home' ? drag.targetProps(item.id) : {})} className={`flex shrink-0 items-center rounded-t-xl ${drag.over === item.id ? 'ring-2 ring-inset ring-hub-accent' : ''}`}>
+            <div key={item.id} role="presentation" {...(!item.id.startsWith('__') ? drag.targetProps(item.id) : {})} className={`flex shrink-0 items-center rounded-t-xl ${drag.over === item.id ? 'ring-2 ring-inset ring-hub-accent' : ''}`}>
             <button
               id={`builder-tab-${item.id}`}
               role="tab"
@@ -59,12 +62,15 @@ export function BuilderTabs({ tabs, activeId, onSelect, onAdd, onRename, canAdd,
               type="button"
               onClick={() => onSelect(item.id)}
               onDoubleClick={() => {
-                if (item.id !== "__home") onRename(item.id);
+                if (!item.id.startsWith("__")) onRename(item.id);
               }}
+              style={tabColorStyle('tab_color' in item ? item.tab_color : null)}
               className={`relative flex max-w-56 shrink-0 items-center gap-2 rounded-t-xl border px-4 py-3 text-xs font-medium transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-hub-accent ${activeId === item.id ? "border-hub-border border-b-hub-background bg-hub-background text-hub-accent shadow-[0_-3px_12px_rgba(0,0,0,0.08)]" : "border-hub-border/50 bg-hub-surface text-hub-muted hover:bg-hub-elevated/50 hover:text-hub-foreground"}`}
             >
               {item.id === "__home" ? (
                 <Home className="size-3.5 shrink-0" />
+              ) : item.id === "__notepad" ? (
+                <NotebookPen className="size-3.5 shrink-0" />
               ) : (
                 <Layers className="size-3.5 shrink-0" />
               )}
@@ -74,10 +80,11 @@ export function BuilderTabs({ tabs, activeId, onSelect, onAdd, onRename, canAdd,
                 <span className="absolute inset-x-4 bottom-1 h-0.5 rounded-full bg-hub-accent" />
               ) : null}
             </button>
-            {item.id !== '__home' && onReorder && !item.archived ? <button type="button" aria-label={`Drag tab ${item.name}`} title="Drag to reorder tab" disabled={saving || movable.length<2} {...drag.handleProps(item.id)} className="rounded p-1 text-hub-muted hover:text-hub-accent focus-visible:ring-2 focus-visible:ring-hub-accent"><GripVertical className="size-4" /></button> : null}
+            {!item.id.startsWith('__') && onReorder && !item.archived ? <button type="button" aria-label={`Drag tab ${item.name}`} title="Drag to reorder tab" disabled={saving || movable.length<2} {...drag.handleProps(item.id)} className="rounded p-1 text-hub-muted hover:text-hub-accent focus-visible:ring-2 focus-visible:ring-hub-accent"><GripVertical className="size-4" /></button> : null}
             </div>
           ))}
         </div>
+        {!notepadEnabled ? <Button variant="ghost" size="sm" className="mb-1 shrink-0" onClick={onAddNotepad} aria-label="Add Notepad tab"><NotebookPen className="size-4" /><span className="hidden sm:inline">Notepad</span></Button> : null}
         <Button
           data-tour="add-tab"
           variant="ghost"
