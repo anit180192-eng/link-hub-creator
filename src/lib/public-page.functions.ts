@@ -22,7 +22,7 @@ export type PublicPage = {
   /** True when this browser is saved as trusted for this page's owner. */
   trusted: boolean;
   archivedProfile: boolean;
-  tabs?: { id: string; name: string; archived: boolean }[];
+  tabs?: { id: string; name: string; archived: boolean; tab_color: string | null }[];
 } | null;
 
 function publicClient() {
@@ -42,7 +42,7 @@ function publicClient() {
   });
 }
 
-const LINK_COLUMNS = "id, platform, label, url, group_name, position, icon_only, favourite, tab_id";
+const LINK_COLUMNS = "id, platform, label, url, group_name, position, icon_only, favourite, tab_id, comment_text";
 
 export const getPublicPage = createServerFn({ method: "GET" })
   .inputValidator((slug: string) => String(slug).slice(0, 60))
@@ -54,7 +54,7 @@ export const getPublicPage = createServerFn({ method: "GET" })
 
     const { data: page, error } = await admin
       .from("pages")
-      .select("id, user_id, slug, display_name, tagline, avatar_url, theme, dark_mode, clocks, home_widgets, social_links, pin_protected")
+      .select("id, user_id, slug, display_name, tagline, avatar_url, theme, dark_mode, clocks, home_widgets, social_links, pin_protected, notepad_enabled, notepad_content, landing_tab")
       .eq("slug", slug)
       .eq("published", true)
       .maybeSingle();
@@ -77,10 +77,13 @@ export const getPublicPage = createServerFn({ method: "GET" })
       clocks: parseClocks(page.clocks),
       home_widgets: page.home_widgets,
       social_links: page.social_links,
+      notepad_enabled: page.notepad_enabled,
+      notepad_content: page.notepad_content,
+      landing_tab: page.landing_tab,
     };
 
     const [{ data: tabRows, error: tabsError }, { data: ownersPages, error: pagesError }, { data: effective, error: planError }] = await Promise.all([
-      admin.from("page_tabs").select("id, name").eq("page_id", page.id).order("position").order("id"),
+      admin.from("page_tabs").select("id, name, tab_color").eq("page_id", page.id).order("position").order("id"),
       admin.from("pages").select("id").eq("user_id", page.user_id).order("created_at").order("id"),
       admin.rpc("effective_plan", { _user_id: page.user_id }),
     ]);
