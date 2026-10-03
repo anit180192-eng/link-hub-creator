@@ -17,6 +17,7 @@ export type Database = {
       account_entitlements: {
         Row: {
           billing_environment: string
+          billing_provider: string
           created_at: string
           current_period_end: string | null
           last_event_at: string | null
@@ -25,11 +26,14 @@ export type Database = {
           plan: string
           scheduled_cancel_at: string | null
           status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           billing_environment?: string
+          billing_provider?: string
           created_at?: string
           current_period_end?: string | null
           last_event_at?: string | null
@@ -38,11 +42,14 @@ export type Database = {
           plan?: string
           scheduled_cancel_at?: string | null
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           billing_environment?: string
+          billing_provider?: string
           created_at?: string
           current_period_end?: string | null
           last_event_at?: string | null
@@ -51,6 +58,8 @@ export type Database = {
           plan?: string
           scheduled_cancel_at?: string | null
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -168,8 +177,20 @@ export type Database = {
           source_hash?: string | null
         }
         Relationships: [
-          { foreignKeyName: "link_comments_link_id_fkey"; columns: ["link_id"]; isOneToOne: false; referencedRelation: "links"; referencedColumns: ["id"] },
-          { foreignKeyName: "link_comments_page_id_fkey"; columns: ["page_id"]; isOneToOne: false; referencedRelation: "pages"; referencedColumns: ["id"] },
+          {
+            foreignKeyName: "link_comments_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "link_comments_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
         ]
       }
       links: {
@@ -344,32 +365,32 @@ export type Database = {
       }
       page_tabs: {
         Row: {
-          tab_color: string | null
           created_at: string
           id: string
           name: string
           page_id: string
           position: number
+          tab_color: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          tab_color?: string | null
           created_at?: string
           id?: string
           name?: string
           page_id: string
           position?: number
+          tab_color?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          tab_color?: string | null
           created_at?: string
           id?: string
           name?: string
           page_id?: string
           position?: number
+          tab_color?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -385,19 +406,19 @@ export type Database = {
       }
       pages: {
         Row: {
-          home_tab_color: string | null
-          notepad_tab_color: string | null
-          landing_tab: string
-          notepad_content: string
-          notepad_enabled: boolean
           avatar_url: string | null
           clocks: Json
           created_at: string
           dark_mode: boolean
           display_name: string
+          home_tab_color: string | null
           home_widgets: Json | null
           id: string
+          landing_tab: string
           name: string
+          notepad_content: string
+          notepad_enabled: boolean
+          notepad_tab_color: string | null
           pin_protected: boolean
           published: boolean
           slug: string
@@ -409,19 +430,19 @@ export type Database = {
           weather_city: string
         }
         Insert: {
-          home_tab_color?: string | null
-          notepad_tab_color?: string | null
-          landing_tab?: string
-          notepad_content?: string
-          notepad_enabled?: boolean
           avatar_url?: string | null
           clocks?: Json
           created_at?: string
           dark_mode?: boolean
           display_name?: string
+          home_tab_color?: string | null
           home_widgets?: Json | null
           id?: string
+          landing_tab?: string
           name?: string
+          notepad_content?: string
+          notepad_enabled?: boolean
+          notepad_tab_color?: string | null
           pin_protected?: boolean
           published?: boolean
           slug: string
@@ -433,19 +454,19 @@ export type Database = {
           weather_city?: string
         }
         Update: {
-          home_tab_color?: string | null
-          notepad_tab_color?: string | null
-          landing_tab?: string
-          notepad_content?: string
-          notepad_enabled?: boolean
           avatar_url?: string | null
           clocks?: Json
           created_at?: string
           dark_mode?: boolean
           display_name?: string
+          home_tab_color?: string | null
           home_widgets?: Json | null
           id?: string
+          landing_tab?: string
           name?: string
+          notepad_content?: string
+          notepad_enabled?: boolean
+          notepad_tab_color?: string | null
           pin_protected?: boolean
           published?: boolean
           slug?: string
@@ -521,12 +542,42 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_webhook_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          occurred_at: string
+          processed_at: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          occurred_at: string
+          processed_at?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          occurred_at?: string
+          processed_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       apply_paddle_event: {
+        Args: {
+          p_ent: Json
+          p_event_id: string
+          p_event_type: string
+          p_occurred_at: string
+        }
+        Returns: string
+      }
+      apply_stripe_event: {
         Args: {
           p_ent: Json
           p_event_id: string
