@@ -1,4 +1,5 @@
 export const WIDGETS = [
+  { id: "featured", name: "Featured Links", description: "Add up to 10 links as square tiles in a scrollable area." },
   {
     id: "clock",
     name: "Clock & date",
@@ -50,7 +51,35 @@ export const WIDGETS = [
   },
 ] as const;
 export type WidgetId = (typeof WIDGETS)[number]["id"];
-export type HomeWidget = { id: WidgetId; size: "compact" | "wide" };
+export const FEATURED_LINK_LIMIT = 10;
+export type FeaturedLink = { id: string; name: string; url: string };
+export type HomeWidget = { id: WidgetId; size: "compact" | "wide"; links?: FeaturedLink[] };
+
+export function featuredLinkUrl(raw: string): string | null {
+  const value = raw.trim();
+  if (!value || (/^[a-z][a-z0-9+.-]*:/i.test(value) && !/^https?:\/\//i.test(value))) return null;
+  try {
+    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
+    if (!["http:", "https:"].includes(url.protocol) || !url.hostname || url.username || url.password) return null;
+    return url.href;
+  } catch { return null; }
+}
+
+export function parseFeaturedLinks(raw: unknown): FeaturedLink[] {
+  if (!Array.isArray(raw)) return [];
+  const ids = new Set<string>();
+  const urls = new Set<string>();
+  const links: FeaturedLink[] = [];
+  for (const item of raw) {
+    if (!item || typeof item.id !== "string" || !item.id || typeof item.name !== "string" || !item.name.trim() || typeof item.url !== "string") continue;
+    const url = featuredLinkUrl(item.url);
+    if (!url || ids.has(item.id) || urls.has(url)) continue;
+    ids.add(item.id); urls.add(url);
+    links.push({ id: item.id, name: item.name.trim().slice(0, 80), url });
+    if (links.length === FEATURED_LINK_LIMIT) break;
+  }
+  return links;
+}
 export const LEGACY_WIDGETS: HomeWidget[] = WIDGETS.filter(({ id }) =>
   ["clock", "world", "favourites", "visited", "recent"].includes(id),
 ).map(({ id }) => ({
@@ -73,6 +102,7 @@ export function parseWidgets(raw: unknown): HomeWidget[] {
     return [
       {
         id: w.id as WidgetId,
+        ...(w.id === "featured" ? { links: parseFeaturedLinks(w.links) } : {}),
         size: w.size === "compact" ? ("compact" as const) : ("wide" as const),
       },
     ];

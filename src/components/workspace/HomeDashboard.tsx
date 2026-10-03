@@ -1,3 +1,4 @@
+import { FeaturedLinksWidget } from "./FeaturedLinksWidget";
 import { SocialLinks } from "@/components/SocialLinks";
 import { useEffect, useState } from "react";
 import {
@@ -278,6 +279,16 @@ export function HomeDashboard({
                 </div>
               ) : null}
             </div>
+            {widget.id === "featured" ? (
+              <FeaturedLinksWidget
+                key={`${slug}:featured`}
+                links={widget.links ?? []}
+                editing={editing}
+                saving={!!saving}
+                disabled={!!socialDisabled}
+                onChange={(links) => onWidgetsChange?.(layout.map((w) => w.id === "featured" ? { ...w, links } : w))}
+              />
+            ) : null}
             <ProductivityWidget
               key={`${slug}:${widget.id}`}
               id={widget.id}
