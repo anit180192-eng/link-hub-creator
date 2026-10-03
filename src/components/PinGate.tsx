@@ -70,11 +70,11 @@ export function PinGate({ slug }: { slug: string }) {
           href="https://landingpagebuilder.aurunex.com/"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Landing Page Builder home"
+          aria-label={`Landing Page / ${slug} — create your own`}
           className="mb-6 inline-flex items-center gap-2 text-[11px] font-semibold text-hub-muted transition-colors hover:text-hub-accent"
         >
           <img src="/favicon.svg" alt="" width={20} height={20} className="h-5 w-5 rounded" />
-          Landing Page Builder
+          Landing Page / {slug}
         </a>
 
         <div className="rounded-xl border border-hub-border bg-hub-surface p-6 sm:p-8">
@@ -195,7 +195,7 @@ export function PinGate({ slug }: { slug: string }) {
           )}
         </div>
         <p className="mt-4 text-center text-xs text-hub-muted">
-          Built with Landing Page Builder by AuruNex
+          By AuruNex
         </p>
       </div>
     </div>

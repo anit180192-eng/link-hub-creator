@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { secureResponse } from "./lib/response-security";
+import { publicHostRedirect } from "./lib/public-page-url";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -48,6 +49,10 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const redirect = publicHostRedirect(new URL(request.url));
+      if (redirect && (request.method === "GET" || request.method === "HEAD")) {
+        return secureResponse(Response.redirect(redirect, 302));
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return secureResponse(await normalizeCatastrophicSsrResponse(response));

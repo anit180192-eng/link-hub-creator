@@ -148,7 +148,7 @@ export function PublishedTabs({
       )}
     >
       <header className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <BrandLink />
+        <BrandLink slug={profile.slug} />
         {!embedded ? <ColourModeToggle
           value={mode}
           onChange={setMode}

@@ -90,20 +90,20 @@ function QuickTiles({ links, label, className, archived = false, comments, onAdd
   );
 }
 
-export function BrandLink({ className }: { className?: string }) {
+export function BrandLink({ className, slug }: { className?: string; slug: string }) {
   return (
     <a
       href="https://landingpagebuilder.aurunex.com/"
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Landing Page Builder home"
+      aria-label={`Landing Page / ${slug} — create your own`}
       className={cn(
         "inline-flex items-center gap-2 text-[11px] font-semibold text-hub-muted transition-colors hover:text-hub-accent",
         className,
       )}
     >
       <img src="/favicon.svg" alt="" width={20} height={20} className="h-5 w-5 rounded" />
-      Landing Page Builder
+      Landing Page / {slug}
     </a>
   );
 }
@@ -177,7 +177,7 @@ export function StartPageView({
     <footer className="mt-4 flex flex-col gap-2 border-t border-hub-border pt-4 text-[10px] uppercase text-hub-muted sm:flex-row sm:items-center sm:justify-between md:col-span-2">
       <span>{name} · Personal hub</span>
       <a href="https://aurunex.com/" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-hub-accent">
-        Built with Landing Page Builder by AuruNex
+        By AuruNex
       </a>
     </footer>
   );
@@ -186,7 +186,7 @@ export function StartPageView({
     return (
       <div data-colour-mode={modeOverride ?? appearance.mode} style={themeStyle(appearance.preset)} className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
         <main className="mx-auto w-full max-w-[560px] px-4 py-6 sm:py-10">
-          {!hideBrand ? <BrandLink className="mb-6" /> : null}
+          {!hideBrand ? <BrandLink slug={profile.slug} className="mb-6" /> : null}
           {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}
           <header className="flex flex-col items-center text-center">
             <Avatar url={profile.avatar_url} initials={initials} size="lg" />
@@ -248,7 +248,7 @@ export function StartPageView({
   return (
     <div data-colour-mode={modeOverride ?? appearance.mode} style={themeStyle(appearance.preset)} className={cn(paletteClass, "min-h-screen bg-hub-background text-hub-foreground")}>
       <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
-        {!hideBrand ? <BrandLink className="mb-4" /> : null}
+        {!hideBrand ? <BrandLink slug={profile.slug} className="mb-4" /> : null}
         {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}
         <div className="grid items-start gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
           <aside className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">

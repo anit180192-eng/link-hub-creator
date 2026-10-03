@@ -578,7 +578,7 @@ export function WorkspacePrototype() {
                   {profile.avatarUrl ? <img src={profile.avatarUrl} alt={`${profile.displayName} profile`} className="size-10 shrink-0 rounded-md border border-hub-border object-cover" /> : <span className="grid size-10 shrink-0 place-items-center rounded-md border border-hub-border bg-hub-elevated font-display text-sm font-semibold text-hub-accent">{profile.displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "?"}</span>}
                   <div className="min-w-0">
                     <h1 className="truncate font-display text-xl font-semibold text-hub-foreground">{profile.name}</h1>
-                    <p className="truncate text-xs text-hub-muted">{tab.name} · {currentLinks.length} links · <span className="text-hub-accent">{profile.published ? `/p/${profile.slug}` : "Not published yet"}</span></p>
+                    <p className="truncate text-xs text-hub-muted">{tab.name} · {currentLinks.length} links · <span className="text-hub-accent">{profile.published ? `landingpage.aurunex.com/${profile.slug}` : "Not published yet"}</span></p>
                   </div>
                 </div>
                 <div className="relative w-44 sm:w-64">
@@ -674,7 +674,7 @@ export function WorkspacePrototype() {
                 {saveState === "error" ? <p role="alert" className="text-xs text-destructive">Add both your display name and page name.</p> : null}
                 <Button onClick={saveProfileDetails}>Save profile</Button>
               </div>
-              <div className="rounded-md border border-hub-border bg-hub-background p-3"><p className="text-xs text-hub-muted">Published address</p><p className="mt-1 truncate font-mono text-xs text-hub-foreground">landingpagebuilder.aurunex.com/p/{profile.slug}</p></div>
+              <div className="rounded-md border border-hub-border bg-hub-background p-3"><p className="text-xs text-hub-muted">Published address</p><p className="mt-1 truncate font-mono text-xs text-hub-foreground">landingpage.aurunex.com/{profile.slug}</p></div>
               <div className="grid gap-2 sm:grid-cols-2"><Button variant="outline" className="justify-start border-hub-border bg-hub-background text-hub-foreground"><Sparkles /> Appearance</Button><Button variant="outline" className="justify-start border-hub-border bg-hub-background text-hub-foreground"><Copy /> Export HTML</Button></div>
             </div>
           ) : (

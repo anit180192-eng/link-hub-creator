@@ -288,7 +288,7 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${esc(name)} — Personal hub</title>
+<title>Landing Page / ${esc(profile.slug)}</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23E3C581'/%3E%3Cg fill='none' stroke='%2308151F' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='7' y='7' width='18' height='18' rx='2.5'/%3E%3Cpath d='M7 13h18M13 25V13'/%3E%3C/g%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -383,10 +383,10 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 <div class="mode-bar" role="group" aria-label="Colour mode">${(["light", "dark", "system"] as const).map(mode => `<button type="button" data-mode-choice="${mode}" aria-pressed="${mode === appearance.mode}">${mode.charAt(0).toUpperCase() + mode.slice(1)}</button>`).join("")}</div>
 <script>(function(){var root=document.documentElement;root.dataset.mode=${JSON.stringify(appearance.mode)};document.querySelectorAll('[data-mode-choice]').forEach(function(b){b.addEventListener('click',function(){root.dataset.mode=b.dataset.modeChoice;document.querySelectorAll('[data-mode-choice]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))})})})})();</script>
 <main${isList ? ' class="is-list"' : ""}><div class="frame">
-  <a class="brand" href="https://landingpagebuilder.aurunex.com/" aria-label="Landing Page Builder home"><svg class="brandmark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#E3C581"/><g fill="none" stroke="#08151F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="18" height="18" rx="2.5"/><path d="M7 13h18M13 25V13"/></g></svg>Landing Page Builder</a>
+  <a class="brand" href="https://landingpagebuilder.aurunex.com/" aria-label="Landing Page / ${esc(profile.slug)} — create your own"><svg class="brandmark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#E3C581"/><g fill="none" stroke="#08151F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="18" height="18" rx="2.5"/><path d="M7 13h18M13 25V13"/></g></svg>Landing Page / ${esc(profile.slug)}</a>
   <div class="side"><header><div class="identity">${avatar}<h1>${esc(name)}</h1><p class="tag">${esc(tagline)}</p></div><div class="index">${parseSocialLinks(profile.social_links).map(link => `<a href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(link.label || socialName(link.platform))}" style="display:inline-block;margin:4px">${esc(socialName(link.platform))}</a>`).join("") || "Personal hub"}</div></header>${clockStrip}</div>
   <div class="content"><div class="sections">${sections}</div></div>
-  <footer><span>${esc(name)} · Personal hub</span><a href="https://aurunex.com/">Built with Landing Page Builder by AuruNex</a></footer>
+  <footer><span>${esc(name)} · Personal hub</span><a href="https://aurunex.com/">By AuruNex</a></footer>
 </div>
 </main>
 ${clockScript}

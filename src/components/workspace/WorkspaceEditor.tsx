@@ -1,3 +1,4 @@
+import { publicPageUrl } from "@/lib/public-page-url";
 import { SOCIAL_PLATFORMS, parseSocialLinks, socialName, socialUrl, type SocialLink } from "@/lib/social-links";
 import { useDragOrder } from "./useDragOrder";
 import { moveItem, orderLinksByFolders } from "@/lib/reorder";
@@ -1190,10 +1191,7 @@ export function WorkspaceEditor() {
       </div>
     );
   const currentFolders = folders.length ? folders : ["Folder 1"];
-  const publicUrl =
-    typeof window === "undefined"
-      ? `/p/${page.slug}`
-      : `${window.location.origin}/p/${page.slug}`;
+  const publicUrl = publicPageUrl(page.slug);
   const firstRun = onboarding === true && !guideDismissed;
   return (
     <div>
@@ -2029,7 +2027,7 @@ export function WorkspaceEditor() {
                     className="mt-1 bg-hub-background"
                   />
                   <p className="mt-1 text-xs text-hub-muted">
-                    /p/{identity.slug || "your-profile"}
+                    landingpage.aurunex.com/{identity.slug || "your-profile"}
                   </p>
                 </div>
                 <Button

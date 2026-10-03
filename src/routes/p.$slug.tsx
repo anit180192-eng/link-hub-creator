@@ -1,4 +1,5 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { BUILDER_ORIGIN } from "@/lib/public-page-url";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { PinGate } from "@/components/PinGate";
 import { PublishedTabs } from "@/components/PublishedTabs";
 import { getPublicPage } from "@/lib/public-page.functions";
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/p/$slug")({
     if (!loaderData) {
       return {
         meta: [
-          { title: "Page not found — Landing Page Builder" },
+          { title: "Page not found — Landing Page" },
           { name: "robots", content: "noindex" },
         ],
       };
@@ -22,10 +23,10 @@ export const Route = createFileRoute("/p/$slug")({
     if (loaderData.protected) {
       return {
         meta: [
-          { title: "Private page — Landing Page Builder" },
+          { title: `Landing Page / ${params.slug}` },
           { name: "description", content: "Enter the PIN to view this private page." },
           { name: "robots", content: "noindex" },
-          { property: "og:title", content: "Private page — Landing Page Builder" },
+          { property: "og:title", content: `Landing Page / ${params.slug}` },
           { property: "og:description", content: "A private start page protected with a PIN." },
           { property: "og:type", content: "website" },
           { name: "twitter:card", content: "summary" },
@@ -37,9 +38,9 @@ export const Route = createFileRoute("/p/$slug")({
       loaderData.profile.tagline || `All of ${name}'s links and accounts in one start page.`;
     return {
       meta: [
-        { title: `${name} — Start page` },
+        { title: `Landing Page / ${params.slug}` },
         { name: "description", content: description },
-        { property: "og:title", content: `${name} — Start page` },
+        { property: "og:title", content: `Landing Page / ${params.slug}` },
         { property: "og:description", content: description },
         { property: "og:type", content: "profile" },
         { name: "twitter:card", content: "summary" },
@@ -52,9 +53,9 @@ export const Route = createFileRoute("/p/$slug")({
       <p className="text-sm text-muted-foreground">
         It may have been unpublished or the address changed.
       </p>
-      <Link to="/" className="text-sm text-primary underline">
+      <a href={BUILDER_ORIGIN} className="text-sm text-primary underline">
         Make your own
-      </Link>
+      </a>
     </div>
   ),
   errorComponent: () => (
