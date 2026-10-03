@@ -9,6 +9,7 @@ import { StartPageView, BrandLink } from "@/components/StartPageView";
 import { HomeDashboard } from "@/components/workspace/HomeDashboard";
 import { cn } from "@/lib/utils";
 import { LinkCommentButton } from "@/components/LinkCommentButton";
+import { IncognitoLinkButton } from "@/components/IncognitoLinkButton";
 import { addPublicLinkComment } from "@/lib/public-page.functions";
 import type { LinkComment } from "@/lib/link-comments";
 import { tabColorStyle } from "@/lib/tab-color";
@@ -191,11 +192,11 @@ export function PublishedTabs({
           {results.length ? <ul className="grid gap-3 sm:grid-cols-2">
             {results.map(({ link, tab, folder, archived }) => <li key={link.id} className="min-w-0 rounded-lg border border-hub-border bg-hub-surface p-4">
               <p className="mb-2 break-words text-xs text-hub-muted">{tab.name} / {folder}{archived ? " · Archived" : ""}</p>
-              <div className="flex items-center gap-1"><a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="flex min-w-0 items-center justify-between gap-3 rounded text-sm font-semibold text-hub-foreground focus-visible:ring-2 focus-visible:ring-hub-accent">
+              <div className="flex items-center justify-between gap-1"><a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="min-w-0 rounded text-sm font-semibold text-hub-foreground focus-visible:ring-2 focus-visible:ring-hub-accent">
                 <span className="min-w-0 break-words">{linkTitle(link)}</span>
-                {!archived ? <ArrowUpRight className="h-4 w-4 shrink-0 text-hub-accent" aria-hidden="true" /> : null}
               </a>
-              <LinkCommentButton linkId={link.id} linkName={linkTitle(link)} ownerNote={link.comment_text} comments={commentItems.filter((item) => item.link_id === link.id)} onSubmit={(body) => addComment(link.id, body)} /></div>
+              <span className="flex shrink-0 items-center gap-0.5"><a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-label={`Open ${linkTitle(link)} in a new tab`} aria-disabled={archived || undefined} className="rounded p-1 text-hub-muted hover:text-hub-accent focus-visible:ring-2 focus-visible:ring-hub-accent"><ArrowUpRight className="size-4" aria-hidden="true" /></a><IncognitoLinkButton url={link.url} name={linkTitle(link)} disabled={archived} />
+              <LinkCommentButton linkId={link.id} linkName={linkTitle(link)} ownerNote={link.comment_text} comments={commentItems.filter((item) => item.link_id === link.id)} onSubmit={(body) => addComment(link.id, body)} /></span></div>
               <p className="mt-1 break-all text-xs text-hub-muted">{hostOf(link.url)}</p>
               {archived ? <p className="mt-2 text-xs text-hub-muted">Archived — renew Premium to open this link.</p> : null}
               <button type="button" onClick={() => { setActive(tab.id); setQuery(""); }} className="mt-3 rounded text-xs font-semibold text-hub-accent underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-hub-accent">View in {tab.name}</button>

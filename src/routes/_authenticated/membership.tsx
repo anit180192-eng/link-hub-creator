@@ -28,7 +28,7 @@ function MembershipPage() {
   const cancelled = data?.membership?.status === "canceled";
   const renewalStopping = cancelled || Boolean(data?.membership?.scheduledCancelAt);
 
-  async function visitPaddle(cancel: boolean) {
+  async function visitStripe(cancel: boolean) {
     setBusy(true);
     try {
       const { url } = cancel ? await cancelPortal() : await portal();
@@ -49,13 +49,13 @@ function MembershipPage() {
           <p className="mt-6 rounded-md border border-hub-accent/40 bg-hub-elevated p-4 font-semibold">{premium ? trialing ? "Premium trial active" : "Premium active" : "Free plan"}</p>
           {premium ? <dl className="mt-6 space-y-4 text-sm">
             <div><dt className="text-hub-muted">{trialing ? "Trial ends" : "Current period ends"}</dt><dd className="mt-1 font-semibold">{endDate}</dd></div>
-            <div><dt className="text-hub-muted">{trialing ? "First payment" : "Renewal"}</dt><dd className="mt-1">{renewalStopping ? "Cancellation scheduled — Premium remains until the date above" : trialing ? `£9.99 for the first year on ${endDate}, unless you cancel first` : "Yearly, unless you cancel in Paddle"}</dd></div>
+            <div><dt className="text-hub-muted">{trialing ? "First payment" : "Renewal"}</dt><dd className="mt-1">{renewalStopping ? "Cancellation scheduled — Premium remains until the date above" : trialing ? `£9.99 for the first year on ${endDate}, unless you cancel first` : "Yearly, unless you cancel in Stripe"}</dd></div>
             <div><dt className="text-hub-muted">Included</dt><dd className="mt-1">{PLAN_LIMITS.premium.profiles} profiles · {PLAN_LIMITS.premium.tabsPerProfile} tabs per profile</dd></div>
             {data?.environment === "sandbox" ? <p className="text-hub-muted">This is a sandbox test membership. No real payment was taken.</p> : null}
           </dl> : <p className="mt-5 text-sm text-hub-muted">Free includes {PLAN_LIMITS.free.profiles} profiles and {PLAN_LIMITS.free.tabsPerProfile} tabs per profile. Premium is {PREMIUM_PRICE_LABEL}. Saved items above Free limits stay archived until Premium is restored.</p>}
           {premium && data?.canManage ? <div className="mt-7 flex flex-wrap gap-3">
-            <Button variant="outline" disabled={busy} onClick={() => visitPaddle(false)}>Manage billing in Paddle</Button>
-            {!renewalStopping ? <AlertDialog><AlertDialogTrigger asChild><Button variant="outline" disabled={busy}>Cancel renewal</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Cancel your next renewal?</AlertDialogTitle><AlertDialogDescription>Cancelling stops the next yearly renewal. It does not automatically refund the current payment. Your Premium access continues until {endDate}. Paddle will ask you to confirm the cancellation.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Keep membership</AlertDialogCancel><AlertDialogAction onClick={() => visitPaddle(true)}>Continue to Paddle</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog> : null}
+            <Button variant="outline" disabled={busy} onClick={() => visitStripe(false)}>Manage billing in Stripe</Button>
+            {!renewalStopping ? <AlertDialog><AlertDialogTrigger asChild><Button variant="outline" disabled={busy}>Cancel renewal</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Cancel your next renewal?</AlertDialogTitle><AlertDialogDescription>Cancelling stops the next yearly renewal. It does not automatically refund the current payment. Your Premium access continues until {endDate}. Stripe will ask you to confirm the cancellation.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Keep membership</AlertDialogCancel><AlertDialogAction onClick={() => visitStripe(true)}>Continue to Stripe</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog> : null}
           </div> : null}
         </>}
       </main>

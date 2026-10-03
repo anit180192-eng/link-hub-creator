@@ -44,6 +44,7 @@ import type { Json } from "@/integrations/supabase/types";
 import { BuilderShell } from "./BuilderShell";
 import { BuilderTabs } from "./BuilderTabs";
 import { LinkCommentButton } from "@/components/LinkCommentButton";
+import { IncognitoLinkButton } from "@/components/IncognitoLinkButton";
 import { commentWordCount, type LinkComment } from "@/lib/link-comments";
 import { TAB_COLORS, tabColorStyle } from "@/lib/tab-color";
 import { PublishedTabs } from "@/components/PublishedTabs";
@@ -278,11 +279,15 @@ function LinkItem({
       >
           {link.label || link.platform}
           {archived ? " · Archived" : ""}
-      </a><LinkCommentButton linkId={link.id} linkName={link.label || link.platform} ownerNote={link.comment_text} comments={comments} onSubmit={onAddComment} onDelete={onDeleteComment} /></div>
+      </a></div>
         <span className="block truncate text-[10px] text-hub-muted">
           {hostOf(link.url)}
         </span>
       </div>
+      <div className="flex items-center gap-0.5">
+        <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-label={`Open ${link.label || link.platform} in a new tab`} aria-disabled={archived || undefined} className="rounded p-1 text-hub-muted hover:text-hub-accent focus-visible:ring-2 focus-visible:ring-hub-accent"><ExternalLink className="size-4" aria-hidden="true" /></a>
+        <IncognitoLinkButton url={link.url} name={link.label || link.platform} disabled={archived} />
+        <LinkCommentButton linkId={link.id} linkName={link.label || link.platform} ownerNote={link.comment_text} comments={comments} onSubmit={onAddComment} onDelete={onDeleteComment} />
       {editing ? (
         <div className="flex">
           <Button
@@ -319,6 +324,7 @@ function LinkItem({
       ) : link.favourite ? (
         <Star className="size-3.5 fill-hub-accent text-hub-accent" />
       ) : null}
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { ArrowUpRight, Folder } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OpenAllButton } from "@/components/OpenAllButton";
 import { LinkCommentButton } from "@/components/LinkCommentButton";
+import { IncognitoLinkButton } from "@/components/IncognitoLinkButton";
 import type { LinkComment } from "@/lib/link-comments";
 import {
   faviconFor,
@@ -30,7 +31,7 @@ function LinkCard({ link, tall = true, archived = false, comments, onAddComment 
   return (
     <div
       className={cn(
-        "group relative grid cursor-pointer grid-cols-[28px_minmax(0,1fr)_18px] items-center gap-3 rounded-md border border-hub-border bg-hub-background px-3 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-hub-accent hover:shadow-[0_0_14px_color-mix(in_oklab,var(--hub-accent)_14%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent active:translate-y-0",
+        "group relative grid cursor-pointer grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-hub-border bg-hub-background px-3 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-hub-accent hover:shadow-[0_0_14px_color-mix(in_oklab,var(--hub-accent)_14%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent active:translate-y-0",
         tall ? "h-16" : "h-14",
       )}
     >
@@ -42,16 +43,14 @@ function LinkCard({ link, tall = true, archived = false, comments, onAddComment 
         </span>
       )}
       <span className="min-w-0">
-        <span className="flex min-w-0 items-center gap-1">
-          <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="min-w-0 truncate rounded text-sm font-semibold text-hub-foreground after:absolute after:inset-0 focus-visible:ring-2 focus-visible:ring-hub-accent">{title}</a>
-          {onAddComment ? <LinkCommentButton linkId={link.id} linkName={title} ownerNote={link.comment_text} comments={comments.filter((item) => item.link_id === link.id)} onSubmit={(body) => onAddComment(link.id, body)} /> : null}
-        </span>
+        <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="block min-w-0 truncate rounded text-sm font-semibold text-hub-foreground after:absolute after:inset-0 focus-visible:ring-2 focus-visible:ring-hub-accent">{title}</a>
         <span className="block truncate text-[11px] text-hub-muted">{hostOf(link.url)}</span>
       </span>
-      <ArrowUpRight
-        className="h-4 w-4 text-hub-muted transition-transform duration-200 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-hub-accent"
-        aria-hidden="true"
-      />
+      <span className="relative z-10 flex items-center gap-0.5">
+        <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-label={`Open ${title} in a new tab`} aria-disabled={archived || undefined} className="rounded p-1 text-hub-muted hover:text-hub-accent focus-visible:ring-2 focus-visible:ring-hub-accent"><ArrowUpRight className="size-4" aria-hidden="true" /></a>
+        <IncognitoLinkButton url={link.url} name={title} disabled={archived} />
+        {onAddComment ? <LinkCommentButton linkId={link.id} linkName={title} ownerNote={link.comment_text} comments={comments.filter((item) => item.link_id === link.id)} onSubmit={(body) => onAddComment(link.id, body)} /> : null}
+      </span>
     </div>
   );
 }
@@ -82,7 +81,8 @@ function QuickTiles({ links, label, className, archived = false, comments, onAdd
               </span>
             )}
           </a>
-          {onAddComment ? <span className="flex max-w-28 items-center gap-0.5"><span className="truncate text-[10px]">{title}</span><LinkCommentButton linkId={link.id} linkName={title} ownerNote={link.comment_text} comments={comments.filter((item) => item.link_id === link.id)} onSubmit={(body) => onAddComment(link.id, body)} /></span> : null}
+          <span className="max-w-28 truncate text-[10px]">{title}</span>
+          <span className="flex items-center gap-0.5"><a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-label={`Open ${title} in a new tab`} aria-disabled={archived || undefined} className="rounded p-1 text-hub-muted hover:text-hub-accent focus-visible:ring-2 focus-visible:ring-hub-accent"><ArrowUpRight className="size-4" aria-hidden="true" /></a><IncognitoLinkButton url={link.url} name={title} disabled={archived} />{onAddComment ? <LinkCommentButton linkId={link.id} linkName={title} ownerNote={link.comment_text} comments={comments.filter((item) => item.link_id === link.id)} onSubmit={(body) => onAddComment(link.id, body)} /> : null}</span>
           </div>
         );
       })}
