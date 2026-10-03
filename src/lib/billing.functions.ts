@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { effectivePlan } from "./plans";
+import { effectivePlan, PREMIUM_TRIAL_DAYS } from "./plans";
 
 /** Legacy Paddle payment links are disabled while billing moves to Stripe. */
 export const getPublicPaddleConfig = createServerFn({ method: "GET" }).handler(async () => ({ environment: "sandbox" as const, clientToken: null }));
@@ -14,8 +14,8 @@ async function sandboxActive() {
 export const getBillingConfig = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { stripeConfigured, stripeCheckoutEnabled, STRIPE_SANDBOX_EMAIL } = await import("./stripe.server");
-    const allowed = String((context.claims as any)?.email ?? "").toLowerCase() === STRIPE_SANDBOX_EMAIL;
+    const { stripeConfigured, stripeCheckoutEnabled, isStripeSandboxEmail } = await import("./stripe.server");
+    const allowed = isStripeSandboxEmail(String((context.claims as any)?.email ?? ""));
     const configured = stripeConfigured() && await sandboxActive();
     const { data } = await (context.supabase as any).from("account_entitlements")
       .select("plan,status,current_period_end,scheduled_cancel_at,billing_environment,billing_provider,stripe_customer_id,stripe_subscription_id")
@@ -36,10 +36,10 @@ export const getBillingConfig = createServerFn({ method: "GET" })
 export const createCheckoutTransaction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { stripeCheckoutEnabled, stripeRequest, STRIPE_SANDBOX_EMAIL, STRIPE_SANDBOX_PRICE_ID } = await import("./stripe.server");
+    const { stripeCheckoutEnabled, stripeRequest, isStripeSandboxEmail, STRIPE_SANDBOX_PRICE_ID } = await import("./stripe.server");
     if (!stripeCheckoutEnabled() || !(await sandboxActive())) throw new Error("Premium sign-ups are paused while payments are being set up");
     const email = String((context.claims as any)?.email ?? "").toLowerCase();
-    if (email !== STRIPE_SANDBOX_EMAIL) throw new Error("Stripe test checkout is limited to the sandbox account");
+    if (!isStripeSandboxEmail(email)) throw new Error("Stripe test checkout is limited to approved sandbox accounts");
     const { data: existing } = await (context.supabase as any).from("account_entitlements")
       .select("plan,status,current_period_end,billing_environment,billing_provider,stripe_customer_id,stripe_subscription_id")
       .eq("user_id", context.userId).maybeSingle();
@@ -56,7 +56,7 @@ export const createCheckoutTransaction = createServerFn({ method: "POST" })
     });
     if (existing?.stripe_customer_id) params.set("customer", existing.stripe_customer_id);
     else params.set("customer_email", email);
-    if (!existing?.stripe_subscription_id) params.set("subscription_data[trial_period_days]", "9");
+    if (!existing?.stripe_subscription_id) params.set("subscription_data[trial_period_days]", String(PREMIUM_TRIAL_DAYS));
     if (process.env["STRIPE_MANAGED_PAYMENTS_ENABLED"] === "true") params.set("managed_payments[enabled]", "true");
     const session = await stripeRequest("checkout/sessions", params);
     if (session?.livemode !== false || typeof session?.url !== "string" || !session.url.startsWith("https://checkout.stripe.com/")) throw new Error("Could not start Stripe checkout");
@@ -64,8 +64,8 @@ export const createCheckoutTransaction = createServerFn({ method: "POST" })
   });
 
 async function billingPortal(userId: string, email: string) {
-  const { stripeConfigured, stripeRequest, STRIPE_SANDBOX_EMAIL } = await import("./stripe.server");
-  if (!stripeConfigured() || !(await sandboxActive()) || email.toLowerCase() !== STRIPE_SANDBOX_EMAIL) throw new Error("Billing is not configured yet");
+  const { stripeConfigured, stripeRequest, isStripeSandboxEmail } = await import("./stripe.server");
+  if (!stripeConfigured() || !(await sandboxActive()) || !isStripeSandboxEmail(email)) throw new Error("Billing is not configured yet");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await (supabaseAdmin as any).from("account_entitlements")
     .select("billing_provider,billing_environment,stripe_customer_id").eq("user_id", userId).maybeSingle();

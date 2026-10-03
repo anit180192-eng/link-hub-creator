@@ -1,7 +1,12 @@
 /** Stripe calls stay on the server. This integration intentionally accepts test keys only. */
 export const STRIPE_API_VERSION = "2025-03-31.basil";
 export const STRIPE_SANDBOX_PRICE_ID = "price_1UMQLgLEDPL8gWz7TEDxrG6O";
-export const STRIPE_SANDBOX_EMAIL = "aurunex.ventures@gmail.com";
+export const STRIPE_SANDBOX_EMAILS = new Set([
+  "aurunex.ventures@gmail.com",
+  "anit180192@gmail.com",
+  "anit18192imp@gmail.com",
+]);
+export const isStripeSandboxEmail = (email: string) => STRIPE_SANDBOX_EMAILS.has(email.trim().toLowerCase());
 
 export const stripeConfigured = () =>
   (process.env["STRIPE_SECRET_KEY"] ?? "").startsWith("sk_test_") &&

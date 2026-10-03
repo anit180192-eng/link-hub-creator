@@ -7,7 +7,8 @@ export const PLAN_LIMITS: Record<Plan, { profiles: number; tabsPerProfile: numbe
   premium: { profiles: 10, tabsPerProfile: 50 },
 };
 export const PREMIUM_PRICE_LABEL = "£9.99 per year";
-export const PREMIUM_TRIAL_LABEL = "9 days free, then £9.99 per year";
+export const PREMIUM_TRIAL_DAYS = 1;
+export const PREMIUM_TRIAL_LABEL = `${PREMIUM_TRIAL_DAYS} day free, then £9.99 per year`;
 
 /** Renewal webhooks can arrive late; allow 24h after period end before an "active" row stops counting. */
 export const ACTIVE_GRACE_MS = 24 * 60 * 60 * 1000;
