@@ -47,7 +47,7 @@ export async function verifyStripeSignature(body: string, header: string | null,
   return signatures.some((signature) => safeEqual(signature, expected));
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function stripeEntitlement(subscription: any) {
   const userId = subscription?.metadata?.user_id;
   if (!UUID.test(userId ?? "") || !/^sub_[A-Za-z0-9]+$/.test(subscription?.id ?? "") || subscription?.livemode !== false) return null;
