@@ -74,6 +74,51 @@ const collections = {
 type Topic = keyof typeof collections;
 const topics = Object.keys(collections) as Topic[];
 
+const useCases = [
+  {
+    audience: "TEAM ONBOARDING",
+    title: "Give new colleagues a place to start.",
+    problem: "A new colleague needs project tools, templates and shared folders. The links are scattered across Teams, emails and bookmarks.",
+    solution: "Bring those destinations into one project page. Group links into Start here, Everyday tools and Reference, then share the page with each new joiner.",
+    example: "Project overview · Templates · Working tools",
+  },
+  {
+    audience: "CREATIVE & AI PROJECTS",
+    title: "Keep your next idea within reach.",
+    problem: "You’re trying AI tools, building small websites or making music. Each experiment adds more project links, tutorials and profiles to manage.",
+    solution: "Organise your creative work into tabs and folders, so the tools you use, the projects you’re building and the places you share them stay easy to revisit.",
+    example: "Web experiments · Music tools · My profiles",
+  },
+  {
+    audience: "TRAINING & WORKSHOPS",
+    title: "Share the resources with the session.",
+    problem: "Tool links and exercises get buried in the session chat. Afterwards, learners ask for the same resources again.",
+    solution: "Share a resource page at the start. Group preparation, live exercises and further reading, then add recording links when they’re available.",
+    example: "Tools to try · Exercises · Keep learning",
+  },
+  {
+    audience: "PROJECT & PROGRAMME MANAGEMENT",
+    title: "Make every workstream easier to navigate.",
+    problem: "Your project uses different boards, dashboards and document folders. Remembering where each one lives becomes another task.",
+    solution: "Use tabs for workstreams and folders for planning, delivery and reporting. Give people a familiar route to the systems where their work happens.",
+    example: "Planning · Delivery · Reporting",
+  },
+  {
+    audience: "COMPANY RESOURCES",
+    title: "Keep useful information close at hand.",
+    problem: "People repeatedly ask where to find request forms, company information and learning resources.",
+    solution: "Maintain a page of clearly labelled resource links. Create a separate public-facing collection for company introductions, services and contact information.",
+    example: "Company information · Forms · Learning",
+  },
+  {
+    audience: "MARKETING & MULTIPLE BRANDS",
+    title: "Give each brand its own collection.",
+    problem: "Websites, social profiles, campaign assets and company stories get mixed together when you manage more than one brand.",
+    solution: "Create a separate profile for each brand, within your plan’s limits. Organise links to its story, published work and campaign resources in one place.",
+    example: "About us · Our journey · Campaign resources",
+  },
+];
+
 function Example() {
   const [topic, setTopic] = useState<Topic>("Personal");
   return (
@@ -216,6 +261,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
         </a>
         <nav aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
+          <a href="#use-cases">Use cases</a>
           <a href="#features">Features</a>
           <a href="#plans">Plans</a>
           <a href="#questions">Questions</a>
@@ -271,6 +317,10 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
               <Check size={14} /> Free account <span>·</span> No coding{" "}
               <span>·</span> No extension required
             </p>
+            <a className="lp-text-link lp-use-cases-link" href="#use-cases">
+              See how this fits your work and everyday life
+              <ChevronRight size={17} aria-hidden="true" />
+            </a>
           </div>
           <div className="lp-hero-demo">
             <Example />
@@ -314,6 +364,30 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
               </article>
             ))}
           </div>
+        </section>
+
+        <section id="use-cases" className="lp-container lp-use-cases" aria-labelledby="use-cases-heading">
+          <div className="lp-section-heading">
+            <p className="lp-eyebrow">REAL SITUATIONS. ONE ORGANISED STARTING POINT.</p>
+            <h2 id="use-cases-heading">Where would one page help you?</h2>
+            <p>Onboarding a colleague, running a workshop or exploring a creative idea? Give the links you need a place you can return to.</p>
+          </div>
+          <div className="lp-feature-cards lp-use-case-cards">
+            {useCases.map(({ audience, title, problem, solution, example }) => (
+              <article key={audience}>
+                <span>{audience}</span>
+                <h3>{title}</h3>
+                <p>{problem}</p>
+                <p className="lp-use-case-solution"><strong>How your page helps</strong>{solution}</p>
+                <p className="lp-use-case-example"><Folder size={14} aria-hidden="true" /><span>{example}</span></p>
+              </article>
+            ))}
+          </div>
+          <div className="lp-use-cases-next">
+            <p>Start with the links you share repeatedly or open every day. Keep the collection current as your work changes.</p>
+            {cta()}
+          </div>
+          <p className="lp-use-cases-note">You manage the page and share it with your audience. Linked documents and tools keep their existing access requirements.</p>
         </section>
 
         <section id="features" className="lp-proof">
@@ -538,6 +612,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
           </small>
         </div>
         <nav aria-label="Footer">
+          <a href="#use-cases">Use cases</a>
           <a href="/setup">Browser setup guide</a>
           <a href="/pricing.html">Pricing</a>
           <a href="/privacy.html">Privacy</a>

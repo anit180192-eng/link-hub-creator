@@ -1079,6 +1079,20 @@
 .lp-sample-task input { margin-top: 4px; accent-color: var(--lp-blue); }
 .lp-widget-empty { font-size: 12px; color: var(--lp-muted); }
 .lp-feature-overview { padding-block: 48px; }
+.lp-use-cases { padding-block: 58px 72px; border-top: 1px solid var(--lp-line); scroll-margin-top: 24px; }
+.lp-use-cases .lp-section-heading { max-width: 720px; }
+.lp-use-case-cards { margin-top: 32px; }
+.lp-use-case-cards article { display: flex; flex-direction: column; }
+.lp-use-case-cards .lp-use-case-solution { margin-top: 18px; }
+.lp-use-case-solution strong { display: block; margin-bottom: 5px; color: var(--lp-ink); font-weight: 600; }
+.lp-use-case-cards .lp-use-case-example { display: flex; align-items: flex-start; gap: 8px; padding-top: 18px; margin-top: auto; color: var(--lp-blue); font-size: 12px; }
+.lp-use-case-example svg { flex-shrink: 0; margin-top: 3px; }
+.lp-use-cases-next { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; margin-top: 32px; }
+.lp-use-cases-next > p { flex: 1 1 280px; max-width: 640px; color: var(--lp-muted); font-size: 14px; }
+.lp-use-cases .lp-use-cases-note { margin-top: 18px; color: var(--lp-muted); font-size: 12px; max-width: 720px; }
+.lp-home .lp-use-cases-link { display: inline-flex; margin-top: 18px; font-size: 13px; }
+.lp-use-cases-link svg { flex-shrink: 0; }
+@media (min-width: 761px) and (max-width: 1100px) { .lp-use-cases .lp-use-case-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .lp-feature-cards { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
 .lp-feature-cards article { padding: 24px; border: 1px solid var(--lp-line); border-radius: 14px; background: var(--lp-surface); }
 .lp-feature-cards article > span { font-size: 10px; letter-spacing: .08em; color: var(--lp-blue); }
