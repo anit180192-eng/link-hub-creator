@@ -223,13 +223,6 @@ const initials = (value: string) =>
     .slice(0, 2)
     .toUpperCase() || "?";
 
-function SpecialTabColor({ value, onChange }: { value: string | null; onChange: (color: string | null) => void }) {
-  return <div className="flex flex-wrap items-center gap-2" aria-label="Tab color">
-    <button type="button" onClick={() => onChange(null)} aria-pressed={!value} className="rounded border border-hub-border px-3 py-2 text-xs aria-pressed:ring-2 aria-pressed:ring-hub-accent">Use theme</button>
-    {TAB_COLORS.map(color => <button key={color} type="button" onClick={() => onChange(color)} aria-label={`Select ${color} tab color`} aria-pressed={value === color} style={tabColorStyle(color)} className="size-8 rounded-full border aria-pressed:ring-2 aria-pressed:ring-offset-2" />)}
-  </div>;
-}
-
 function LinkItem({
   link,
   editing,
@@ -382,6 +375,7 @@ export function WorkspaceEditor() {
     name: "",
   });
   const [tabDraft, setTabDraft] = useState({ id: "", name: "", tab_color: null as string | null });
+  const specialTabDraft = tabDraft.id === "__home" || tabDraft.id === "__notepad";
   const [notepadDraft, setNotepadDraft] = useState("");
   const [clockDraft, setClockDraft] = useState({ label: "", tz: "" });
   const [photoError, setPhotoError] = useState("");
@@ -759,6 +753,15 @@ export function WorkspaceEditor() {
   });
   const updateTab = useMutation({
     mutationFn: async () => {
+      if (specialTabDraft) {
+        if (!page) throw Error("Choose a profile");
+        const patch = tabDraft.id === "__home"
+          ? { home_tab_color: tabDraft.tab_color }
+          : { notepad_tab_color: tabDraft.tab_color };
+        const q = await supabase.from("pages").update(patch).eq("id", page.id);
+        if (q.error) throw q.error;
+        return;
+      }
       const name = tabDraft.name.trim().slice(0, 30);
       if (!name) throw Error("Enter a tab name");
       const q = await supabase
@@ -768,7 +771,10 @@ export function WorkspaceEditor() {
       if (q.error) throw q.error;
     },
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["tabs", page?.id] });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["tabs", page?.id] }),
+        qc.invalidateQueries({ queryKey: ["pages"] }),
+      ]);
       setDrawer(null);
       toast.success("Tab settings saved");
     },
@@ -1521,14 +1527,31 @@ export function WorkspaceEditor() {
             ) : null}
             {tabId === "__notepad" && page.notepad_enabled ? (
               <section className="mx-auto max-w-3xl space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2"><h1 className="font-display text-xl font-semibold">Notepad</h1><Button variant="outline" size="sm" disabled={page.landing_tab === "__notepad"} onClick={() => savePage.mutate({ landing_tab: "__notepad" })}>{page.landing_tab === "__notepad" ? "Landing tab" : "Make landing tab"}</Button></div>
-                <SpecialTabColor value={page.notepad_tab_color} onChange={(notepad_tab_color) => savePage.mutate({ notepad_tab_color })} />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h1 className="font-display text-xl font-semibold">Notepad</h1>
+                  <Button variant="outline" size="sm" className="border-hub-border" onClick={() => {
+                    setTabDraft({ id: "__notepad", name: "Notepad", tab_color: page.notepad_tab_color });
+                    setDrawer("tab");
+                  }}>
+                    <Ellipsis />
+                    Tab settings
+                  </Button>
+                </div>
                 <p className="text-sm text-hub-muted">Everyone visiting this page can read this note. Only you can edit it.</p>
                 <textarea aria-label="Notepad content" value={notepadDraft} onChange={(e) => setNotepadDraft(e.target.value)} className="min-h-80 w-full rounded-md border border-hub-border bg-hub-background p-4 text-sm leading-6" placeholder="Write a note for visitors…" />
                 <Button disabled={savePage.isPending || notepadDraft === page.notepad_content} onClick={() => savePage.mutate({ notepad_content: notepadDraft })}>Save Notepad</Button>
               </section>
             ) : tabId === "__home" ? (
-              <div className="space-y-3"><div className="flex flex-wrap items-center justify-between gap-2"><SpecialTabColor value={page.home_tab_color} onChange={(home_tab_color) => savePage.mutate({ home_tab_color })} /><Button variant="outline" size="sm" disabled={page.landing_tab === "__home"} onClick={() => savePage.mutate({ landing_tab: "__home" })}>{page.landing_tab === "__home" ? "Landing tab" : "Make Home landing tab"}</Button></div>
+              <div className="space-y-3">
+                <div className="flex justify-end">
+                  <Button variant="outline" size="sm" className="border-hub-border" onClick={() => {
+                    setTabDraft({ id: "__home", name: "Home", tab_color: page.home_tab_color });
+                    setDrawer("tab");
+                  }}>
+                    <Ellipsis />
+                    Tab settings
+                  </Button>
+                </div>
               <HomeDashboard
                 profileId={page.id}
                 profileName={page.name}
@@ -2425,16 +2448,22 @@ export function WorkspaceEditor() {
           ) : null}
           {drawer === "tab" ? (
             <div className="mt-6 space-y-4">
-              <Label htmlFor="tab-name">Tab name in {page.name}</Label>
-              <Input
-                id="tab-name"
-                value={tabDraft.name}
-                onChange={(e) =>
-                  setTabDraft({ ...tabDraft, name: e.target.value })
-                }
-                placeholder="Creative"
-                className="bg-hub-background"
-              />
+              {specialTabDraft ? (
+                <p className="text-sm font-medium">{tabDraft.name}</p>
+              ) : (
+                <>
+                  <Label htmlFor="tab-name">Tab name in {page.name}</Label>
+                  <Input
+                    id="tab-name"
+                    value={tabDraft.name}
+                    onChange={(e) =>
+                      setTabDraft({ ...tabDraft, name: e.target.value })
+                    }
+                    placeholder="Creative"
+                    className="bg-hub-background"
+                  />
+                </>
+              )}
               <div className="space-y-2">
                 <Label>Tab color</Label>
                 <div className="flex flex-wrap items-center gap-2">
@@ -2446,21 +2475,23 @@ export function WorkspaceEditor() {
                 onClick={() =>
                   tabDraft.id ? updateTab.mutate() : createTab.mutate()
                 }
-                disabled={!tabDraft.id && tabs.length >= MAX_TABS}
+                disabled={updateTab.isPending || createTab.isPending || (!tabDraft.id && tabs.length >= MAX_TABS)}
               >
                 {tabDraft.id ? "Save tab settings" : "Add tab"}
               </Button>
               {tabDraft.id ? (
                 <div className="space-y-2 border-t border-hub-border pt-4">
-                  <Button variant="outline" className="w-full" disabled={page.landing_tab === tabDraft.id} onClick={() => savePage.mutate({ landing_tab: tabDraft.id })}>{page.landing_tab === tabDraft.id ? "This is the landing tab" : "Make this the landing tab"}</Button>
-                <Button
-                  variant="ghost"
-                  className="text-destructive"
-                  disabled={tabs.length <= 1}
-                  onClick={() => deleteTab.mutate()}
-                >
-                  Delete tab
-                </Button>
+                  <Button variant="outline" className="w-full" disabled={savePage.isPending || page.landing_tab === tabDraft.id} onClick={() => savePage.mutate({ landing_tab: tabDraft.id })}>{page.landing_tab === tabDraft.id ? "This is the landing tab" : "Make this the landing tab"}</Button>
+                  {!specialTabDraft ? (
+                    <Button
+                      variant="ghost"
+                      className="text-destructive"
+                      disabled={tabs.length <= 1}
+                      onClick={() => deleteTab.mutate()}
+                    >
+                      Delete tab
+                    </Button>
+                  ) : null}
                 </div>
               ) : (
                 <div className="border-t border-hub-border pt-4">
