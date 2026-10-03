@@ -48,7 +48,7 @@ export function PremiumDialog({ open, onOpenChange }: { open: boolean; onOpenCha
         <DialogHeader>
           <DialogTitle>{premium ? "Your Premium membership" : c?.checkoutEnabled ? "Go Premium" : "Premium sign-ups paused"}</DialogTitle>
           <DialogDescription>
-            {c?.environment === "production" ? PREMIUM_TRIAL_LABEL : PREMIUM_PRICE_LABEL} (GBP). Free: {PLAN_LIMITS.free.profiles} profiles, {PLAN_LIMITS.free.tabsPerProfile} tabs per profile. Premium: {PLAN_LIMITS.premium.profiles} profiles, {PLAN_LIMITS.premium.tabsPerProfile} tabs per profile.
+            {c?.checkoutEnabled && c.environment === "production" ? PREMIUM_TRIAL_LABEL : PREMIUM_PRICE_LABEL} (GBP). Free: {PLAN_LIMITS.free.profiles} profiles, {PLAN_LIMITS.free.tabsPerProfile} tabs per profile. Premium: {PLAN_LIMITS.premium.profiles} profiles, {PLAN_LIMITS.premium.tabsPerProfile} tabs per profile.
             {c && !c.checkoutEnabled ? " New memberships will open once payment setup is approved. Your Free account remains available." : ""}
             {c?.checkoutEnabled && c.environment === "sandbox" ? " Test mode: no real charges." : ""}
           </DialogDescription>

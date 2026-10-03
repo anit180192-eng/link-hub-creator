@@ -15,6 +15,11 @@ export const isBillingConfigured = (e: ReturnType<typeof env>) =>
   !!(e.clientToken && e.priceId && e.apiKey && e.webhookSecret) &&
   (e.environment === "sandbox" ? e.clientToken.startsWith("test_") : !e.clientToken.startsWith("test_"));
 
+/** Production checkout needs a separate, explicit launch switch. */
+const isCheckoutEnabled = (e: ReturnType<typeof env>) =>
+  process.env["PADDLE_CHECKOUT_ENABLED"] === "true" &&
+  (e.environment === "sandbox" || process.env["PADDLE_LIVE_CHECKOUT_ENABLED"] === "true");
+
 async function activeBillingEnvironment(): Promise<BillingEnvironment | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await (supabaseAdmin as any).from("billing_settings").select("active_environment").eq("id", true).single();
@@ -38,7 +43,7 @@ export const getBillingConfig = createServerFn({ method: "GET" })
     const matching = dbEnvironment === e.environment && data?.billing_environment === e.environment;
     return {
       configured,
-      checkoutEnabled: configured && process.env["PADDLE_CHECKOUT_ENABLED"] === "true",
+      checkoutEnabled: configured && isCheckoutEnabled(e),
       environment: e.environment,
       clientToken: configured ? e.clientToken : null,
       email: (context.claims as any)?.email ?? null,
@@ -53,7 +58,7 @@ export const createCheckoutTransaction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const e = env();
-    if (process.env["PADDLE_CHECKOUT_ENABLED"] !== "true") throw new Error("Premium sign-ups are paused while payments are being set up");
+    if (!isCheckoutEnabled(e)) throw new Error("Premium sign-ups are paused while payments are being set up");
     if (!isBillingConfigured(e) || (await activeBillingEnvironment()) !== e.environment) throw new Error("Checkout isn't available yet");
     const { data: existing } = await (context.supabase as any).from("account_entitlements").select("plan,status,current_period_end,billing_environment").eq("user_id", context.userId).maybeSingle();
     if (effectivePlan(existing, new Date(), e.environment) === "premium") throw new Error("This account already has Premium. Open Membership to manage it.");
