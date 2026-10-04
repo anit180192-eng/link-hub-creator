@@ -251,7 +251,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
       </a>
       <header className="lp-header lp-container">
         <a href="/" className="lp-brand" aria-label="Landing Page Builder home">
-          <img src="/favicon.svg" alt="" width={40} height={40} />
+          <img src="/homepage-logo.svg" alt="" width={40} height={40} />
           <div>
             Landing Page Builder<small>YOUR PERSONAL START PAGE</small>
           </div>
