@@ -8,6 +8,18 @@ import {
   ArrowDown,
   X,
   GripVertical,
+  ArrowUpRight,
+  Layers3,
+  Sun,
+  Clock3,
+  Globe2,
+  StickyNote,
+  CalendarDays,
+  Star,
+  Timer,
+  ListChecks,
+  History,
+  BarChart3,
 } from "lucide-react";
 import { useDragOrder } from "./useDragOrder";
 import { Button } from "@/components/ui/button";
@@ -27,6 +39,12 @@ export type DashboardLink = {
   url: string;
   favourite?: boolean;
 };
+const widgetIcons = { clock: Clock3, world: Globe2, notes: StickyNote, calendar: CalendarDays, featured: Layers3, favourites: Star, focus: Timer, tasks: ListChecks, recent: History, visited: BarChart3 };
+function WidgetIcon({ id }: { id: HomeWidget["id"] }) {
+  const Icon = widgetIcons[id];
+  return <Icon size={17} aria-hidden="true" />;
+}
+export type DashboardSpace = { id: string; name: string; count: number };
 export type DashboardClock = { tz: string; label: string };
 type Props = {
   profileId: string;
@@ -48,6 +66,9 @@ type Props = {
   onEditIdentity: () => void;
   onEditClocks: () => void;
   onPublish: () => void;
+  spaces?: DashboardSpace[];
+  onOpenSpace?: (id: string) => void;
+  onFindLinks?: () => void;
 };
 export function HomeDashboard({
   profileName,
@@ -68,8 +89,14 @@ export function HomeDashboard({
   onEditIdentity,
   onEditClocks,
   onPublish,
+  spaces = [],
+  onOpenSpace,
+  onFindLinks,
 }: Props) {
+  const IdentityHeading = editing ? "h2" : "h1";
   const layout = parseWidgets(widgets);
+  const homeClock = !editing && layout.some((w) => w.id === "clock");
+  const visibleLayout = homeClock ? layout.filter((w) => w.id !== "clock") : layout;
   const drag = useDragOrder(
     layout.map((w) => w.id),
     slug,
@@ -78,6 +105,7 @@ export function HomeDashboard({
       onWidgetsChange?.(ids.map((id) => layout.find((w) => w.id === id)!)),
   );
   const [now, setNow] = useState<Date | null>(null);
+  const greeting = !now ? "Your daily space" : now.getHours() < 12 ? "Good morning" : now.getHours() < 18 ? "Good afternoon" : "Good evening";
   const [activity, setActivity] = useState<ReturnType<typeof readActivity>>({
     visits: [],
     recent: [],
@@ -141,8 +169,8 @@ export function HomeDashboard({
     </a>
   );
   return (
-    <div className="mt-5 space-y-4">
-      <section className="flex flex-wrap items-center gap-4 rounded-lg border border-hub-border bg-hub-surface p-5">
+    <div className="studio-home mt-5 space-y-4">
+      <section data-home-hero={!editing || undefined} className="studio-home-identity flex flex-wrap items-center gap-4 rounded-lg border border-hub-border bg-hub-surface p-5">
         {avatarUrl ? (
           <img
             src={avatarUrl}
@@ -150,12 +178,19 @@ export function HomeDashboard({
             className="size-14 rounded-md object-cover"
           />
         ) : null}
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1"><h2 className="text-2xl font-semibold">
+        <div className="studio-home-copy min-w-0 flex-1">
+          {!editing ? <p className="studio-home-greeting"><Sun size={14} aria-hidden="true" /> {greeting}<span aria-hidden="true"> / </span><span>Your home on the web</span></p> : null}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1"><IdentityHeading className="text-2xl font-semibold">
             {displayName || profileName}
-          </h2><SocialLinks value={socialLinks} disabled={!!socialDisabled} /></div>
+          </IdentityHeading><SocialLinks value={socialLinks} disabled={!!socialDisabled} /></div>
           <p className="text-sm text-hub-muted">{tagline}</p>
+          {!editing && onFindLinks && links.length > 0 ? <button type="button" className="studio-home-find" onClick={onFindLinks}>Find a link <ArrowUpRight size={15} aria-hidden="true" /></button> : null}
         </div>
+        {homeClock ? <div className="studio-hero-clock" aria-label="Local time and date">
+          <span className="studio-clock-label">LOCAL TIME</span>
+          <p className="studio-hero-time">{now ? now.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "—"}</p>
+          <p className="studio-hero-date">{now ? now.toLocaleDateString([], {weekday: "long", month: "long", day: "numeric"}) : "Today"}</p>
+        </div> : null}
         {editing ? (
           <>
             <Button variant="ghost" onClick={onEditIdentity}>
@@ -169,7 +204,19 @@ export function HomeDashboard({
           </>
         ) : null}
       </section>
-      {!layout.length ? (
+      {!editing && spaces.length > 0 && onOpenSpace ? <section className="studio-spaces" aria-label="Explore your spaces">
+        <div className="studio-home-section-heading"><h2>Your spaces</h2><span>{spaces.length} collections, one place</span></div>
+        <div className="studio-space-grid">
+          {spaces.map((space, index) => <button key={space.id} type="button" className="studio-space-card" onClick={() => onOpenSpace(space.id)}>
+            <span className="studio-space-icon" aria-hidden="true"><Layers3 size={20} /></span>
+            <span className="studio-space-copy"><span>{space.name}</span><small>{space.count} {space.count === 1 ? "link" : "links"}</small></span>
+            <ArrowUpRight className="studio-space-arrow" size={17} aria-hidden="true" />
+            <span className="studio-space-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+          </button>)}
+        </div>
+      </section> : null}
+      {!editing && visibleLayout.length > 0 ? <div className="studio-home-section-heading"><h2>At a glance</h2><span>A little space for your day</span></div> : null}
+      {!layout.length && (editing || !spaces.length) ? (
         <section className="rounded-lg border border-dashed border-hub-border p-10 text-center">
           <h3 className="text-lg font-semibold">
             {editing ? "Make Home your own" : "Welcome to my page"}
@@ -187,20 +234,22 @@ export function HomeDashboard({
           ) : null}
         </section>
       ) : null}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {layout.map((widget, index) => (
+      <div className="studio-widgets grid grid-cols-1 gap-4 md:grid-cols-2">
+        {visibleLayout.map((widget, index) => (
           <section
             key={widget.id}
+            data-widget={widget.id}
             {...drag.targetProps(widget.id)}
             style={
               drag.over === widget.id
                 ? { outline: "2px solid var(--hub-accent)", outlineOffset: 2 }
                 : undefined
             }
-            className={`min-w-0 rounded-lg border border-hub-border bg-hub-surface p-4 ${widget.size === "wide" ? "md:col-span-2" : ""}`}
+            className={`studio-widget min-w-0 rounded-lg border border-hub-border bg-hub-surface p-4 ${widget.size === "wide" ? "md:col-span-2" : ""}`}
           >
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="studio-widget-heading mb-3 flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-semibold">
+                {!editing ? <span className="studio-widget-icon"><WidgetIcon id={widget.id} /></span> : null}
                 {WIDGETS.find((w) => w.id === widget.id)?.name}
               </h3>
               {editing ? (

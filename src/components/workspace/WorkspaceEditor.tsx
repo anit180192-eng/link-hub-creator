@@ -247,7 +247,7 @@ function LinkItem({
 }) {
   const icon = faviconFor(link.url);
   return (
-    <div className="group grid min-h-11 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-2 border-t border-hub-border/70 px-3 first:border-t-0 hover:bg-hub-elevated/55">
+    <div className="studio-builder-link group grid min-h-11 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-2 border-t border-hub-border/70 px-3 first:border-t-0 hover:bg-hub-elevated/55">
       {icon ? (
         <img src={icon} alt="" className="size-6 rounded-sm" />
       ) : (
@@ -1515,7 +1515,7 @@ export function WorkspaceEditor() {
             }
             data-colour-mode={readPageTheme(page.theme, page.dark_mode).mode}
             style={themeStyle(readPageTheme(page.theme).preset)}
-            className="theme-scope min-w-0 bg-hub-background px-4 py-5 text-hub-foreground sm:p-6"
+            className="studio-builder-canvas theme-scope min-w-0 bg-hub-background px-4 py-5 text-hub-foreground sm:p-6"
           >
             {archivedPage || archivedTab ? (
               <div className="mb-4 rounded-md border border-hub-accent/40 bg-hub-surface p-3 text-sm">
@@ -1692,7 +1692,7 @@ export function WorkspaceEditor() {
                         }}
                         {...folderDrag.targetProps(folder)}
                         style={folderDrag.over === folder ? {outline: "2px solid var(--hub-accent)", outlineOffset: 2} : undefined}
-                        className="break-inside-avoid overflow-hidden rounded-md border border-hub-border bg-hub-surface"
+                        className="studio-builder-folder break-inside-avoid overflow-hidden rounded-md border border-hub-border bg-hub-surface"
                       >
                         <header className="flex min-h-10 items-center gap-2 border-b border-hub-border bg-hub-elevated/45 px-3">
                           {!preview && <Button variant="ghost" size="icon" className="size-6 shrink-0 cursor-grab active:cursor-grabbing" aria-label={`Drag folder ${folder}`} title="Drag to reorder folders" disabled={archivedTab || reorderFolders.isPending || folders.length < 2} {...folderDrag.handleProps(folder)}><GripVertical className="size-4" /></Button>}
@@ -1890,7 +1890,7 @@ export function WorkspaceEditor() {
         <SheetContent
           data-colour-mode={dashboardMode}
           style={themeStyle("cobalt")}
-          className={`theme-scope w-full overflow-y-auto border-hub-border bg-hub-surface text-hub-foreground ${drawer === "security" ? "sm:max-w-[50vw] lg:w-1/2" : "sm:max-w-md"}`}
+          className={`studio-builder-drawer theme-scope w-full overflow-y-auto border-hub-border bg-hub-surface text-hub-foreground ${drawer === "security" ? "sm:max-w-[50vw] lg:w-1/2" : "sm:max-w-md"}`}
         >
           <SheetHeader>
             <SheetTitle className="font-display text-hub-foreground">

@@ -1,7 +1,7 @@
 import { ColourModeToggle, useSavedMode } from "@/components/ColourControls";
 import { readPageTheme, themeStyle } from "@/lib/page-themes";
 import { recordVisit } from "@/lib/home-widgets";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Search, X, ArrowUpRight } from "lucide-react";
 import { folderName } from "@/lib/folder-names";
@@ -12,7 +12,7 @@ import { LinkCommentButton } from "@/components/LinkCommentButton";
 import { IncognitoLinkButton } from "@/components/IncognitoLinkButton";
 import { addPublicLinkComment } from "@/lib/public-page.functions";
 import type { LinkComment } from "@/lib/link-comments";
-import { tabColorStyle } from "@/lib/tab-color";
+import type { CSSProperties } from "react";
 import {
   isSafeUrl,
   linkCountLabel,
@@ -56,6 +56,7 @@ export function PublishedTabs({
     return desired === "__home" || (desired === "__notepad" && profile.notepad_enabled) || tabs.some((t) => t.id === desired && !t.archived)
       ? desired : "__home";
   });
+  const searchRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const searching = query.trim().length > 0;
   const results = useMemo(() => {
@@ -108,14 +109,16 @@ export function PublishedTabs({
       title={n === undefined ? undefined : `${label}: ${linkCountLabel(n)}`}
       aria-label={n === undefined ? undefined : `${label}, ${linkCountLabel(n)}`}
       onClick={() => setActive(id)}
-      style={tabColorStyle(color)}
+      aria-current={active === id ? "page" : undefined}
+      style={color && /^#[0-9a-f]{6}$/i.test(color) ? { "--tab-accent": color } as CSSProperties : undefined}
       className={cn(
-        "group relative shrink-0 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors",
+        "studio-tab group relative shrink-0 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors",
         active === id
           ? "bg-hub-accent text-hub-background"
           : "text-hub-muted hover:text-hub-foreground",
       )}
     >
+      {color && /^#[0-9a-f]{6}$/i.test(color) ? <span className="studio-tab-dot" aria-hidden="true" /> : null}
       {label}
       {n !== undefined ? (
         <span aria-hidden="true" className="ml-1.5 hidden rounded bg-hub-background/60 px-1 text-[10px] tabular-nums group-hover:inline group-focus-visible:inline">
@@ -144,10 +147,10 @@ export function PublishedTabs({
       className={cn(
         palette,
         embedded ? "min-h-[520px]" : "min-h-screen",
-        "bg-hub-background text-hub-foreground",
+        "published-studio bg-hub-background text-hub-foreground",
       )}
     >
-      <header className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <header className="studio-topbar mx-auto flex max-w-[1120px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <BrandLink slug={profile.slug} />
         {!embedded ? <ColourModeToggle
           value={mode}
@@ -158,7 +161,7 @@ export function PublishedTabs({
       <nav
         className={cn(
           !embedded && "sticky top-0",
-          "z-10 border-b border-hub-border bg-hub-background/95 backdrop-blur",
+          "studio-nav z-10 border-b border-hub-border bg-hub-background/95 backdrop-blur",
         )}
         aria-label="Tabs"
       >
@@ -169,9 +172,10 @@ export function PublishedTabs({
             {tabs.map((t) => btn(t.id, `${t.name}${t.archived ? " · Archived" : ""}`, countFor(t.id), t.tab_color))}
           </div>
         <div className="w-full sm:w-64 sm:shrink-0" role="search" aria-label="Search this profile">
-          <div className="flex items-center gap-2 rounded-lg border border-hub-border bg-hub-surface px-3 focus-within:ring-2 focus-within:ring-hub-accent">
+          <div className="studio-search flex items-center gap-2 rounded-lg border border-hub-border bg-hub-surface px-3 focus-within:ring-2 focus-within:ring-hub-accent">
             <Search className="h-4 w-4 shrink-0 text-hub-muted" aria-hidden="true" />
             <input
+              ref={searchRef}
               type="search"
               aria-label="Search links across all tabs"
               placeholder="Search all tabs…"
@@ -185,12 +189,13 @@ export function PublishedTabs({
         </div>
         </div>
       </nav>
+      <div className="studio-content" key={searching ? "search" : active}>
       {searching ? (
         <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
           <h1 className="text-xl font-semibold">Search results</h1>
           <p role="status" aria-live="polite" className="mb-5 mt-1 text-sm text-hub-muted">{results.length} {results.length === 1 ? "link" : "links"} found across all tabs</p>
           {results.length ? <ul className="grid gap-3 sm:grid-cols-2">
-            {results.map(({ link, tab, folder, archived }) => <li key={link.id} className="min-w-0 rounded-lg border border-hub-border bg-hub-surface p-4">
+            {results.map(({ link, tab, folder, archived }) => <li key={link.id} className="studio-search-result min-w-0 rounded-lg border border-hub-border bg-hub-surface p-4">
               <p className="mb-2 break-words text-xs text-hub-muted">{tab.name} / {folder}{archived ? " · Archived" : ""}</p>
               <div className="flex items-center justify-between gap-1"><a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="min-w-0 rounded text-sm font-semibold text-hub-foreground focus-visible:ring-2 focus-visible:ring-hub-accent">
                 <span className="min-w-0 break-words">{linkTitle(link)}</span>
@@ -231,6 +236,9 @@ export function PublishedTabs({
             links={dash}
             widgets={profile.home_widgets}
             clocks={parseClocks(profile.clocks)}
+            spaces={tabs.filter((t) => !t.archived && !archivedProfile).map((t) => ({id: t.id, name: t.name, count: countFor(t.id)}))}
+            onOpenSpace={setActive}
+            onFindLinks={() => searchRef.current?.focus()}
             editing={false}
             onEditIdentity={() => {}}
             onEditClocks={() => {}}
@@ -252,6 +260,7 @@ export function PublishedTabs({
           }
         />
       )}
+      </div>
     </div>
   );
 }

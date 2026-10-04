@@ -16,6 +16,7 @@ import {
 import { HomeWidgetDemo } from "./HomeWidgetDemo";
 import creativeImage from "@/assets/homepage/05-creative-tab-demo.webp.asset.json";
 import "./homepage.css";
+import "./homepage-studio.css";
 
 const collections = {
   Personal: [
@@ -245,7 +246,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
     </a>
   );
   return (
-    <div className="lp-home" data-theme={theme}>
+    <div className="lp-home lp-studio" data-theme={theme}>
       <a className="lp-skip" href="#main">
         Skip to content
       </a>

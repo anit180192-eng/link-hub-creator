@@ -1,5 +1,5 @@
 import { Home, Layers, Plus, GripVertical, ArrowLeft, ArrowRight, NotebookPen } from "lucide-react";
-import { tabColorStyle } from "@/lib/tab-color";
+import type { CSSProperties } from "react";
 import { useDragOrder } from "./useDragOrder";
 import { moveItem } from "@/lib/reorder";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ export function BuilderTabs({ tabs, notepadEnabled, homeColor, notepadColor, onA
   const drag = useDragOrder(movable, 'builder-tabs', saving || !onReorder, saveOrder);
   const selected = movable.indexOf(activeId);
   return (
-    <div className="border-b border-hub-border bg-hub-surface/50 px-3 pt-4 sm:px-5">
+    <div className="studio-builder-tabs border-b border-hub-border bg-hub-surface/50 px-3 pt-4 sm:px-5">
       <div className="mb-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold text-hub-muted">
         <span className="uppercase tracking-[0.16em]">Page tabs</span>
         {onReorder && <><span>Drag the dotted handles to reorder</span><button type="button" className="rounded p-1 hover:bg-hub-elevated disabled:opacity-40" aria-label="Move selected tab left" disabled={saving || selected<=0} onClick={()=>saveOrder(moveItem(movable,selected,selected-1))}><ArrowLeft className="size-4"/></button><button type="button" className="rounded p-1 hover:bg-hub-elevated disabled:opacity-40" aria-label="Move selected tab right" disabled={saving || selected<0 || selected>=movable.length-1} onClick={()=>saveOrder(moveItem(movable,selected,selected+1))}><ArrowRight className="size-4"/></button></>}
@@ -66,7 +66,7 @@ export function BuilderTabs({ tabs, notepadEnabled, homeColor, notepadColor, onA
               onDoubleClick={() => {
                 if (!item.id.startsWith("__")) onRename(item.id);
               }}
-              style={tabColorStyle(item.tab_color)}
+              style={item.tab_color && /^#[0-9a-f]{6}$/i.test(item.tab_color) ? { "--tab-accent": item.tab_color } as CSSProperties : undefined}
               className={`relative flex max-w-56 shrink-0 items-center gap-2 rounded-t-xl border px-4 py-3 text-xs font-medium transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-hub-accent ${activeId === item.id ? "border-hub-border border-b-hub-background bg-hub-background text-hub-accent shadow-[0_-3px_12px_rgba(0,0,0,0.08)]" : "border-hub-border/50 bg-hub-surface text-hub-muted hover:bg-hub-elevated/50 hover:text-hub-foreground"}`}
             >
               {item.id === "__home" ? (
@@ -76,6 +76,7 @@ export function BuilderTabs({ tabs, notepadEnabled, homeColor, notepadColor, onA
               ) : (
                 <Layers className="size-3.5 shrink-0" />
               )}
+              {item.tab_color && /^#[0-9a-f]{6}$/i.test(item.tab_color) ? <span className="studio-builder-tab-dot" aria-hidden="true" /> : null}
               <span className="truncate">{item.name}</span>
               {item.archived ? <span className="text-[9px] text-hub-muted">Archived</span> : null}
               {activeId === item.id ? (

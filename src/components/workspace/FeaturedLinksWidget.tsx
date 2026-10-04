@@ -19,20 +19,20 @@ export function FeaturedLinksWidget({ links, editing, saving, disabled, onChange
   const updating = !!draft?.id;
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
+      {editing ? <div className="flex items-center justify-between gap-2">
         <p className="text-xs text-hub-muted">{links.length} / {FEATURED_LINK_LIMIT} links</p>
         {editing ? <Button size="sm" variant="outline" disabled={saving || atLimit || !!draft} onClick={() => {
           setError(""); setDraft({ id: "", name: "", url: "" });
         }}><Plus /> Add link</Button> : null}
-      </div>
+      </div> : null}
       {links.length ? (
         <div role="region" aria-label="Featured links" tabIndex={0} className="max-h-52 overflow-y-auto overscroll-contain rounded p-1 focus-visible:ring-2 focus-visible:ring-hub-accent">
-          <div className="grid grid-cols-[repeat(auto-fill,5rem)] gap-3">
+          <div className="studio-featured-grid grid grid-cols-[repeat(auto-fill,5rem)] gap-3">
             {links.map((link) => (
-              <div key={link.id} className="w-20">
+              <div key={link.id} className="studio-featured-item w-20">
                 <a href={disabled ? undefined : link.url} target="_blank" rel="noopener noreferrer" aria-disabled={disabled || undefined}
                   aria-label={link.name} title={disabled ? "Archived — renew Premium to open this link" : link.name}
-                  className="flex size-20 flex-col items-center justify-center gap-2 rounded-md border border-hub-border bg-hub-background p-2 text-center hover:border-hub-accent focus-visible:ring-2 focus-visible:ring-hub-accent">
+                  className="studio-featured-tile flex size-20 flex-col items-center justify-center gap-2 rounded-md border border-hub-border bg-hub-background p-2 text-center hover:border-hub-accent focus-visible:ring-2 focus-visible:ring-hub-accent">
                   <img src={faviconFor(link.url) || "/favicon.svg"} alt="" className="size-7" />
                   <span className="w-full truncate text-[11px]">{link.name}</span>
                 </a>

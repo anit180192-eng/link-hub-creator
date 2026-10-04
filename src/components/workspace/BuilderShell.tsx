@@ -58,14 +58,14 @@ export function BuilderShell({
   const [navigationOpen, setNavigationOpen] = useState(false);
   const navigation = (
     <>
-      <div className="border-b border-hub-border px-5 py-6">
+      <div className="studio-builder-brand border-b border-hub-border px-5 py-6">
         <Brand className="text-sm" />
         <p className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-hub-muted">
           <PanelLeft className="size-3" /> Builder dashboard
         </p>
       </div>
       <div
-        className="min-h-0 flex-1 overflow-y-auto px-3 py-5"
+        className="studio-builder-tools min-h-0 flex-1 overflow-y-auto px-3 py-5"
         onClick={(event) => {
           if ((event.target as HTMLElement).closest("button, a")) setNavigationOpen(false);
         }}
@@ -77,17 +77,17 @@ export function BuilderShell({
   );
 
   return (
-    <div className="theme-scope flex min-h-screen bg-hub-background text-hub-foreground" data-colour-mode={colourMode} style={themeStyle("cobalt")}>
+    <div className="builder-studio theme-scope flex min-h-screen bg-hub-background text-hub-foreground" data-colour-mode={colourMode} style={themeStyle("cobalt")}>
       <aside
         aria-label="Builder tools"
-        className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-hub-border bg-hub-surface md:flex"
+        className="studio-builder-sidebar sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-hub-border bg-hub-surface md:flex"
       >
         {navigation}
       </aside>
       <Sheet open={navigationOpen} onOpenChange={setNavigationOpen}>
         <SheetContent
           side="left"
-          data-colour-mode={colourMode} style={themeStyle("cobalt")} className="theme-scope flex w-72 flex-col gap-0 border-hub-border bg-hub-surface p-0 text-hub-foreground"
+          data-colour-mode={colourMode} style={themeStyle("cobalt")} className="builder-studio studio-builder-navigation theme-scope flex w-72 flex-col gap-0 border-hub-border bg-hub-surface p-0 text-hub-foreground"
         >
           <SheetHeader className="sr-only">
             <SheetTitle>Builder tools</SheetTitle>
@@ -97,7 +97,7 @@ export function BuilderShell({
         </SheetContent>
       </Sheet>
       <div className="min-w-0 flex-1">
-        <header className="flex min-h-20 flex-wrap items-center justify-between gap-3 border-b border-hub-border px-4 py-4 sm:px-7 lg:px-9">
+        <header className="studio-builder-toolbar flex min-h-20 flex-wrap items-center justify-between gap-3 border-b border-hub-border px-4 py-4 sm:px-7 lg:px-9">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -147,10 +147,10 @@ export function BuilderShell({
             {publishAction}
           </div>
         </header>
-        <main data-colour-mode={pageMode} style={themeStyle(pagePreset)} className="theme-scope bg-hub-background text-hub-foreground mx-auto w-full max-w-[1680px] px-3 py-5 sm:px-7 sm:py-7 lg:px-9">
+        <main data-colour-mode={pageMode} style={themeStyle(pagePreset)} className="studio-builder-workspace theme-scope bg-hub-background text-hub-foreground mx-auto w-full max-w-[1680px] px-3 py-5 sm:px-7 sm:py-7 lg:px-9">
           <section
             aria-label="Profile selection"
-            className="mb-6 flex flex-wrap items-center justify-between gap-3"
+            className="studio-builder-profile mb-6 flex flex-wrap items-center justify-between gap-3"
           >
             <div className="min-w-0">
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-hub-muted">
@@ -160,7 +160,7 @@ export function BuilderShell({
             </div>
             <div className="flex items-center gap-3 text-xs">
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${published ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300" : "border-hub-border text-hub-muted"}`}
+                className={`studio-publish-status inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${published ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300" : "border-hub-border text-hub-muted"}`}
               >
                 <span
                   className={`size-1.5 rounded-full ${published ? "bg-emerald-400" : "bg-hub-muted"}`}
@@ -183,9 +183,9 @@ export function BuilderShell({
           {!preview ? guide : null}
           <section
             aria-label={preview ? "Published-page preview" : "Editable page"}
-            className="overflow-hidden rounded-2xl border border-hub-border bg-hub-background shadow-[0_16px_60px_rgba(0,0,0,0.2)]"
+            className="studio-builder-frame overflow-hidden rounded-2xl border border-hub-border bg-hub-background shadow-[0_16px_60px_rgba(0,0,0,0.2)]"
           >
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hub-border bg-hub-surface px-4 py-3 sm:px-5">
+            <div className="studio-builder-frame-header flex flex-wrap items-center justify-between gap-2 border-b border-hub-border bg-hub-surface px-4 py-3 sm:px-5">
               <div className="flex min-w-0 items-center gap-2.5">
                 <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-hub-accent/10 text-hub-accent">
                   {preview ? <Eye className="size-3.5" /> : <PanelLeft className="size-3.5" />}

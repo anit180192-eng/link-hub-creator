@@ -31,7 +31,7 @@ function LinkCard({ link, tall = true, archived = false, comments, onAddComment 
   return (
     <div
       className={cn(
-        "group relative grid cursor-pointer grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-hub-border bg-hub-background px-3 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-hub-accent hover:shadow-[0_0_14px_color-mix(in_oklab,var(--hub-accent)_14%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent active:translate-y-0",
+        "studio-link group relative grid cursor-pointer grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-hub-border bg-hub-background px-3 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-hub-accent hover:shadow-[0_0_14px_color-mix(in_oklab,var(--hub-accent)_14%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hub-accent active:translate-y-0",
         tall ? "h-16" : "h-14",
       )}
     >
@@ -46,7 +46,7 @@ function LinkCard({ link, tall = true, archived = false, comments, onAddComment 
         <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-disabled={archived || undefined} className="block min-w-0 truncate rounded text-sm font-semibold text-hub-foreground after:absolute after:inset-0 focus-visible:ring-2 focus-visible:ring-hub-accent">{title}</a>
         <span className="block truncate text-[11px] text-hub-muted">{hostOf(link.url)}</span>
       </span>
-      <span className="relative z-10 flex items-center gap-0.5">
+      <span className="studio-link-actions relative z-10 flex items-center gap-0.5">
         <a href={archived ? undefined : normalizeUrl(link.url)} target={archived ? undefined : "_blank"} rel="noopener noreferrer" aria-label={`Open ${title} in a new tab`} aria-disabled={archived || undefined} className="rounded p-1 text-hub-muted hover:text-hub-accent focus-visible:ring-2 focus-visible:ring-hub-accent"><ArrowUpRight className="size-4" aria-hidden="true" /></a>
         <IncognitoLinkButton url={link.url} name={title} disabled={archived} />
         {onAddComment ? <LinkCommentButton linkId={link.id} linkName={title} ownerNote={link.comment_text} comments={comments.filter((item) => item.link_id === link.id)} onSubmit={(body) => onAddComment(link.id, body)} /> : null}
@@ -111,7 +111,7 @@ export function BrandLink({ className, slug }: { className?: string; slug: strin
 function Avatar({ url, initials, size }: { url: string | null; initials: string; size: "md" | "lg" }) {
   const dims = size === "lg" ? "h-20 w-20 rounded-full text-2xl" : "h-14 w-14 rounded-md text-lg";
   return url ? (
-    <img src={url} alt="" className={cn(dims, "border border-hub-border object-cover grayscale")} />
+    <img src={url} alt="" className={cn(dims, "border border-hub-border object-cover")} />
   ) : (
     <div
       className={cn(
@@ -166,7 +166,7 @@ export function StartPageView({
     <span className="text-[10px] tabular-nums text-hub-muted" title={linkCountLabel(n)} aria-label={linkCountLabel(n)}>{String(n).padStart(2, "0")}</span>
   );
   const tabBar = canOpen && safe.length ? (
-    <div className="mb-3 flex justify-end"><OpenAllButton urls={safe.map((l) => l.url)} scope={`the ${tabName ?? "current"} tab`} className="border border-hub-border" /></div>
+    <div className="studio-folder-toolbar mb-3 flex items-center justify-between gap-3"><span className="studio-section-label">{tabName ?? "Your collection"} <span className="text-hub-muted">· {linkCountLabel(safe.length)}</span></span><OpenAllButton urls={safe.map((l) => l.url)} scope={`the ${tabName ?? "current"} tab`} className="border border-hub-border" /></div>
   ) : null;
   const appearance = readPageTheme(profile.theme, profile.dark_mode);
   const isList = appearance.layout === "list";
@@ -188,7 +188,7 @@ export function StartPageView({
         <main className="mx-auto w-full max-w-[560px] px-4 py-6 sm:py-10">
           {!hideBrand ? <BrandLink slug={profile.slug} className="mb-6" /> : null}
           {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}
-          <header className="flex flex-col items-center text-center">
+          <header className="studio-list-identity flex flex-col items-center text-center">
             <Avatar url={profile.avatar_url} initials={initials} size="lg" />
             <h1 className="mt-4 font-display text-2xl font-semibold leading-tight">{name}</h1>
             <p className="mt-2 max-w-sm text-sm leading-6 text-hub-muted">{tagline}</p>
@@ -250,22 +250,22 @@ export function StartPageView({
       <main className="mx-auto w-full max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8">
         {!hideBrand ? <BrandLink slug={profile.slug} className="mb-4" /> : null}
         {archived ? <p className="mb-4 rounded-md border border-hub-accent/40 p-3 text-sm">Archived on the Free plan. Your links are saved, but opening them requires Premium.</p> : null}
-        <div className="grid items-start gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
-            <header className="rounded-lg border border-hub-border bg-hub-surface p-5">
+        <div className="studio-link-layout grid items-start gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
+          <aside className="studio-identity-row grid gap-4 sm:grid-cols-2 md:grid-cols-1">
+            <header className="studio-identity rounded-lg border border-hub-border bg-hub-surface p-5">
               <Avatar url={profile.avatar_url} initials={initials} size="md" />
-              <h1 className="mt-5 font-display text-2xl font-semibold leading-tight">{name}</h1>
+              <div className="studio-identity-copy"><h1 className="mt-5 font-display text-2xl font-semibold leading-tight">{name}</h1>
               <p className="mt-2 text-xs leading-5 text-hub-muted">{tagline}</p>
               <div className="mt-5 flex items-center gap-2 border-t border-hub-border pt-4 text-[10px] font-semibold uppercase text-hub-muted">
                 {parseSocialLinks(profile.social_links).length ? <SocialLinks value={profile.social_links} disabled={archived} /> : <><span className="h-1.5 w-1.5 rounded-full bg-hub-accent" aria-hidden="true" /> Personal hub</>}
-              </div>
+              </div></div>
             </header>
             <WorldClocks clocks={clocks} dark={profile.dark_mode} />
           </aside>
 
           <div className="min-w-0">
             {tabBar}
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="studio-folders grid gap-4 lg:grid-cols-2">
               {safe.length === 0 ? (
                 <p className="rounded-lg border border-hub-border bg-hub-surface p-5 text-sm text-hub-muted">No links yet.</p>
               ) : (
@@ -277,7 +277,7 @@ export function StartPageView({
                   return (
                     <section
                       key={group || "__default"}
-                      className={cn("rounded-lg border border-hub-border bg-hub-surface p-4", featured && "lg:col-span-2")}
+                      className={cn("studio-folder rounded-lg border border-hub-border bg-hub-surface p-4", featured && "lg:col-span-2")}
                     >
                       <div className="mb-3 flex items-center justify-between">
                         <div className="flex min-w-0 items-center gap-2.5">
