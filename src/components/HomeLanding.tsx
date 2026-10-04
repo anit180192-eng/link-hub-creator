@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
-  Bookmark,
   Check,
   ChevronRight,
   Folder,
@@ -252,9 +251,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
       </a>
       <header className="lp-header lp-container">
         <a href="/" className="lp-brand" aria-label="Landing Page Builder home">
-          <span>
-            <Bookmark size={21} />
-          </span>
+          <img src="/favicon.svg" alt="" width={40} height={40} />
           <div>
             Landing Page Builder<small>YOUR PERSONAL START PAGE</small>
           </div>
@@ -537,7 +534,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
             </h2>
             <p>
               Still unsure?{" "}
-              <a href="mailto:antcodeslabs@gmail.com">Ask us a question.</a>
+              <a href="mailto:aurunex.ventures@gmail.com">Ask us a question.</a>
             </p>
           </div>
           <div>
@@ -610,6 +607,12 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
               AuruNex
             </a>
           </small>
+          <p>
+            Curious about what else we build and explore?{" "}
+            <a href="https://aurunex.com/" target="_blank" rel="noopener noreferrer">
+              Explore AuruNex <ArrowUpRight size={11} aria-hidden="true" />
+            </a>
+          </p>
         </div>
         <nav aria-label="Footer">
           <a href="#use-cases">Use cases</a>
@@ -618,7 +621,7 @@ export function HomeLanding({ signedIn = false }: { signedIn?: boolean }) {
           <a href="/privacy.html">Privacy</a>
           <a href="/terms.html">Terms</a>
           <a href="/refunds.html">Refunds & cancellation</a>
-          <a href="mailto:antcodeslabs@gmail.com">Contact</a>
+          <a href="mailto:aurunex.ventures@gmail.com">Contact us</a>
         </nav>
       </footer>
     </div>
