@@ -175,7 +175,7 @@ export function StartPageView({
 
   const footer = (
     <footer className="mt-4 flex flex-col gap-2 border-t border-hub-border pt-4 text-[10px] uppercase text-hub-muted sm:flex-row sm:items-center sm:justify-between md:col-span-2">
-      <span>{name} · Personal hub</span>
+      <span>{name}</span>
       <a href="https://aurunex.com/" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-hub-accent">
         By AuruNex
       </a>
@@ -256,9 +256,9 @@ export function StartPageView({
               <Avatar url={profile.avatar_url} initials={initials} size="md" />
               <div className="studio-identity-copy"><h1 className="mt-5 font-display text-2xl font-semibold leading-tight">{name}</h1>
               <p className="mt-2 text-xs leading-5 text-hub-muted">{tagline}</p>
-              <div className="mt-5 flex items-center gap-2 border-t border-hub-border pt-4 text-[10px] font-semibold uppercase text-hub-muted">
-                {parseSocialLinks(profile.social_links).length ? <SocialLinks value={profile.social_links} disabled={archived} /> : <><span className="h-1.5 w-1.5 rounded-full bg-hub-accent" aria-hidden="true" /> Personal hub</>}
-              </div></div>
+              {parseSocialLinks(profile.social_links).length ? <div className="mt-5 flex items-center gap-2 border-t border-hub-border pt-4 text-[10px] font-semibold uppercase text-hub-muted">
+                <SocialLinks value={profile.social_links} disabled={archived} />
+              </div> : null}</div>
             </header>
             <WorldClocks clocks={clocks} dark={profile.dark_mode} />
           </aside>

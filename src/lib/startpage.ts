@@ -384,9 +384,9 @@ export function renderStartPageHtml(profile: StartPageProfile, links: StartPageL
 <script>(function(){var root=document.documentElement;root.dataset.mode=${JSON.stringify(appearance.mode)};document.querySelectorAll('[data-mode-choice]').forEach(function(b){b.addEventListener('click',function(){root.dataset.mode=b.dataset.modeChoice;document.querySelectorAll('[data-mode-choice]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))})})})})();</script>
 <main${isList ? ' class="is-list"' : ""}><div class="frame">
   <a class="brand" href="https://landingpagebuilder.aurunex.com/" aria-label="Landing Page / ${esc(profile.slug)} — create your own"><svg class="brandmark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#E3C581"/><g fill="none" stroke="#08151F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="18" height="18" rx="2.5"/><path d="M7 13h18M13 25V13"/></g></svg>Landing Page / ${esc(profile.slug)}</a>
-  <div class="side"><header><div class="identity">${avatar}<h1>${esc(name)}</h1><p class="tag">${esc(tagline)}</p></div><div class="index">${parseSocialLinks(profile.social_links).map(link => `<a href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(link.label || socialName(link.platform))}" style="display:inline-block;margin:4px">${esc(socialName(link.platform))}</a>`).join("") || "Personal hub"}</div></header>${clockStrip}</div>
+  <div class="side"><header><div class="identity">${avatar}<h1>${esc(name)}</h1><p class="tag">${esc(tagline)}</p></div>${parseSocialLinks(profile.social_links).length ? `<div class="index">${parseSocialLinks(profile.social_links).map(link => `<a href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(link.label || socialName(link.platform))}" style="display:inline-block;margin:4px">${esc(socialName(link.platform))}</a>`).join("")}</div>` : ""}</header>${clockStrip}</div>
   <div class="content"><div class="sections">${sections}</div></div>
-  <footer><span>${esc(name)} · Personal hub</span><a href="https://aurunex.com/">By AuruNex</a></footer>
+  <footer><span>${esc(name)}</span><a href="https://aurunex.com/">By AuruNex</a></footer>
 </div>
 </main>
 ${clockScript}
