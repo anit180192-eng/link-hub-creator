@@ -132,6 +132,13 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <div role="status" style={{ position: "fixed", inset: 0, zIndex: 2147483647, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px", background: "#081c24", color: "#ffffff", textAlign: "center", fontFamily: "system-ui, sans-serif" }}>
+          <div style={{ maxWidth: "720px" }}>
+            <p style={{ color: "#78e2cf", fontSize: "14px", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "24px" }}>Landing Page Builder</p>
+            <h1 style={{ fontSize: "clamp(32px, 6vw, 64px)", lineHeight: 1.1, marginBottom: "24px" }}>We're making improvements at the moment.</h1>
+            <p style={{ fontSize: "20px", lineHeight: 1.6, color: "#c5d5db" }}>We'll be back soon. Thank you for your patience.</p>
+          </div>
+        </div>
         {children}
         <Scripts />
       </body>
